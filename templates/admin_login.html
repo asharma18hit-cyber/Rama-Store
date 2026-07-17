@@ -1,0 +1,620 @@
+<!-- templates/admin_login.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rama Store - Owner Verification Gate</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=IBM+Plex+Mono:wght@500;700&family=Work+Sans:wght@500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Main Style Reference -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+    <style>
+        :root {
+            --admin-bg: #030712;
+            --admin-card: rgba(15, 23, 42, 0.55);
+            --admin-border: rgba(184, 137, 43, 0.25);
+            --admin-border-glow: rgba(184, 137, 43, 0.6);
+            --admin-text: #f3f4f6;
+            --admin-text-muted: #9ca3af;
+            --gold-accent: #b8892b;
+            --gold-accent-hover: #e5ab37;
+            --gold-glow: rgba(184, 137, 43, 0.3);
+            --radius-lg: 16px;
+            --radius-md: 8px;
+            --radius-sm: 4px;
+            --transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--admin-bg);
+            color: var(--admin-text);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Ambient drifing neon glows */
+        .ambient-glows {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .glow-indigo {
+            position: absolute;
+            width: 450px;
+            height: 450px;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.07) 0%, transparent 70%);
+            top: -10%;
+            left: 10%;
+            animation: driftGlow 25s ease-in-out infinite alternate;
+        }
+        .glow-gold {
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(184, 137, 43, 0.05) 0%, transparent 70%);
+            bottom: -5%;
+            right: 15%;
+            animation: driftGlow 30s ease-in-out infinite alternate-reverse;
+        }
+
+        @keyframes driftGlow {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(50px, 40px) scale(1.15); }
+        }
+
+        /* Twinkling Star Canvas Background */
+        canvas#star-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 2;
+            opacity: 0.65;
+        }
+
+        .grid-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+              linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+            background-size: 24px 24px;
+            z-index: 3;
+            pointer-events: none;
+        }
+
+        /* Frosted Glassmorphism Verification Card */
+        .auth-card {
+            width: 100%;
+            max-width: 450px;
+            background: var(--admin-card);
+            backdrop-filter: blur(25px) saturate(190%);
+            -webkit-backdrop-filter: blur(25px) saturate(190%);
+            border: 1px solid var(--admin-border);
+            border-radius: var(--radius-lg);
+            padding: 3rem 2.5rem;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6), 
+                        0 0 40px rgba(184, 137, 43, 0.05);
+            z-index: 10;
+            position: relative;
+            transform: translateY(30px);
+            opacity: 0;
+            animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        /* Glowing inner line element */
+        .auth-card::after {
+            content: '';
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            right: 4px;
+            bottom: 4px;
+            border: 1.5px solid transparent;
+            border-radius: calc(var(--radius-lg) - 3px);
+            border-image: linear-gradient(135deg, var(--gold-glow), transparent 40%, transparent 60%, var(--gold-glow)) 1;
+            pointer-events: none;
+        }
+
+        @keyframes slideUp {
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .auth-header img {
+            width: 58px;
+            height: 58px;
+            border-radius: var(--radius-sm);
+            border: 2px solid var(--gold-accent);
+            object-fit: cover;
+            margin-bottom: 1.25rem;
+            box-shadow: 0 0 20px var(--gold-glow);
+            animation: breatheLogo 4s ease-in-out infinite alternate;
+        }
+
+        @keyframes breatheLogo {
+            0% { transform: scale(1); box-shadow: 0 0 15px var(--gold-glow); }
+            100% { transform: scale(1.05); box-shadow: 0 0 25px rgba(184, 137, 43, 0.5); }
+        }
+
+        .auth-header h1 {
+            font-size: 1.6rem;
+            font-weight: 800;
+            margin: 0;
+            letter-spacing: -0.01em;
+            color: var(--admin-text);
+        }
+
+        .auth-header h1 span {
+            color: var(--gold-accent);
+        }
+
+        .auth-header p {
+            color: var(--gold-accent);
+            font-family: 'Work Sans', sans-serif;
+            font-size: 0.8rem;
+            margin: 0.5rem 0 0 0;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-weight: 700;
+        }
+
+        /* Form animation staggered load */
+        .auth-form-step {
+            display: none;
+        }
+
+        .auth-form-step.active {
+            display: block;
+        }
+
+        .entry-item {
+            opacity: 0;
+            transform: translateY(15px);
+        }
+        .active .entry-item {
+            animation: fieldReveal 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        @keyframes fieldReveal {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .input-wrapper {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 1.1rem 1rem 0.5rem 1rem;
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid var(--admin-border);
+            border-radius: var(--radius-sm);
+            color: var(--admin-text);
+            font-size: 0.95rem;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        .input-field:focus {
+            border-color: var(--gold-accent);
+            background: rgba(15, 23, 42, 0.85);
+            box-shadow: 0 0 15px rgba(184, 137, 43, 0.15);
+            transform: translateY(-1px);
+        }
+
+        .floating-label {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--admin-text-muted);
+            pointer-events: none;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            font-size: 0.95rem;
+        }
+
+        .input-field:focus ~ .floating-label,
+        .input-field:not(:placeholder-shown) ~ .floating-label {
+            top: 25%;
+            transform: translateY(-50%) scale(0.8);
+            transform-origin: left top;
+            color: var(--gold-accent);
+            font-weight: 600;
+        }
+
+        .submit-btn {
+            width: 100%;
+            background: var(--gold-accent);
+            border: 1px solid var(--gold-accent);
+            color: #000000;
+            padding: 1rem;
+            font-size: 0.95rem;
+            font-weight: 700;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 15px rgba(184, 137, 43, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -150%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transform: skewX(-25deg);
+            transition: 0.75s;
+        }
+
+        .submit-btn:hover {
+            background: var(--gold-accent-hover);
+            border-color: var(--gold-accent-hover);
+            box-shadow: 0 6px 20px rgba(184, 137, 43, 0.3);
+            transform: translateY(-2px);
+        }
+        .submit-btn:hover::before {
+            left: 150%;
+        }
+
+        .password-toggle-btn {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: transparent;
+            border: none;
+            color: var(--admin-text-muted);
+            cursor: pointer;
+            font-size: 1.1rem;
+            outline: none;
+            z-index: 10;
+        }
+
+        .password-toggle-btn:hover {
+            color: var(--admin-text);
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 1.75rem;
+            font-size: 0.85rem;
+        }
+
+        .back-link a {
+            color: var(--gold-accent);
+            text-decoration: none;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .back-link a:hover {
+            text-decoration: underline;
+            text-shadow: 0 0 8px var(--gold-glow);
+        }
+
+        /* Toast Notifications style */
+        .toast-container {
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        /* Spinners */
+        .btn-spinner {
+            display: none;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid rgba(0,0,0,0.2);
+            border-radius: 50%;
+            border-top-color: #000;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Ambient drifting space glows -->
+    <div class="ambient-glows">
+        <div class="glow-indigo"></div>
+        <div class="glow-gold"></div>
+    </div>
+
+    <!-- Starfield particles canvas and overlay grid -->
+    <canvas id="star-canvas"></canvas>
+    <div class="grid-overlay"></div>
+
+    <!-- Toast Notifications Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <div class="auth-card">
+        <div class="auth-header">
+            <img src="/static/rama_store_logo.jpg" alt="Logo">
+            <h1>Rama <span>Store</span></h1>
+            <p>Owner Verification Gate</p>
+        </div>
+
+        <!-- STEP 1: OWNER ACCESS CREDENTIALS -->
+        <form id="form-admin-creds" class="auth-form-step active" onsubmit="submitAdminCreds(event)">
+            <div class="input-wrapper entry-item" style="animation-delay: 0.05s;">
+                <input type="text" id="admin-identifier" class="input-field" placeholder=" " required value="7268903804">
+                <label class="floating-label" for="admin-identifier">Registered Owner Details</label>
+            </div>
+            
+            <div class="input-wrapper entry-item" style="animation-delay: 0.12s;">
+                <input type="password" id="admin-password" class="input-field" placeholder=" " required>
+                <label class="floating-label" for="admin-password">Secure Password</label>
+                <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('admin-password', this)">👁️</button>
+            </div>
+
+            <div class="entry-item" style="animation-delay: 0.20s;">
+                <button type="submit" class="submit-btn" id="btn-creds-submit">
+                    <span class="btn-spinner"></span>
+                    <span class="btn-text">🔐 Request Verification OTP</span>
+                </button>
+            </div>
+            
+            <div class="back-link entry-item" style="animation-delay: 0.28s;">
+                <a href="/">➔ Return to Storefront</a>
+            </div>
+        </form>
+
+        <!-- STEP 2: OWNER OTP 2FA CHALLENGE -->
+        <form id="form-admin-otp" class="auth-form-step" onsubmit="submitAdminOTP(event)">
+            <div style="text-align: center; margin-bottom: 1.5rem; color: var(--admin-text-muted); font-size: 0.85rem;" class="entry-item" style="animation-delay: 0.05s;">
+                Enter the 6-digit administrative verification code sent to your registered owner coordinates.
+            </div>
+            
+            <div class="input-wrapper entry-item" style="animation-delay: 0.12s;">
+                <input type="text" id="admin-otp-code" class="input-field" placeholder=" " required pattern="\d{6}" maxlength="6" style="text-align: center; font-size: 1.3rem; letter-spacing: 0.3em; font-weight: 700; font-family: var(--font-mono); height: 3.5rem;">
+                <label class="floating-label" for="admin-otp-code" style="text-align: center; width: 100%;">6-Digit Owner OTP</label>
+            </div>
+
+            <div class="entry-item" style="animation-delay: 0.20s;">
+                <button type="submit" class="submit-btn" id="btn-otp-submit">
+                    <span class="btn-spinner"></span>
+                    <span class="btn-text">🛡️ Verify & Authenticate</span>
+                </button>
+            </div>
+
+            <div class="back-link entry-item" style="animation-delay: 0.28s;">
+                <a href="javascript:void(0)" onclick="goBackToStep1()">« Re-enter Owner Credentials</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Client-Side Animations and OTP Actions script -->
+    <script>
+        // Stars Particle Generator
+        const canvas = document.getElementById('star-canvas');
+        const ctx = canvas.getContext('2d');
+        let stars = [];
+        
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        for (let i = 0; i < 45; i++) {
+            stars.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                size: Math.random() * 1.5 + 0.5,
+                opacity: Math.random(),
+                speed: Math.random() * 0.012 + 0.003
+            });
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            stars.forEach(s => {
+                ctx.fillStyle = `rgba(255, 255, 255, ${s.opacity})`;
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+                ctx.fill();
+                s.opacity += s.speed;
+                if (s.opacity > 0.95 || s.opacity < 0.05) s.speed = -s.speed;
+            });
+            requestAnimationFrame(draw);
+        }
+        draw();
+
+        // Password Show/Hide toggle
+        function togglePasswordVisibility(fieldId, btnEl) {
+            const field = document.getElementById(fieldId);
+            if (field.type === 'password') {
+                field.type = 'text';
+                btnEl.innerText = '🙈';
+            } else {
+                field.type = 'password';
+                btnEl.innerText = '👁️';
+            }
+        }
+
+        function goBackToStep1() {
+            document.getElementById('form-admin-otp').classList.remove('active');
+            document.getElementById('form-admin-creds').classList.add('active');
+            retriggerFormEntrance(document.getElementById('form-admin-creds'));
+        }
+
+        function retriggerFormEntrance(formElement) {
+            const items = formElement.querySelectorAll('.entry-item');
+            items.forEach(item => {
+                item.style.animation = 'none';
+                void item.offsetWidth; // Trigger reflow
+                item.style.animation = 'fieldReveal 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards';
+            });
+        }
+
+        // Toast notifications logic
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            toast.style.backgroundColor = type === 'success' ? '#10b981' : '#ef4444';
+            toast.style.color = '#ffffff';
+            toast.style.padding = '0.75rem 1.25rem';
+            toast.style.borderRadius = 'var(--radius-sm)';
+            toast.style.boxShadow = '0 10px 20px rgba(0,0,0,0.3)';
+            toast.style.marginBottom = '0.5rem';
+            toast.style.display = 'flex';
+            toast.style.alignItems = 'center';
+            toast.style.gap = '0.5rem';
+            toast.style.fontSize = '0.9rem';
+            toast.style.fontWeight = '600';
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateY(10px)';
+            toast.style.transition = 'all 0.3s ease';
+            
+            const icon = type === 'success' ? '✅' : '❌';
+            toast.innerHTML = `<span>${icon}</span><span>${message}</span>`;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.opacity = '1';
+                toast.style.transform = 'translateY(0)';
+            }, 10);
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(10px)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // POST REQUEST: SUBMIT CREDENTIALS
+        async function submitAdminCreds(e) {
+            e.preventDefault();
+            const identifier = document.getElementById('admin-identifier').value.trim();
+            const password = document.getElementById('admin-password').value;
+            
+            const btn = document.getElementById('btn-creds-submit');
+            const spinner = btn.querySelector('.btn-spinner');
+            const btnTxt = btn.querySelector('.btn-text');
+            
+            btn.disabled = true;
+            spinner.style.display = 'inline-block';
+            btnTxt.innerText = 'Requesting OTP...';
+            
+            try {
+                const res = await fetch('/api/auth/admin-login-request', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email_or_phone: identifier, password: password })
+                });
+                const data = await res.json();
+                btn.disabled = false;
+                spinner.style.display = 'none';
+                btnTxt.innerText = '🔐 Request Verification OTP';
+                
+                if (res.ok) {
+                    showToast("Owner credentials verified! OTP generated.");
+                    document.getElementById('form-admin-creds').classList.remove('active');
+                    document.getElementById('form-admin-otp').classList.add('active');
+                    retriggerFormEntrance(document.getElementById('form-admin-otp'));
+                    
+                    if (data.debug_otp) {
+                        showToast(`[DEV ONLY] OTP Code: ${data.debug_otp}`, "success");
+                        const otpInput = document.getElementById('admin-otp-code');
+                        if (otpInput) {
+                            otpInput.value = data.debug_otp;
+                        }
+                    }
+                } else {
+                    showToast(data.error || "Verification failed. Access Denied.", "error");
+                }
+            } catch(err) {
+                btn.disabled = false;
+                spinner.style.display = 'none';
+                btnTxt.innerText = '🔐 Request Verification OTP';
+                showToast("Connection failed: " + err.message, "error");
+            }
+        }
+
+        // POST REQUEST: SUBMIT OTP
+        async function submitAdminOTP(e) {
+            e.preventDefault();
+            const otp = document.getElementById('admin-otp-code').value.trim();
+            
+            const btn = document.getElementById('btn-otp-submit');
+            const spinner = btn.querySelector('.btn-spinner');
+            const btnTxt = btn.querySelector('.btn-text');
+            
+            btn.disabled = true;
+            spinner.style.display = 'inline-block';
+            btnTxt.innerText = 'Verifying OTP...';
+            
+            try {
+                const res = await fetch('/api/auth/admin-login-verify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ otp: otp })
+                });
+                const data = await res.json();
+                btn.disabled = false;
+                spinner.style.display = 'none';
+                btnTxt.innerText = '🛡️ Verify & Authenticate';
+                
+                if (res.ok) {
+                    showToast("Verification successful! Opening Admin Control Desk...");
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1200);
+                } else {
+                    showToast(data.error || "Invalid verification code.", "error");
+                }
+            } catch(err) {
+                btn.disabled = false;
+                spinner.style.display = 'none';
+                btnTxt.innerText = '🛡️ Verify & Authenticate';
+                showToast("Connection failed: " + err.message, "error");
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,873 @@
+<!-- templates/admin.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rama Store - Secure Admin Control Desk</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+    
+    <!-- Main Style Reference -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+    <style>
+        :root {
+            /* Custom Dark mode variables for Admin console */
+            --admin-bg: #090d16;
+            --admin-card: rgba(30, 41, 59, 0.45);
+            --admin-border: rgba(184, 137, 43, 0.15);
+            --admin-text: #f1f5f9;
+            --admin-text-muted: #94a3b8;
+            --gold-accent: #b8892b;
+            --gold-accent-hover: #9c711f;
+        }
+
+        body.admin-body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--admin-bg);
+            color: var(--admin-text);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            min-height: 100vh;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.08) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(184, 137, 43, 0.05) 0px, transparent 50%);
+        }
+
+        .admin-sidebar {
+            width: 280px;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(12px);
+            border-right: 1px solid var(--admin-border);
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            position: fixed;
+            height: 100vh;
+            left: 0;
+            top: 0;
+            z-index: 100;
+        }
+
+        .admin-sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px dashed var(--admin-border);
+        }
+
+        .admin-sidebar-logo img {
+            width: 38px;
+            height: 38px;
+            border-radius: var(--radius-sm);
+            border: 1.5px solid var(--gold-accent);
+            object-fit: cover;
+        }
+
+        .admin-sidebar-logo h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin: 0;
+            color: var(--admin-text);
+            letter-spacing: 0.02em;
+        }
+
+        .admin-sidebar-logo h1 span {
+            color: var(--gold-accent);
+        }
+
+        .admin-nav-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            flex-grow: 1;
+        }
+
+        .admin-nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.85rem 1rem;
+            background: transparent;
+            border: 1px solid transparent;
+            border-radius: var(--radius-md);
+            color: var(--admin-text-muted);
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 100%;
+        }
+
+        .admin-nav-item:hover {
+            color: var(--admin-text);
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .admin-nav-item.active {
+            color: var(--admin-text);
+            background: rgba(184, 137, 43, 0.15);
+            border-color: rgba(184, 137, 43, 0.3);
+            box-shadow: 0 4px 20px -5px rgba(184, 137, 43, 0.2);
+        }
+
+        .admin-nav-icon {
+            font-size: 1.2rem;
+        }
+
+        .admin-sidebar-footer {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding-top: 1.5rem;
+            border-top: 1px dashed var(--admin-border);
+        }
+
+        .admin-sidebar-footer .user-avatar {
+            width: 36px;
+            height: 36px;
+            background: var(--gold-accent);
+            color: var(--admin-text);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+
+        .admin-sidebar-footer .user-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .admin-sidebar-footer .user-name {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--admin-text);
+        }
+
+        .admin-sidebar-footer .logout-btn {
+            background: transparent;
+            border: none;
+            color: var(--danger);
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 0;
+            text-align: left;
+            margin-top: 2px;
+            transition: opacity 0.2s;
+        }
+
+        .admin-sidebar-footer .logout-btn:hover {
+            opacity: 0.8;
+        }
+
+        .admin-content-area {
+            margin-left: 280px;
+            padding: 2.5rem 3rem;
+            flex-grow: 1;
+            max-width: 1400px;
+            min-height: 100vh;
+        }
+
+        .admin-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .admin-header-title h2 {
+            font-size: 1.75rem;
+            font-weight: 800;
+            margin: 0;
+            letter-spacing: -0.02em;
+        }
+
+        .admin-header-title p {
+            color: var(--admin-text-muted);
+            margin: 0.25rem 0 0 0;
+            font-size: 0.9rem;
+        }
+
+        /* Metrics Bar grid override */
+        .admin-metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .admin-metric-card {
+            background: var(--admin-card);
+            border: 1px solid var(--admin-border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            backdrop-filter: blur(8px);
+            transition: transform 0.3s var(--transition-bounce);
+        }
+
+        .admin-metric-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(184, 137, 43, 0.3);
+        }
+
+        .admin-metric-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: rgba(184, 137, 43, 0.1);
+            color: var(--gold-accent);
+        }
+
+        .admin-metric-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .admin-metric-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--admin-text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .admin-metric-value {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--admin-text);
+            margin: 0;
+            font-family: 'IBM Plex Mono', monospace;
+        }
+
+        /* Glassmorphic forms, inputs, tables */
+        .card {
+            background: var(--admin-card) !important;
+            border: 1px solid var(--admin-border) !important;
+            border-radius: var(--radius-lg) !important;
+            backdrop-filter: blur(12px);
+            color: var(--admin-text) !important;
+        }
+
+        .card-header h2 {
+            color: var(--admin-text) !important;
+            font-weight: 700;
+        }
+
+        input, select, textarea {
+            background: rgba(15, 23, 42, 0.5) !important;
+            border: 1px solid var(--admin-border) !important;
+            color: var(--admin-text) !important;
+            border-radius: var(--radius-sm) !important;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--gold-accent) !important;
+            box-shadow: 0 0 10px rgba(184, 137, 43, 0.15) !important;
+        }
+
+        .data-table, .cart-table {
+            color: var(--admin-text) !important;
+        }
+
+        .data-table th, .cart-table th {
+            background: rgba(15, 23, 42, 0.75) !important;
+            color: var(--gold-accent) !important;
+            border-bottom: 1px solid var(--admin-border) !important;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+        }
+
+        .data-table td, .cart-table td {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+        }
+
+        .data-table tbody tr:hover, .cart-table tbody tr:hover {
+            background: rgba(255, 255, 255, 0.02) !important;
+        }
+
+        .btn-primary {
+            background: var(--gold-accent) !important;
+            border: 1px solid var(--gold-accent) !important;
+            color: var(--admin-bg) !important;
+            font-weight: 700 !important;
+            transition: all 0.25s !important;
+        }
+
+        .btn-primary:hover {
+            background: var(--gold-accent-hover) !important;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05) !important;
+            border: 1px solid var(--admin-border) !important;
+            color: var(--admin-text) !important;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1) !important;
+        }
+        
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.4s ease-out;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="admin-body">
+
+    <!-- A. SIDENAV MENU PANEL -->
+    <aside class="admin-sidebar">
+        <div class="admin-sidebar-logo" onclick="window.location.href='/'">
+            <img src="/static/rama_store_logo.jpg" alt="Rama Store Logo">
+            <h1>Rama <span>Store</span></h1>
+        </div>
+        
+        <nav class="admin-nav-menu">
+            <button class="admin-nav-item active" id="sidebar-tab-dashboard" onclick="switchTab('dashboard')">
+                <span class="admin-nav-icon">📊</span> Overview
+            </button>
+            <button class="admin-nav-item" id="sidebar-tab-pos" onclick="switchTab('pos')">
+                <span class="admin-nav-icon">🛒</span> POS Desk
+            </button>
+            <button class="admin-nav-item" id="sidebar-tab-inventory" onclick="switchTab('inventory')">
+                <span class="admin-nav-icon">📦</span> Catalog Upload
+            </button>
+            <button class="admin-nav-item" id="sidebar-tab-orders" onclick="switchTab('orders')">
+                <span class="admin-nav-icon">📋</span> Fulfillment
+            </button>
+            <button class="admin-nav-item" id="sidebar-tab-announcements" onclick="switchTab('announcements')">
+                <span class="admin-nav-icon">📢</span> Announcements
+            </button>
+            <button class="admin-nav-item" onclick="window.location.href='/'" style="margin-top: 1.5rem; border-color: rgba(255,255,255,0.05);">
+                <span class="admin-nav-icon">🏠</span> Back to Shop
+            </button>
+        </nav>
+        
+        <div class="admin-sidebar-footer">
+            <div class="user-avatar" id="user-avatar">A</div>
+            <div class="user-info">
+                <span class="user-name" id="user-display-name">Owner Admin</span>
+                <button class="logout-btn" onclick="handleLogout()">Sign Out</button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- B. CORE WORKSPACE AREA -->
+    <main class="admin-content-area">
+        
+        <!-- Header row -->
+        <header class="admin-header-row">
+            <div class="admin-header-title">
+                <h2 id="admin-view-heading">Dashboard Overview</h2>
+                <p id="admin-view-subheading">Analyze active sales metrics and counter inventory</p>
+            </div>
+        </header>
+
+        <!-- Metric summaries bar (Visible on Overview & POS) -->
+        <div class="admin-metrics-grid" id="admin-metrics-row">
+            <div class="admin-metric-card">
+                <div class="admin-metric-icon">📦</div>
+                <div class="admin-metric-info">
+                    <span class="admin-metric-label">Total Products</span>
+                    <h3 class="admin-metric-value" id="metric-total-products">0</h3>
+                </div>
+            </div>
+            <div class="admin-metric-card">
+                <div class="admin-metric-icon" style="background: rgba(239, 68, 68, 0.1); color: #ef4444;">⚠️</div>
+                <div class="admin-metric-info">
+                    <span class="admin-metric-label">Low Stock Alerts</span>
+                    <h3 class="admin-metric-value" id="metric-low-stock" style="color: #ef4444;">0</h3>
+                </div>
+            </div>
+            <div class="admin-metric-card">
+                <div class="admin-metric-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">📈</div>
+                <div class="admin-metric-info">
+                    <span class="admin-metric-label">Today's Revenue</span>
+                    <h3 class="admin-metric-value" id="metric-revenue" style="color: #10b981;">₹0.00</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- 1. OVERVIEW TAB -->
+        <section id="tab-dashboard" class="tab-content active">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Low Stock Alerts</h2>
+                    </div>
+                    <div class="card-body" style="padding: 1.5rem;">
+                        <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 1rem;">Items with stock quantity less than 10 units:</p>
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>SKU</th>
+                                        <th>Product Name</th>
+                                        <th>Price</th>
+                                        <th style="text-align: center;">Stock</th>
+                                        <th style="text-align: center;">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-low-stock-body">
+                                    <tr>
+                                        <td colspan="5" style="text-align: center; color: var(--admin-text-muted); padding: 2rem 0;">No low stock alerts. All items healthy.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Quick Sales Summary</h2>
+                    </div>
+                    <div class="card-body" style="padding: 2.5rem; text-align: center;">
+                        <div style="font-size: 4rem; margin-bottom: 1rem;">💵</div>
+                        <h3 style="font-size: 1.5rem; margin-bottom: 0.5rem; font-weight: 700;">Counter Register Active</h3>
+                        <p style="color: var(--admin-text-muted); font-size: 0.9rem; max-width: 320px; margin: 0 auto 1.5rem auto;">Quickly create a cashier checkout bill for walk-in retail counter buyers.</p>
+                        <button class="btn btn-primary" onclick="switchTab('pos')" style="padding: 0.75rem 2rem;">Open POS Terminal</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. POS TERMINAL TAB -->
+        <section id="tab-pos" class="tab-content">
+            <div class="pos-layout">
+                <div class="pos-main">
+                    <div class="search-container">
+                        <div class="search-icon-wrapper">
+                            <input type="text" id="pos-search-input" placeholder="Scan SKU barcode or type product details..." autocomplete="off">
+                        </div>
+                        <div class="suggestions-dropdown" id="pos-suggestions"></div>
+                    </div>
+
+                    <div class="card cart-card">
+                        <div class="card-header">
+                            <h2>Active Billing Cart</h2>
+                            <button class="btn btn-secondary" onclick="clearCart()">Clear Cart</button>
+                        </div>
+                        <div class="cart-table-wrapper">
+                            <table class="cart-table" id="cart-table" style="display: none;">
+                                <thead>
+                                    <tr>
+                                        <th>Product Details</th>
+                                        <th>SKU</th>
+                                        <th>Price</th>
+                                        <th>Quantity</th>
+                                        <th>Total</th>
+                                        <th style="text-align: center;">Remove</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="cart-items-body"></tbody>
+                            </table>
+                            <div class="cart-empty-state" id="cart-empty-message">
+                                <div class="cart-empty-icon">🛒</div>
+                                <p>Billing cart is empty. Scan barcodes or search to add billing products.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pos-sidebar">
+                    <div class="card checkout-card">
+                        <div class="card-header">
+                            <h2>Billing checkout desk</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="summary-section">
+                                <div class="summary-row">
+                                    <span>Subtotal</span>
+                                    <span id="pos-subtotal">₹0.00</span>
+                                </div>
+                                <div class="summary-row">
+                                    <span>GST Tax (18%)</span>
+                                    <span id="pos-tax">₹0.00</span>
+                                </div>
+                                <div class="summary-row total">
+                                    <span>Amount Payable</span>
+                                    <span id="pos-total">₹0.00</span>
+                                </div>
+                            </div>
+                            
+                            <form id="pos-checkout-form" onsubmit="handlePOSCheckout(event)" style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1.5rem;">
+                                <div class="auth-input-group">
+                                    <label for="pos-customer-phone">Customer Phone Number (Optional)</label>
+                                    <input type="text" id="pos-customer-phone" placeholder="e.g. 9876543210" maxlength="10">
+                                </div>
+                                <button type="submit" class="btn btn-primary checkout-btn" style="padding: 1rem; font-size: 1rem; font-weight: 700;">Complete Cashier Sale</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. CATALOG EDITOR TAB -->
+        <section id="tab-inventory" class="tab-content">
+            <div class="inventory-layout" style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 2rem; align-items: start;">
+                
+                <!-- Left panel: Active inventory table -->
+                <div class="card inventory-table-card">
+                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                        <h2>Active Catalog Inventory</h2>
+                        <div class="inventory-search">
+                            <input type="text" id="catalog-search" placeholder="Search inventory SKU or name..." oninput="loadCatalog()" style="padding: 0.5rem 1rem; font-size: 0.85rem; border-radius: 20px;">
+                        </div>
+                    </div>
+                    <div class="card-body" style="padding: 1rem;">
+                        <div class="table-responsive" style="max-height: 520px; overflow-y: auto;">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>SKU Code</th>
+                                        <th>Product Name</th>
+                                        <th>Category</th>
+                                        <th>Prices (Buy/Sell)</th>
+                                        <th style="text-align: center;">Stock</th>
+                                        <th style="text-align: center;">Status</th>
+                                        <th style="text-align: center;">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="catalog-items-body"></tbody>
+                            </table>
+                        </div>
+                        <div class="pagination-bar" id="catalog-pagination" style="display: flex; justify-content: center; gap: 0.5rem; margin-top: 1.5rem; align-items: center;">
+                            <!-- Dynamic pagination numbers -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right panel: Forms -->
+                <div style="display: flex; flex-direction: column; gap: 2rem;">
+                    <!-- Form 1: Add new product -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 id="product-form-title">Register New Item</h2>
+                        </div>
+                        <div class="card-body">
+                            <form id="product-form" onsubmit="handleProductSubmit(event)">
+                                <input type="hidden" id="prod-id">
+                                <div class="product-form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                    <div class="auth-input-group" style="grid-column: span 2;">
+                                        <label for="prod-sku">Unique SKU / Barcode ID *</label>
+                                        <input type="text" id="prod-sku" required placeholder="e.g. 10203040">
+                                    </div>
+                                    <div class="auth-input-group" style="grid-column: span 2;">
+                                        <label for="prod-name">Product Name *</label>
+                                        <input type="text" id="prod-name" required placeholder="e.g. A4 Register Notebook">
+                                    </div>
+                                    <div class="auth-input-group" style="grid-column: span 2;">
+                                        <label for="prod-category">Category Tree Node *</label>
+                                        <select id="prod-category" required>
+                                            <option value="">Select category...</option>
+                                        </select>
+                                    </div>
+                                    <div class="auth-input-group" style="grid-column: span 2;">
+                                        <label for="prod-status">Publish Status *</label>
+                                        <select id="prod-status" required>
+                                            <option value="draft">Draft (Hidden)</option>
+                                            <option value="published" selected>Published (Storefront)</option>
+                                        </select>
+                                    </div>
+                                    <div class="auth-input-group" style="grid-column: span 2;">
+                                        <label for="prod-image-url">Product Image URL (Optional)</label>
+                                        <input type="text" id="prod-image-url" placeholder="https://images.unsplash.com/photo...">
+                                    </div>
+                                    <div class="auth-input-group">
+                                        <label for="prod-purchase-price">Purchase Price (₹) *</label>
+                                        <input type="number" step="0.01" id="prod-purchase-price" required placeholder="30.00">
+                                    </div>
+                                    <div class="auth-input-group">
+                                        <label for="prod-selling-price">Selling Price (₹) *</label>
+                                        <input type="number" step="0.01" id="prod-selling-price" required placeholder="50.00">
+                                    </div>
+                                    <div class="auth-input-group" style="grid-column: span 2;">
+                                        <label for="prod-stock">Initial Stock Quantity *</label>
+                                        <input type="number" id="prod-stock" required placeholder="120">
+                                    </div>
+                                </div>
+                                <div style="display: flex; gap: 0.5rem; margin-top: 1.5rem;">
+                                    <button type="button" class="btn btn-secondary" onclick="resetProductForm()" style="flex: 1;">Cancel</button>
+                                    <button type="submit" class="btn btn-primary" id="btn-product-submit" style="flex: 2;">Add Product to Catalog</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Form 2: Add category tree node -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>Add Category Node</h2>
+                        </div>
+                        <div class="card-body">
+                            <form id="category-form" onsubmit="handleCategorySubmit(event)">
+                                <div class="auth-input-group" style="margin-bottom: 1rem;">
+                                    <label for="cat-name">Category Title *</label>
+                                    <input type="text" id="cat-name" required placeholder="e.g. Spiral Copies">
+                                </div>
+                                <div class="auth-input-group" style="margin-bottom: 1.5rem;">
+                                    <label for="cat-parent">Parent Category (Optional - Nest node)</label>
+                                    <select id="cat-parent">
+                                        <option value="">None (Root Category)</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-primary" style="width: 100%;">Create Node</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. ORDERS fulfillment TAB -->
+        <section id="tab-orders" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Client Orders Delivery Tracking</h2>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Date</th>
+                                    <th>Customer Details</th>
+                                    <th>Shipping Address</th>
+                                    <th>Total Amount</th>
+                                    <th>Status Badging</th>
+                                    <th style="text-align: center;">Update Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-orders-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. ANNOUNCEMENTS TAB -->
+        <section id="tab-announcements" class="tab-content">
+            <div class="card" style="max-width: 600px; margin: 0.5rem auto;">
+                <div class="card-header">
+                    <h2>Publish Counter Announcements</h2>
+                </div>
+                <div class="card-body">
+                    <form id="announcement-form" onsubmit="handleAnnouncementSubmit(event)">
+                        <div class="auth-input-group" style="margin-bottom: 1.25rem;">
+                            <label for="ann-stock-status">Stock Status Announcement</label>
+                            <input type="text" id="ann-stock-status" required style="width: 100%; padding: 0.75rem; border-radius: 6px;">
+                        </div>
+                        <div class="auth-input-group" style="margin-bottom: 1.25rem;">
+                            <label for="ann-loyalty-offer">Loyalty Offer Announcement</label>
+                            <input type="text" id="ann-loyalty-offer" required style="width: 100%; padding: 0.75rem; border-radius: 6px;">
+                        </div>
+                        <div class="auth-input-group" style="margin-bottom: 1.25rem;">
+                            <label for="ann-home-delivery">Home Delivery Announcement</label>
+                            <input type="text" id="ann-home-delivery" required style="width: 100%; padding: 0.75rem; border-radius: 6px;">
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.75rem; font-weight: 600;">Publish Announcements Live</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- GLOBAL TOAST NOTIFICATIONS -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- MODAL 1: EDIT PRODUCT DIALOG (Keep for backup safety) -->
+    <div class="modal-overlay" id="edit-product-modal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3>Edit Product Details</h3>
+                <button class="modal-close" onclick="closeEditModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="edit-product-form" onsubmit="handleEditFormSubmit(event)">
+                    <input type="hidden" id="edit-prod-id">
+                    <div class="product-form-grid">
+                        <div>
+                            <label for="edit-prod-sku">Unique SKU / Barcode ID *</label>
+                            <input type="text" id="edit-prod-sku" required>
+                        </div>
+                        <div>
+                            <label for="edit-prod-name">Product Name *</label>
+                            <input type="text" id="edit-prod-name" required>
+                        </div>
+                        <div>
+                            <label for="edit-prod-purchase-price">Purchase Price (₹) *</label>
+                            <input type="number" step="0.01" id="edit-prod-purchase-price" required>
+                        </div>
+                        <div>
+                            <label for="edit-prod-selling-price">Selling/Retail Price (₹) *</label>
+                            <input type="number" step="0.01" id="edit-prod-selling-price" required>
+                        </div>
+                        <div>
+                            <label for="edit-prod-stock">Stock Quantity *</label>
+                            <input type="number" id="edit-prod-stock" required>
+                        </div>
+                        <div>
+                            <label for="edit-prod-status">Visibility Status *</label>
+                            <select id="edit-prod-status" required>
+                                <option value="draft">Draft (Hidden)</option>
+                                <option value="published">Published</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="margin-top: 1.5rem; width: 100%;">Save Changes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: PRINTABLE RECEIPT SUCCESS -->
+    <div class="modal-overlay" id="receipt-modal">
+        <div class="modal-container" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3>Transaction Success</h3>
+                <button class="modal-close" onclick="closeReceiptModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="success-checkmark-wrapper">
+                    <svg class="checkmark-svg" viewBox="0 0 52 52">
+                        <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none"/>
+                        <path class="checkmark-kick" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                    </svg>
+                </div>
+                <div id="receipt-modal-content"></div>
+            </div>
+            <div class="modal-footer" style="justify-content: space-between;">
+                <button class="btn btn-secondary" onclick="printReceipt()">Print Receipt</button>
+                <button class="btn btn-primary" onclick="closeReceiptModal()">Done</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Script -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    
+    <script>
+        // Custom Admin view tab switching engine overrides
+        const originalSwitchTab = switchTab;
+        switchTab = function(tabName) {
+            // Update Sidenav styling active classes
+            document.querySelectorAll('.admin-nav-item').forEach(btn => btn.classList.remove('active'));
+            const activeBtn = document.getElementById(`sidebar-tab-${tabName === 'inventory' ? 'inventory' : (tabName === 'dashboard' ? 'dashboard' : tabName)}`);
+            if (activeBtn) activeBtn.classList.add('active');
+            
+            // Show/Hide headers
+            const heading = document.getElementById('admin-view-heading');
+            const subheading = document.getElementById('admin-view-subheading');
+            const metricsRow = document.getElementById('admin-metrics-row');
+            
+            if (tabName === 'dashboard') {
+                heading.innerText = "Dashboard Overview";
+                subheading.innerText = "Analyze active sales metrics and counter inventory";
+                metricsRow.style.display = 'grid';
+                loadAdminDashboardLowStock();
+            } else if (tabName === 'pos') {
+                heading.innerText = "Cashier POS Desk";
+                subheading.innerText = "Process retail billing bills for counter buyers";
+                metricsRow.style.display = 'none';
+            } else if (tabName === 'inventory') {
+                heading.innerText = "Inventory Catalog";
+                subheading.innerText = "Manage products catalog registers and hierarchy trees";
+                metricsRow.style.display = 'none';
+            } else if (tabName === 'orders') {
+                heading.innerText = "Fulfillment Manager";
+                subheading.innerText = "Track and update customer checkout deliveries";
+                metricsRow.style.display = 'none';
+            } else if (tabName === 'announcements') {
+                heading.innerText = "Announcements Publisher";
+                subheading.innerText = "Display announcements at the top of the storefront";
+                metricsRow.style.display = 'none';
+            }
+            
+            // Switch tabs
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            const activeContent = document.getElementById(`tab-${tabName}`);
+            if (activeContent) activeContent.classList.add('active');
+            
+            // Trigger callbacks in main script
+            if (tabName === 'inventory') {
+                loadCatalog();
+            } else if (tabName === 'orders') {
+                loadAdminOrders();
+            } else if (tabName === 'announcements') {
+                loadAnnouncementsIntoForm();
+            }
+        };
+        
+        async function loadAdminDashboardLowStock() {
+            try {
+                const response = await fetch('/api/products?per_page=100');
+                const data = await response.json();
+                if (response.ok) {
+                    const lowStockItems = data.products.filter(p => p.stock < 10);
+                    const tbody = document.getElementById('admin-low-stock-body');
+                    if (lowStockItems.length === 0) {
+                        tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--admin-text-muted); padding: 2rem 0;">No low stock alerts. All items healthy.</td></tr>`;
+                    } else {
+                        tbody.innerHTML = lowStockItems.map(p => `
+                            <tr>
+                                <td><span class="badge badge-draft">${p.sku}</span></td>
+                                <td style="font-weight: 600;">${p.name}</td>
+                                <td>${formatINR(p.selling_price)}</td>
+                                <td style="text-align: center; font-weight: 700; color: var(--danger);">${p.stock} units</td>
+                                <td style="text-align: center;">
+                                    <button class="btn btn-secondary btn-sm" onclick="switchTab('inventory'); editProduct(${p.id})">Restock</button>
+                                </td>
+                            </tr>
+                        `).join('');
+                    }
+                }
+            } catch(e) {
+                console.error("Failed to load dashboard low stock alerts:", e);
+            }
+        }
+        
+        // Initial setup
+        window.addEventListener('DOMContentLoaded', () => {
+            loadDashboardMetrics();
+            loadAdminDashboardLowStock();
+        });
+    </script>
+</body>
+</html>

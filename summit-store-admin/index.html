@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Summit Store Console</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="toast-region" class="toast-region" aria-live="polite"></div>
+
+  <main id="auth-view" class="view auth-view">
+    <section class="auth-card" aria-labelledby="auth-title">
+      <div class="auth-heading">
+        <p class="eyebrow">Summit Store</p>
+        <h1 id="auth-title">Welcome back</h1>
+      </div>
+
+      <div class="auth-tabs" role="tablist" aria-label="Authentication mode">
+        <button id="login-tab" class="auth-tab active" type="button" role="tab" aria-selected="true">Login</button>
+        <button id="signup-tab" class="auth-tab" type="button" role="tab" aria-selected="false">Signup</button>
+      </div>
+
+      <form id="login-form" class="auth-form" novalidate>
+        <div class="field">
+          <label for="login-identifier">Email or Phone Number</label>
+          <input id="login-identifier" name="identifier" type="text" autocomplete="email" placeholder="name@example.com or +919876543210">
+          <small class="field-error"></small>
+        </div>
+
+        <div class="field">
+          <label for="login-password">Password</label>
+          <input id="login-password" name="password" type="password" autocomplete="current-password" placeholder="Enter password">
+          <small class="field-error"></small>
+        </div>
+
+        <label class="check-row">
+          <input id="remember-me" type="checkbox">
+          <span>Remember me</span>
+        </label>
+
+        <button class="primary-button" type="submit">Login</button>
+      </form>
+
+      <form id="signup-form" class="auth-form hidden" novalidate>
+        <div id="signup-phase-one" class="signup-phase">
+          <div class="field">
+            <label for="signup-name">Full Name</label>
+            <input id="signup-name" name="name" type="text" autocomplete="name" placeholder="Rahul Sharma">
+            <small class="field-error"></small>
+          </div>
+
+          <div class="field">
+            <label for="signup-identifier">Email or Phone Number</label>
+            <input id="signup-identifier" name="identifier" type="text" autocomplete="email" placeholder="name@example.com or +919876543210">
+            <small class="field-error"></small>
+          </div>
+
+          <label class="check-row terms-row">
+            <input id="signup-terms" type="checkbox">
+            <span>I agree to the Terms and Privacy Policy</span>
+          </label>
+
+          <button id="send-otp-button" class="primary-button" type="button">Send Verification Code</button>
+        </div>
+
+        <div id="signup-phase-two" class="signup-phase hidden">
+          <div class="otp-copy">
+            <h2>Verify your contact</h2>
+            <p>Enter the 6-digit code sent to your email or phone number.</p>
+          </div>
+
+          <div class="otp-field">
+            <label>Verification Code</label>
+            <div id="otp-matrix" class="otp-matrix" aria-label="6 digit verification code">
+              <input class="otp-input" inputmode="numeric" maxlength="1" aria-label="Digit 1">
+              <input class="otp-input" inputmode="numeric" maxlength="1" aria-label="Digit 2">
+              <input class="otp-input" inputmode="numeric" maxlength="1" aria-label="Digit 3">
+              <input class="otp-input" inputmode="numeric" maxlength="1" aria-label="Digit 4">
+              <input class="otp-input" inputmode="numeric" maxlength="1" aria-label="Digit 5">
+              <input class="otp-input" inputmode="numeric" maxlength="1" aria-label="Digit 6">
+            </div>
+            <small id="otp-error" class="field-error"></small>
+          </div>
+
+          <div class="split-actions">
+            <button id="back-to-signup" class="ghost-button" type="button">Back</button>
+            <button class="primary-button" type="submit">Verify Account</button>
+          </div>
+        </div>
+      </form>
+
+      <div class="divider" aria-hidden="true"><span>or</span></div>
+
+      <button id="google-auth-button" class="google-button" type="button">
+        <span class="google-mark" aria-hidden="true">G</span>
+        <span>Continue with Google</span>
+      </button>
+    </section>
+  </main>
+
+  <section id="dashboard-view" class="view dashboard-view hidden" aria-label="Store dashboard">
+    <header class="top-navbar">
+      <a class="brand" href="#/dashboard" aria-label="Summit dashboard">
+        <span class="brand-mark">S</span>
+        <span>Summit</span>
+      </a>
+
+      <div class="search-pill">
+        <span aria-hidden="true">⌕</span>
+        <input id="dashboard-search" type="search" placeholder="Search products, categories, posts">
+      </div>
+
+      <div class="nav-actions">
+        <button id="create-shortcut" class="create-button" type="button">+ Create</button>
+        <button id="profile-trigger" class="avatar-button" type="button" aria-haspopup="true" aria-expanded="false">
+          <span class="avatar">RS</span>
+        </button>
+      </div>
+
+      <aside id="profile-dropdown" class="profile-dropdown" aria-label="Profile menu">
+        <div class="profile-top">
+          <span class="avatar large">RS</span>
+          <div>
+            <strong id="profile-name">Rahul Sharma</strong>
+            <span>Store Member</span>
+          </div>
+        </div>
+        <button type="button">Account Settings</button>
+        <button id="profile-admin-link" type="button">Admin Product Panel</button>
+        <button id="logout-button" type="button">Sign out</button>
+      </aside>
+    </header>
+
+    <div class="summit-grid">
+      <aside class="left-sidebar">
+        <nav aria-label="Primary">
+          <p class="sidebar-heading">GENERAL</p>
+          <a class="nav-item active" href="#/dashboard" data-filter="">Dashboard</a>
+          <a class="nav-item" href="#/feed" data-filter="">Store Feed</a>
+          <button id="sidebar-admin-link" class="nav-item nav-button" type="button">Admin Settings</button>
+
+          <p class="sidebar-heading">CUSTOM FEED</p>
+          <div id="category-nav" class="category-nav"></div>
+        </nav>
+      </aside>
+
+      <main class="center-content">
+        <header class="content-header">
+          <div>
+            <h2>Primary Dashboard</h2>
+            <p>Live product cards, category tags, stock notes, and customer actions.</p>
+          </div>
+          <button id="clear-filter-button" class="secondary-button" type="button">Clear Filter</button>
+        </header>
+
+        <section id="product-feed" class="product-feed" aria-label="Published products"></section>
+      </main>
+
+      <aside class="right-sidebar">
+        <section class="side-panel">
+          <h3>Department Activity</h3>
+          <div id="department-list" class="department-list"></div>
+        </section>
+
+        <section class="side-panel">
+          <h3>Inventory Snapshot</h3>
+          <div class="metric-grid">
+            <article>
+              <strong id="metric-products">0</strong>
+              <span>Products</span>
+            </article>
+            <article>
+              <strong id="metric-stock">0</strong>
+              <span>Stock Units</span>
+            </article>
+          </div>
+        </section>
+      </aside>
+    </div>
+  </section>
+
+  <section id="admin-view" class="view admin-view hidden" aria-label="Admin product publishing panel">
+    <header class="top-navbar">
+      <a class="brand" href="#/admin">
+        <span class="brand-mark">A</span>
+        <span>Admin Product Panel</span>
+      </a>
+      <button id="return-dashboard-button" class="secondary-button" type="button">Return to Dashboard</button>
+    </header>
+
+    <main class="admin-layout">
+      <section class="inventory-panel" aria-labelledby="inventory-title">
+        <div class="panel-heading">
+          <h2 id="inventory-title">All Active Inventory Table</h2>
+          <p>Products currently published to the active store stream.</p>
+        </div>
+
+        <div class="table-shell">
+          <table>
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>Stock</th>
+              </tr>
+            </thead>
+            <tbody id="inventory-table-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <aside class="publish-panel" aria-labelledby="publish-title">
+        <div class="panel-heading">
+          <h2 id="publish-title">Publish New Product Form</h2>
+          <p>Validated category publishing using the shared store constants.</p>
+        </div>
+
+        <form id="publish-form" class="publish-form" novalidate>
+          <div class="field">
+            <label for="product-title">Product Title</label>
+            <input id="product-title" type="text" placeholder="Fresh bakery combo">
+            <small class="field-error"></small>
+          </div>
+
+          <div class="field">
+            <label for="product-description">Product Description</label>
+            <textarea id="product-description" rows="4" placeholder="Describe ingredients, size, availability, or usage notes."></textarea>
+            <small class="field-error"></small>
+          </div>
+
+          <div class="field">
+            <label for="product-category">Category</label>
+            <select id="product-category"></select>
+            <small class="field-error"></small>
+          </div>
+
+          <div class="field-grid">
+            <div class="field">
+              <label for="product-price">Price</label>
+              <input id="product-price" type="number" min="0" step="0.01" placeholder="199.00">
+              <small class="field-error"></small>
+            </div>
+            <div class="field">
+              <label for="product-stock">Inventory Stock Level</label>
+              <input id="product-stock" type="number" min="0" step="1" placeholder="25">
+              <small class="field-error"></small>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="product-image">Product Image</label>
+            <div id="drop-zone" class="drop-zone">
+              <input id="product-image" type="file" accept="image/*">
+              <div id="drop-copy" class="drop-copy">
+                <strong>Drag and drop image here</strong>
+                <span>or browse from your device</span>
+              </div>
+              <img id="image-preview" class="image-preview hidden" alt="Selected product preview">
+            </div>
+          </div>
+
+          <button class="primary-button" type="submit">Publish Product to Store</button>
+        </form>
+      </aside>
+    </main>
+  </section>
+
+  <div id="admin-gate" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="gate-title">
+    <section class="gate-card">
+      <div class="gate-heading">
+        <span class="lock-icon" aria-hidden="true">!</span>
+        <h2 id="gate-title">Secure Admin Gate</h2>
+        <p>Enter administrative credentials to access product publishing.</p>
+      </div>
+
+      <form id="admin-gate-form" class="gate-form" novalidate>
+        <div class="field">
+          <label for="admin-login-id">Admin Login ID</label>
+          <input id="admin-login-id" type="text" autocomplete="off" placeholder="Admin Login ID">
+          <small class="field-error"></small>
+        </div>
+
+        <div class="field">
+          <label for="admin-security-key">Admin Security Key</label>
+          <input id="admin-security-key" type="password" autocomplete="current-password" placeholder="Admin Security Key">
+          <small class="field-error"></small>
+        </div>
+
+        <div class="split-actions">
+          <button id="cancel-gate-button" class="secondary-button" type="button">Cancel</button>
+          <button class="primary-button" type="submit">Authenticate</button>
+        </div>
+      </form>
+    </section>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

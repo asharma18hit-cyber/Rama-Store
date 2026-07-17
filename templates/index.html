@@ -1,0 +1,431 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rama Store - Enterprise Monolithic Bookstore</title>
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body id="auth-container-body">
+
+    <!-- ==========================================
+       SECTION B: CONSUMER STOREFRONT VIEW (STORE VIEWS)
+       ========================================== -->
+    <div id="customer-storefront-view" class="storefront-container">
+        <!-- Consumer Navigation Header -->
+        <header class="storefront-header">
+            <div class="logo-section" style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer;" onclick="switchStorefrontTab('home')">
+                <img src="/static/rama_store_logo.jpg" alt="Rama Store Logo" style="width: 34px; height: 34px; border-radius: var(--radius-sm); border: 1.5px solid var(--marigold); object-fit: cover;">
+                <h1 style="margin: 0; font-size: 1.5rem; font-family: var(--font-display); font-weight: 700; color: var(--ivory);">Rama <span class="logo-accent" style="color: var(--marigold);">Store</span></h1>
+            </div>
+            
+            <div class="storefront-search">
+                <input type="text" id="store-search-input" placeholder="Search books, copies, bookmarks..." oninput="triggerStoreSearch()">
+            </div>
+            
+            <div class="header-actions">
+                <button class="cart-trigger-btn" onclick="toggleCartDrawer(true)">
+                    <span>🛒</span> Cart
+                    <span class="cart-badge-count" id="cart-badge-count">0</span>
+                </button>
+                <div class="user-profile-widget" id="customer-profile-widget" style="display: none;">
+                    <button class="btn btn-secondary btn-sm" id="btn-admin-dashboard-link" style="display: none; font-size: 0.8rem; padding: 0.35rem 0.75rem;" onclick="routeToAdminDashboard()">Hi, Admin ➔</button>
+                    <button class="btn btn-secondary btn-sm" id="btn-store-rewards" style="font-size: 0.8rem; padding: 0.35rem 0.75rem; border-color: rgba(184, 137, 43, 0.3); color: var(--gold-line);" onclick="switchStorefrontTab('rewards')">Rewards 🎁</button>
+                    <div class="user-avatar" id="customer-avatar" onclick="switchStorefrontTab('profile')">C</div>
+                    <span class="user-name" id="customer-display-name" onclick="switchStorefrontTab('profile')">Profile</span>
+                    <button class="logout-btn" onclick="handleLogout()">Logout</button>
+                </div>
+                <button class="btn btn-primary" id="btn-store-signin" onclick="openLoginOverlay()">Sign In</button>
+            </div>
+        </header>
+
+        <!-- Store Announcement Banner -->
+        <div id="store-announcement-banner" style="background: var(--marigold); color: var(--ink); padding: 0.5rem 1rem; font-size: 0.85rem; font-weight: 700; text-align: center; border-bottom: 1px solid rgba(184, 137, 43, 0.2); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; display: flex; justify-content: center; align-items: center; gap: 0.5rem; letter-spacing: 0.03em; position: sticky; top: var(--header-height); z-index: 10;">
+            📢 <span id="store-announcement-text">Loading latest counter announcements...</span>
+        </div>
+
+        <!-- Customer Storefront Main Layout -->
+        <main class="storefront-main-layout">
+            
+            <!-- Storefront Tab: HOME -->
+            <div id="store-tab-home" class="store-tab-content active">
+                <div class="hero-banner">
+                    <div class="hero-content">
+                        <h2>Explore Premium Literature</h2>
+                        <p>Browse our catalog of bestselling novels, high-quality copies, and bookmarks. Free delivery on orders above ₹500.</p>
+                        <button class="btn btn-primary" onclick="scrollStoreToCatalog()">Shop Collection ➔</button>
+                    </div>
+                    <div class="hero-graphic">📚</div>
+                </div>
+                
+                <!-- Reorder Usual Basket Row -->
+                <div class="card usual-basket-card" style="margin-bottom: 2rem; padding: 1.5rem;">
+                    <h3 style="font-family: var(--font-display); font-size: 1.25rem; font-style: italic; color: var(--gold-line); margin-bottom: 1rem; font-weight: 700;">Reorder Your Usuals</h3>
+                    <div class="usual-basket-row" id="usual-basket-items-container" style="display: flex; gap: 1rem; overflow-x: auto; padding-bottom: 0.5rem;">
+                        <!-- Loaded dynamically from javascript -->
+                    </div>
+                </div>
+                
+                <div class="storefront-grid-wrapper" id="storefront-grid-boundary">
+                    <!-- Amazon-style Sidebar filter tree -->
+                    <aside class="storefront-sidebar">
+                        <div class="filter-group">
+                            <h4>Store Categories</h4>
+                            <div class="nested-category-tree" id="store-filter-categories">
+                                <!-- Loaded dynamically as recursive list tree -->
+                            </div>
+                        </div>
+                        <div class="filter-group">
+                            <h4>Max Price</h4>
+                            <div class="price-slider-wrapper">
+                                <input type="range" id="price-slider-input" min="0" max="2000" step="50" value="2000" oninput="updatePriceSliderLabel(this.value)">
+                                <div class="price-slider-labels">
+                                    <span>₹0</span>
+                                    <span id="price-slider-max-label">₹2,000</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="btn btn-secondary" style="width: 100%; margin-top: 1rem;" onclick="resetStoreFilters()">Reset Filters</button>
+                    </aside>
+                    
+                    <!-- Product catalog grid -->
+                    <div class="storefront-products-section">
+                        <div class="products-grid" id="storefront-products-grid">
+                            <!-- Shimmer Skeletons loaded dynamically -->
+                        </div>
+                        <div class="infinite-scroll-trigger" id="infinite-scroll-trigger"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Storefront Tab: PROFILE & ORDERS -->
+            <div id="store-tab-profile" class="store-tab-content">
+                <div class="profile-layout-grid">
+                    <div class="card profile-info-card">
+                        <div class="card-header">
+                            <h2>My Account Details</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="profile-details-list">
+                                <div class="profile-item">
+                                    <label>Username</label>
+                                    <p id="profile-user-fullname">-</p>
+                                </div>
+                                <div class="profile-item">
+                                    <label>Email Address</label>
+                                    <p id="profile-user-identifier">-</p>
+                                </div>
+                                <div class="profile-item">
+                                    <label>Account Role</label>
+                                    <p><span class="badge badge-in-stock" id="profile-user-role">Customer</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card change-password-card">
+                        <div class="card-header">
+                            <h2>Change Account Password</h2>
+                        </div>
+                        <div class="card-body" style="padding: 1.5rem;">
+                            <form id="form-change-password" onsubmit="handleChangePassword(event)">
+                                <div class="auth-input-group" style="margin-bottom: 1rem;">
+                                    <label for="change-pwd-current">Current Password *</label>
+                                    <input type="password" id="change-pwd-current" required placeholder="••••••••" style="width: 100%; padding: 0.65rem; border-radius: 6px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text);">
+                                </div>
+                                <div class="auth-input-group" style="margin-bottom: 1rem;">
+                                    <label for="change-pwd-new">New Password *</label>
+                                    <input type="password" id="change-pwd-new" required placeholder="••••••••" style="width: 100%; padding: 0.65rem; border-radius: 6px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text);">
+                                </div>
+                                <div class="auth-input-group" style="margin-bottom: 1.25rem;">
+                                    <label for="change-pwd-confirm">Confirm New Password *</label>
+                                    <input type="password" id="change-pwd-confirm" required placeholder="••••••••" style="width: 100%; padding: 0.65rem; border-radius: 6px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text);">
+                                </div>
+                                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.65rem; font-weight: 600;">Update Password</button>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <div class="card orders-history-card">
+                        <div class="card-header">
+                            <h2>My Purchase History</h2>
+                        </div>
+                        <div class="card-body" id="customer-orders-list-wrapper">
+                            <!-- Populated with order timelines -->
+                        </div>
+                    </div>
+            </div>
+            
+            <!-- Storefront Tab: REWARDS & LOYALTY LEDGER -->
+            <div id="store-tab-rewards" class="store-tab-content">
+                <div class="rewards-layout-grid">
+                    <!-- Rewards Balance Card -->
+                    <div class="card rewards-balance-card" style="text-align: center; padding: 2.5rem 2rem;">
+                        <h3 style="font-family: var(--font-display); font-size: 1.5rem; font-style: italic; color: var(--gold-line); margin-bottom: 0.5rem; font-weight: 700;">My Counter Rewards</h3>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">Current Balance</p>
+                        
+                        <div class="points-balance-display" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin: 1rem 0; position: relative;">
+                            <span id="loyalty-points-value" style="font-family: var(--font-display); font-size: 4rem; font-weight: 800; color: var(--ink); line-height: 1;">350</span>
+                            <span style="font-family: var(--font-mono); font-size: 1.2rem; color: var(--marigold); font-weight: 600; margin-top: 1rem;">pts</span>
+                            
+                            <!-- Delta popup helper -->
+                            <span id="loyalty-points-delta" style="position: absolute; left: calc(50% + 70px); top: 0; font-family: var(--font-mono); font-weight: 700; color: var(--teal); font-size: 1.1rem; opacity: 0; transform: translateY(10px); transition: all 0.4s ease; pointer-events: none;">+100 pts</span>
+                        </div>
+                        
+                        <div class="rewards-card-footer" style="border-top: 1px dashed rgba(184, 137, 43, 0.25); padding-top: 1rem; margin-top: 1rem; font-size: 0.85rem; color: var(--text-muted);">
+                            Earn 10% back in points on every checkout purchase!
+                        </div>
+                    </div>
+                    
+                    <!-- Running Rewards Ledger Card -->
+                    <div class="card rewards-ledger-card">
+                        <div class="card-header">
+                            <h2>Rewards & Transactions Ledger</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="store-ledger-box" id="rewards-ledger-container">
+                                <!-- Populated dynamically by javascript -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Cart drawer overlay -->
+        <div class="cart-drawer-overlay" id="cart-drawer" onclick="toggleCartDrawer(false)">
+            <div class="cart-drawer-container" onclick="event.stopPropagation()">
+                <div class="drawer-header">
+                    <h3>Your Cart Selection</h3>
+                    <button class="drawer-close" onclick="toggleCartDrawer(false)">×</button>
+                </div>
+                <div class="drawer-body">
+                    <div class="cart-empty-state" id="store-cart-empty" style="display: block;">
+                        <div class="cart-empty-icon">🛒</div>
+                        <p>Your cart is empty. Add products from our catalog to get started!</p>
+                    </div>
+                    <div class="drawer-cart-list" id="store-cart-list" style="display: none;">
+                        <!-- Dynamic items -->
+                    </div>
+                </div>
+                <div class="drawer-footer" id="store-cart-footer" style="display: none;">
+                    <div class="summary-row">
+                        <span>Subtotal</span>
+                        <span id="store-cart-subtotal">₹0.00</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>GST Tax (18%)</span>
+                        <span id="store-cart-tax">₹0.00</span>
+                    </div>
+                    <div class="summary-row total">
+                        <span>Total Price</span>
+                        <span id="store-cart-total">₹0.00</span>
+                    </div>
+                    <button class="btn btn-primary checkout-btn" onclick="openCheckoutDrawer()">Proceed to Checkout</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Checkout delivery detail drawer overlay -->
+        <div class="checkout-sheet-overlay" id="checkout-sheet" onclick="toggleCheckoutDrawer(false)">
+            <div class="checkout-sheet-container" onclick="event.stopPropagation()">
+                <div class="drawer-header">
+                    <h3>Complete Checkout Delivery</h3>
+                    <button class="drawer-close" onclick="toggleCheckoutDrawer(false)">×</button>
+                </div>
+                <div class="drawer-body">
+                    <form id="store-checkout-form" onsubmit="handleCustomerCheckoutSubmit(event)">
+                        <div class="auth-input-group">
+                            <label for="checkout-shipping-address">Delivery / Shipping Address *</label>
+                            <textarea id="checkout-shipping-address" required placeholder="Enter your full street address, landmark, pin code..."></textarea>
+                        </div>
+                        <div class="checkout-summary-review card">
+                            <div class="card-header">
+                                <h2>Payment Summary</h2>
+                            </div>
+                            <div class="card-body">
+                                <div class="summary-row">
+                                    <span>Products Total</span>
+                                    <span id="checkout-review-subtotal">₹0.00</span>
+                                </div>
+                                <div class="summary-row total">
+                                    <span>Amount Payable (Inc. 18% GST)</span>
+                                    <span id="checkout-review-total">₹0.00</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary checkout-btn">Verify & Proceed to Payment</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- PWA Mobile Bottom Tab bar -->
+        <div class="mobile-nav-bar" id="mobile-nav-bar">
+            <button class="mobile-nav-item active" onclick="switchStorefrontTab('home')">
+                <span class="nav-icon">🏠</span>
+                <span class="nav-label">Home</span>
+            </button>
+            <button class="mobile-nav-item" onclick="scrollStoreToCatalog()">
+                <span class="nav-icon">🔍</span>
+                <span class="nav-label">Search</span>
+            </button>
+            <button class="mobile-nav-item" onclick="toggleCartDrawer(true)">
+                <span class="nav-icon">🛒</span>
+                <span class="nav-label">Cart</span>
+            </button>
+            <button class="mobile-nav-item" onclick="switchStorefrontTab('rewards')">
+                <span class="nav-icon">🎁</span>
+                <span class="nav-label">Rewards</span>
+            </button>
+            <button class="mobile-nav-item" onclick="switchStorefrontTab('profile')">
+                <span class="nav-icon">👤</span>
+                <span class="nav-label">Profile</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- GLOBAL TOAST NOTIFICATIONS -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- ==========================================
+       MODAL CONTAINERS
+       ========================================== -->
+    
+    <!-- MODAL 1: EDIT PRODUCT DIALOG -->
+    <div class="modal-overlay" id="edit-product-modal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3>Edit Product Details</h3>
+                <button class="modal-close" onclick="closeEditModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="edit-product-form" onsubmit="handleEditFormSubmit(event)">
+                    <input type="hidden" id="edit-prod-id">
+                    <div class="product-form-grid">
+                        <div>
+                            <label for="edit-prod-sku">Unique SKU / Barcode ID *</label>
+                            <input type="text" id="edit-prod-sku" required>
+                        </div>
+                        <div>
+                            <label for="edit-prod-name">Product Name *</label>
+                            <input type="text" id="edit-prod-name" required>
+                        </div>
+                        <div>
+                            <label for="edit-prod-category-id">Category Tree Node *</label>
+                            <select id="edit-prod-category-id" required>
+                                <!-- Populated dynamically -->
+                            </select>
+                        </div>
+                        <div>
+                            <label for="edit-prod-status">Publish Status *</label>
+                            <select id="edit-prod-status" required>
+                                <option value="draft">Draft (Hidden)</option>
+                                <option value="published">Published (Storefront)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="edit-prod-image-url">Image URL</label>
+                            <input type="text" id="edit-prod-image-url">
+                        </div>
+                        <div>
+                            <label for="edit-prod-purchase-price">Purchase Price (₹) *</label>
+                            <input type="number" id="edit-prod-purchase-price" step="0.01" min="0" required>
+                        </div>
+                        <div>
+                            <label for="edit-prod-selling-price">Selling Price (₹) *</label>
+                            <input type="number" id="edit-prod-selling-price" step="0.01" min="0" required>
+                        </div>
+                        <div>
+                            <label for="edit-prod-stock">Current Stock Quantity *</label>
+                            <input type="number" id="edit-prod-stock" min="0" required>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeEditModal()">Cancel</button>
+                <button type="submit" form="edit-product-form" class="btn btn-primary">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 3: PAYMENT GATEWAY CARD INTERFACE -->
+    <div class="modal-overlay" id="checkout-payment-modal">
+        <div class="modal-container" style="max-width: 450px; position: relative;">
+            
+            <div id="payment-processing-overlay" class="payment-processing-mask" style="display: none;">
+                <div class="processing-spinner-box">
+                    <div class="processing-spinner"></div>
+                    <p>Contacting Secure Gateway...</p>
+                    <span style="font-size: 0.8rem; color: var(--text-muted);">Please do not refresh or close window.</span>
+                </div>
+            </div>
+
+            <div class="modal-header">
+                <h3>Secure Gateway Checkout</h3>
+                <button class="modal-close" onclick="cancelPaymentIntent()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="payment-intent-total-bar">
+                    <span>Payable Amount (Inc. 18% GST):</span>
+                    <span id="payment-intent-total" style="font-size: 1.3rem; font-weight: 800; color: var(--teal);">₹0.00</span>
+                </div>
+                <form id="payment-card-form" onsubmit="handlePaymentFormSubmit(event)">
+                    <div class="auth-input-group">
+                        <label for="payment-cardholder-name">Cardholder Name *</label>
+                        <input type="text" id="payment-cardholder-name" required placeholder="e.g. John Doe">
+                    </div>
+                    <div class="auth-input-group" style="position: relative;">
+                        <label for="payment-card-number">Credit / Debit Card Number *</label>
+                        <input type="text" id="payment-card-number" required placeholder="XXXX XXXX XXXX XXXX" maxlength="19" style="padding-right: 3.5rem;">
+                        <div class="card-brand-logo" id="payment-card-brand">💳</div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="auth-input-group">
+                            <label for="payment-card-expiry">Expiry Date *</label>
+                            <input type="text" id="payment-card-expiry" required placeholder="MM/YY" maxlength="5">
+                        </div>
+                        <div class="auth-input-group">
+                            <label for="payment-card-cvv">CVV Code *</label>
+                            <input type="password" id="payment-card-cvv" required placeholder="123" maxlength="3">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer" style="justify-content: space-between;">
+                <button class="btn btn-secondary" onclick="cancelPaymentIntent()">Cancel Order</button>
+                <button type="submit" form="payment-card-form" class="btn btn-primary" style="background-color: var(--teal);">Pay Securely</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: PRINTABLE RECEIPT SUCCESS -->
+    <div class="modal-overlay" id="receipt-modal">
+        <div class="modal-container" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3>Transaction Success</h3>
+                <button class="modal-close" onclick="closeReceiptModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="success-checkmark-wrapper">
+                    <svg class="checkmark-svg" viewBox="0 0 52 52">
+                        <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none"/>
+                        <path class="checkmark-kick" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                    </svg>
+                </div>
+                <div id="receipt-modal-content"></div>
+            </div>
+            <div class="modal-footer" style="justify-content: space-between;">
+                <button class="btn btn-secondary" onclick="printReceipt()">Print Receipt</button>
+                <button class="btn btn-primary" onclick="closeReceiptModal()">Done</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Script -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

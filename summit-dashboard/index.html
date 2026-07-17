@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Summit Dashboard</title>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Top Navbar -->
+  <header class="top-navbar">
+    <!-- Left Section -->
+    <div class="nav-left">
+      <button class="icon-btn sidebar-toggle-btn" aria-label="Toggle Layout">
+        <i data-lucide="menu"></i>
+      </button>
+      <div class="app-logo">
+        <span class="logo-accent">S</span>ummit
+      </div>
+    </div>
+
+    <!-- Center Section: Search -->
+    <div class="nav-center">
+      <div class="search-wrapper">
+        <i data-lucide="search" class="search-icon"></i>
+        <input type="text" placeholder="Search posts, articles, or topics..." aria-label="Search">
+      </div>
+    </div>
+
+    <!-- Right Section -->
+    <div class="nav-right">
+      <button class="btn-create">
+        <i data-lucide="plus" class="btn-icon"></i>
+        <span>Create</span>
+      </button>
+      <button class="icon-btn" aria-label="Grid Menu">
+        <i data-lucide="layout-grid"></i>
+      </button>
+      <div class="profile-avatar-container" id="profile-avatar-trigger">
+        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80" alt="User Profile" class="profile-avatar">
+        <span class="online-indicator"></span>
+      </div>
+    </div>
+
+    <!-- User Profile Dropdown Menu (flyout) -->
+    <div class="profile-dropdown-card" id="profile-dropdown">
+      <!-- Top User Info -->
+      <div class="dropdown-header">
+        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80" alt="User Avatar" class="dropdown-avatar">
+        <div class="dropdown-user-details">
+          <div class="dropdown-user-name">Chris Harris</div>
+          <div class="dropdown-user-role">Senior Developer</div>
+        </div>
+        <span class="pro-badge">Pro Plan</span>
+      </div>
+
+      <!-- Middle Menu Options -->
+      <div class="dropdown-menu-list">
+        <a href="#" class="dropdown-menu-item">
+          <i data-lucide="user-check"></i>
+          <span>Set availability</span>
+        </a>
+        <a href="#" class="dropdown-menu-item">
+          <i data-lucide="settings"></i>
+          <span>Profile Settings</span>
+        </a>
+        <a href="#" class="dropdown-menu-item">
+          <i data-lucide="sliders"></i>
+          <span>Preferences</span>
+        </a>
+        <a href="#" class="dropdown-menu-item">
+          <i data-lucide="shield-check"></i>
+          <span>Security</span>
+        </a>
+        <div class="dropdown-menu-item dark-mode-toggle">
+          <div class="toggle-left">
+            <i data-lucide="moon"></i>
+            <span>Dark mode</span>
+          </div>
+          <label class="switch-control">
+            <input type="checkbox" id="dark-mode-checkbox">
+            <span class="slider-round"></span>
+          </label>
+        </div>
+        <a href="#" class="dropdown-menu-item">
+          <i data-lucide="terminal"></i>
+          <span>Developer Tools</span>
+        </a>
+        <a href="#" class="dropdown-menu-item">
+          <i data-lucide="download"></i>
+          <span>Download SDK</span>
+        </a>
+        <a href="#" class="dropdown-menu-item">
+          <i data-lucide="upload-cloud"></i>
+          <span>File Uploads</span>
+        </a>
+      </div>
+
+      <!-- Bottom Logout -->
+      <div class="dropdown-footer">
+        <a href="#" class="dropdown-menu-item sign-out-item">
+          <i data-lucide="log-out"></i>
+          <span>Sign out</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Grid Layout Layout -->
+  <div class="main-split-container">
+    <!-- Left Navigation Sidebar -->
+    <aside class="left-sidebar">
+      <nav class="sidebar-nav">
+        <!-- Section: General -->
+        <div class="nav-section">
+          <div class="nav-section-header">
+            <span>General</span>
+            <i data-lucide="chevron-down" class="section-arrow"></i>
+          </div>
+          <div class="nav-section-content">
+            <a href="#" class="nav-item">
+              <i data-lucide="home"></i>
+              <span>Dashboard</span>
+            </a>
+            <a href="#" class="nav-item">
+              <i data-lucide="compass"></i>
+              <span>Discover</span>
+            </a>
+            <a href="#" class="nav-item active">
+              <i data-lucide="bookmark"></i>
+              <span>Saved Posts</span>
+              <span class="nav-badge">3</span>
+            </a>
+            <a href="#" class="nav-item">
+              <i data-lucide="bell"></i>
+              <span>Notifications</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Section: Custom Feed -->
+        <div class="nav-section">
+          <div class="nav-section-header">
+            <span>Custom Feed</span>
+            <i data-lucide="chevron-down" class="section-arrow"></i>
+          </div>
+          <div class="nav-section-content">
+            <a href="#" class="nav-item">
+              <i data-lucide="trending-up"></i>
+              <span>Trending Topics</span>
+            </a>
+            <a href="#" class="nav-item">
+              <i data-lucide="hash"></i>
+              <span>Hashtags</span>
+            </a>
+            <a href="#" class="nav-item">
+              <i data-lucide="users"></i>
+              <span>Communities</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Section: Personal Space -->
+        <div class="nav-section">
+          <div class="nav-section-header">
+            <span>Personal Space</span>
+            <i data-lucide="chevron-down" class="section-arrow"></i>
+          </div>
+          <div class="nav-section-content">
+            <a href="#" class="nav-item">
+              <i data-lucide="folder"></i>
+              <span>Projects</span>
+            </a>
+            <a href="#" class="nav-item">
+              <i data-lucide="history"></i>
+              <span>History</span>
+            </a>
+            <a href="#" class="nav-item">
+              <i data-lucide="star"></i>
+              <span>Starred Items</span>
+            </a>
+          </div>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- Center Content Area (Saved Posts Page) -->
+    <main class="center-content">
+      <!-- Page Header -->
+      <header class="page-header">
+        <div class="page-title-area">
+          <h1 class="page-title">Saved Posts</h1>
+          <p class="page-subtitle">Your bookmarked posts and articles</p>
+        </div>
+        <div class="page-actions">
+          <button class="btn-secondary">
+            <i data-lucide="filter"></i>
+            <span>Filter</span>
+          </button>
+          <button class="btn-secondary danger-hover">
+            <i data-lucide="archive"></i>
+            <span>Archive All</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Sub-Header Bar -->
+      <div class="sub-header-bar">
+        <span class="post-count">3 Saved Posts</span>
+        <span class="last-saved-time">Last saved: 1 day ago</span>
+      </div>
+
+      <!-- Content Cards Vertical Stack -->
+      <div class="cards-stack">
+        <!-- Post Card 1 -->
+        <article class="post-card">
+          <!-- Card Header -->
+          <div class="card-header">
+            <div class="card-header-left">
+              <div class="community-avatar bg-violet-100 text-violet-600">N</div>
+              <div class="community-meta">
+                <div class="community-name">r/nextjs</div>
+                <div class="poster-meta">
+                  <span class="poster-username">u/leeerob</span>
+                  <span class="meta-dot"></span>
+                  <span class="time-elapsed">12h ago</span>
+                </div>
+              </div>
+            </div>
+            <div class="card-header-right">
+              <span class="pill-badge">Saved 1 day ago</span>
+              <button class="icon-btn-sm" aria-label="More Options">
+                <i data-lucide="more-horizontal"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Card Body -->
+          <div class="card-body">
+            <h2 class="post-title">Mastering Next.js 15 Server Components and PPR Strategies</h2>
+            <p class="post-desc">A deep dive into partial pre-rendering (PPR) models, dynamic caching flags, static generation boundaries, and the future performance architectures in next-gen react layouts.</p>
+            <div class="tags-wrap">
+              <span class="post-tag">#nextjs</span>
+              <span class="post-tag">#best-practices</span>
+              <span class="post-tag">#react</span>
+            </div>
+          </div>
+
+          <!-- Card Footer -->
+          <div class="card-footer">
+            <div class="footer-left">
+              <div class="engagement-action-block">
+                <button class="vote-arrow vote-up" aria-label="Upvote">
+                  <i data-lucide="arrow-up"></i>
+                </button>
+                <span class="vote-count">1.2k</span>
+                <button class="vote-arrow vote-down" aria-label="Downvote">
+                  <i data-lucide="arrow-down"></i>
+                </button>
+              </div>
+              <button class="footer-action-btn">
+                <i data-lucide="message-square"></i>
+                <span>142 Comments</span>
+              </button>
+            </div>
+            <div class="footer-right">
+              <button class="bookmark-btn active" aria-label="Unsave bookmark">
+                <i data-lucide="bookmark" class="fill-current"></i>
+              </button>
+            </div>
+          </div>
+        </article>
+
+        <!-- Post Card 2 -->
+        <article class="post-card">
+          <!-- Card Header -->
+          <div class="card-header">
+            <div class="card-header-left">
+              <div class="community-avatar bg-amber-100 text-amber-600">T</div>
+              <div class="community-meta">
+                <div class="community-name">r/tailwindcss</div>
+                <div class="poster-meta">
+                  <span class="poster-username">u/adamwathan</span>
+                  <span class="meta-dot"></span>
+                  <span class="time-elapsed">1d ago</span>
+                </div>
+              </div>
+            </div>
+            <div class="card-header-right">
+              <span class="pill-badge">Saved 2 days ago</span>
+              <button class="icon-btn-sm" aria-label="More Options">
+                <i data-lucide="more-horizontal"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Card Body -->
+          <div class="card-body">
+            <h2 class="post-title">CSS Variables First: Designing in Tailwind CSS v4.0</h2>
+            <p class="post-desc">Exploring how the new theme system integrates with pure CSS variables, eliminating the javascript configurations entirely and improving startup build speeds.</p>
+            <div class="tags-wrap">
+              <span class="post-tag">#tailwind</span>
+              <span class="post-tag">#css-variables</span>
+              <span class="post-tag">#frontend</span>
+            </div>
+          </div>
+
+          <!-- Card Footer -->
+          <div class="card-footer">
+            <div class="footer-left">
+              <div class="engagement-action-block">
+                <button class="vote-arrow vote-up" aria-label="Upvote">
+                  <i data-lucide="arrow-up"></i>
+                </button>
+                <span class="vote-count">840</span>
+                <button class="vote-arrow vote-down" aria-label="Downvote">
+                  <i data-lucide="arrow-down"></i>
+                </button>
+              </div>
+              <button class="footer-action-btn">
+                <i data-lucide="message-square"></i>
+                <span>56 Comments</span>
+              </button>
+            </div>
+            <div class="footer-right">
+              <button class="bookmark-btn active" aria-label="Unsave bookmark">
+                <i data-lucide="bookmark" class="fill-current"></i>
+              </button>
+            </div>
+          </div>
+        </article>
+
+        <!-- Post Card 3 -->
+        <article class="post-card">
+          <!-- Card Header -->
+          <div class="card-header">
+            <div class="card-header-left">
+              <div class="community-avatar bg-sky-100 text-sky-600">TS</div>
+              <div class="community-meta">
+                <div class="community-name">r/typescript</div>
+                <div class="poster-meta">
+                  <span class="poster-username">u/andershejlsberg</span>
+                  <span class="meta-dot"></span>
+                  <span class="time-elapsed">3d ago</span>
+                </div>
+              </div>
+            </div>
+            <div class="card-header-right">
+              <span class="pill-badge">Saved 3 days ago</span>
+              <button class="icon-btn-sm" aria-label="More Options">
+                <i data-lucide="more-horizontal"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Card Body -->
+          <div class="card-body">
+            <h2 class="post-title">Understanding TypeScript 5.5's Inferred Type Predicates</h2>
+            <p class="post-desc">Learn how the TypeScript compiler now automatically infers type predicate signatures for filter routines, reducing unnecessary explicit assertions and boilerplate code.</p>
+            <div class="tags-wrap">
+              <span class="post-tag">#typescript</span>
+              <span class="post-tag">#type-safety</span>
+              <span class="post-tag">#programming</span>
+            </div>
+          </div>
+
+          <!-- Card Footer -->
+          <div class="card-footer">
+            <div class="footer-left">
+              <div class="engagement-action-block">
+                <button class="vote-arrow vote-up" aria-label="Upvote">
+                  <i data-lucide="arrow-up"></i>
+                </button>
+                <span class="vote-count">2.1k</span>
+                <button class="vote-arrow vote-down" aria-label="Downvote">
+                  <i data-lucide="arrow-down"></i>
+                </button>
+              </div>
+              <button class="footer-action-btn">
+                <i data-lucide="message-square"></i>
+                <span>312 Comments</span>
+              </button>
+            </div>
+            <div class="footer-right">
+              <button class="bookmark-btn active" aria-label="Unsave bookmark">
+                <i data-lucide="bookmark" class="fill-current"></i>
+              </button>
+            </div>
+          </div>
+        </article>
+      </div>
+    </main>
+
+    <!-- Right Sidebar Widgets -->
+    <aside class="right-sidebar">
+      <div class="right-sidebar-content">
+        <!-- Widget: Trending Posts -->
+        <section class="sidebar-widget">
+          <div class="widget-header">
+            <h3 class="widget-title">Trending Posts</h3>
+            <a href="#" class="widget-link">View All</a>
+          </div>
+
+          <div class="trending-list">
+            <!-- Trending Item 1 -->
+            <div class="trending-item">
+              <div class="trending-meta">
+                <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=60&q=80" alt="Subreddit" class="trending-avatar">
+                <div class="trending-sub-details">
+                  <span class="trending-sub">r/reactjs</span>
+                  <span class="trending-badge badge-trending">trending</span>
+                </div>
+              </div>
+              <a href="#" class="trending-title">React Router v7.0.0 Alpha Released: What to expect?</a>
+              <div class="trending-metrics">
+                <span>1.4k Upvotes</span>
+                <span class="meta-dot-sm"></span>
+                <span>208 comments</span>
+              </div>
+            </div>
+
+            <hr class="trending-divider">
+
+            <!-- Trending Item 2 -->
+            <div class="trending-item">
+              <div class="trending-meta">
+                <img src="https://images.unsplash.com/photo-1607799279861-4dd421887fb3?auto=format&fit=crop&w=60&q=80" alt="Subreddit" class="trending-avatar">
+                <div class="trending-sub-details">
+                  <span class="trending-sub">r/webdev</span>
+                  <span class="trending-badge badge-hot">hot</span>
+                </div>
+              </div>
+              <a href="#" class="trending-title">Why CSS Container Queries are replacing Media Queries</a>
+              <div class="trending-metrics">
+                <span>948 Upvotes</span>
+                <span class="meta-dot-sm"></span>
+                <span>114 comments</span>
+              </div>
+            </div>
+
+            <hr class="trending-divider">
+
+            <!-- Trending Item 3 -->
+            <div class="trending-item">
+              <div class="trending-meta">
+                <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=60&q=80" alt="Subreddit" class="trending-avatar">
+                <div class="trending-sub-details">
+                  <span class="trending-sub">r/node</span>
+                  <span class="trending-badge badge-trending">trending</span>
+                </div>
+              </div>
+              <a href="#" class="trending-title">Node.js 22 adds built-in WebSocket client natively</a>
+              <div class="trending-metrics">
+                <span>650 Upvotes</span>
+                <span class="meta-dot-sm"></span>
+                <span>89 comments</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <hr class="widget-separator">
+
+        <!-- Widget: Community Standings -->
+        <section class="sidebar-widget">
+          <div class="widget-header">
+            <h3 class="widget-title">Active Communities</h3>
+            <a href="#" class="widget-link">Explore</a>
+          </div>
+          <div class="active-communities-list">
+            <div class="community-row">
+              <div class="comm-left">
+                <div class="comm-avatar bg-violet-100 text-violet-600">N</div>
+                <div class="comm-details">
+                  <span class="comm-name">r/nextjs</span>
+                  <span class="comm-subscribers">245k members</span>
+                </div>
+              </div>
+              <button class="btn-join">Join</button>
+            </div>
+            <div class="community-row">
+              <div class="comm-left">
+                <div class="comm-avatar bg-amber-100 text-amber-600">T</div>
+                <div class="comm-details">
+                  <span class="comm-name">r/tailwindcss</span>
+                  <span class="comm-subscribers">189k members</span>
+                </div>
+              </div>
+              <button class="btn-join joined">Joined</button>
+            </div>
+            <div class="community-row">
+              <div class="comm-left">
+                <div class="comm-avatar bg-sky-100 text-sky-600">TS</div>
+                <div class="comm-details">
+                  <span class="comm-name">r/typescript</span>
+                  <span class="comm-subscribers">310k members</span>
+                </div>
+              </div>
+              <button class="btn-join">Join</button>
+            </div>
+          </div>
+        </section>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Interactive Logic -->
+  <script src="app.js"></script>
+</body>
+</html>
