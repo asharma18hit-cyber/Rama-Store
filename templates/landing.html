@@ -16,6 +16,12 @@
     
     <!-- Favicon -->
     <link rel="icon" type="image/jpg" href="/static/rama_store_logo.jpg">
+    
+    <!-- Three.js Library CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <!-- Entrance Overlay Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/entrance-overlay.css') }}">
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -995,6 +1001,17 @@
 </head>
 <body>
 
+    <!-- WebGL Spiral Shader Entrance Overlay -->
+    <div id="entrance-overlay" class="entrance-overlay-container">
+        <div id="shader-canvas-container" class="shader-canvas-container"></div>
+        <div class="entrance-content-wrapper">
+            <h1 id="entrance-wordmark" class="entrance-wordmark stage-hidden">RAMA Store</h1>
+            <p id="entrance-tagline" class="entrance-tagline stage-hidden">Authentic Literature & Counter Ledger</p>
+            <button id="btn-enter-store" class="btn-enter-store stage-hidden">Enter Store</button>
+        </div>
+        <button id="btn-skip-entrance" class="btn-skip-entrance">Skip Intro</button>
+    </div>
+
     <!-- STICKY HEADER NAVIGATION -->
     <nav class="navbar" id="main-navbar">
         <a href="#" class="nav-logo">
@@ -1357,5 +1374,9 @@
             revealElements(); // Trigger on initial render
         });
     </script>
+    
+    <!-- Custom WebGL Spiral Shader Intro Scripts -->
+    <script src="{{ url_for('static', filename='js/spiral-shader.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/entrance-overlay.js') }}"></script>
 </body>
 </html>

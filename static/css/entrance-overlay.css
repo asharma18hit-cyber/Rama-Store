@@ -1,0 +1,154 @@
+/* static/css/entrance-overlay.css */
+
+.entrance-overlay-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: #121313; /* Ink Black background matching base shader color */
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1),
+                visibility 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.shader-canvas-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: none;
+    transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.entrance-content-wrapper {
+    position: relative;
+    z-index: 10;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    max-width: 90%;
+}
+
+/* Typography pairing: literary Serif for header, clean Sans-Serif for tag/button */
+.entrance-wordmark {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 4rem;
+    font-weight: 800;
+    color: #FAF7F2; /* Aged Paper Cream */
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    text-shadow: 0 0 35px rgba(107, 31, 40, 0.35);
+    transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1),
+                filter 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.entrance-tagline {
+    font-family: 'Work Sans', sans-serif;
+    font-size: 1.05rem;
+    color: #D4B066; /* Warm Gold */
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    max-width: 450px;
+    line-height: 1.4;
+    transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-enter-store {
+    background-color: #6B1F28; /* Deep Burgundy */
+    color: #FAF7F2;
+    border: 1px solid #6B1F28;
+    padding: 0.95rem 2.4rem;
+    border-radius: 4px;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
+    font-size: 0.9rem;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(107, 31, 40, 0.25);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-enter-store:hover {
+    background-color: transparent;
+    color: #FAF7F2;
+    border-color: #FAF7F2;
+    box-shadow: none;
+    transform: translateY(-2px);
+}
+
+.btn-skip-entrance {
+    position: absolute;
+    bottom: 2.5rem;
+    right: 3rem;
+    background: transparent;
+    border: none;
+    color: rgba(250, 247, 242, 0.3);
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    cursor: pointer;
+    z-index: 20;
+    transition: color 0.3s ease;
+}
+
+.btn-skip-entrance:hover {
+    color: #FAF7F2;
+}
+
+/* Stage hidden states */
+.stage-hidden {
+    opacity: 0;
+}
+
+.entrance-wordmark.stage-hidden {
+    filter: blur(20px);
+}
+
+.entrance-tagline.stage-hidden {
+    transform: translateY(15px);
+}
+
+.btn-enter-store.stage-hidden {
+    transform: translateY(15px);
+}
+
+/* Stage revealed states */
+.stage-visible {
+    opacity: 1;
+}
+
+.entrance-wordmark.stage-visible {
+    filter: blur(0);
+}
+
+.entrance-tagline.stage-visible {
+    transform: translateY(0);
+}
+
+.btn-enter-store.stage-visible {
+    transform: translateY(0);
+}
+
+/* Page reveal backdrop blur on dismissal */
+body.entrance-active #hero,
+body.entrance-active #main-navbar {
+    filter: blur(15px);
+    transform: scale(0.97);
+}
+
+#hero, #main-navbar {
+    transition: filter 1.5s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
