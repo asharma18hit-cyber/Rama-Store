@@ -59,8 +59,10 @@ def admin_required(f):
 
 @app.route('/')
 def index_page():
-    """Renders the main single page interface (POS & Catalog storefront)."""
-    return render_template('index.html')
+    """Renders the landing/intro page for guests, or store app for logged-in users."""
+    if 'user_id' in session:
+        return render_template('index.html')
+    return render_template('landing.html')
 
 @app.route('/login')
 def login_page():

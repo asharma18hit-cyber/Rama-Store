@@ -223,7 +223,7 @@ async function handleLogout() {
     if (window.location.pathname.includes('/admin')) {
         window.location.href = '/admin';
     } else {
-        routeUserLayout(null);
+        window.location.href = '/';
     }
 }
 

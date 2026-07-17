@@ -1,0 +1,1361 @@
+<!-- templates/landing.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rama Store - Authentic Literature & Bookshop Counter</title>
+    
+    <!-- Meta Tags for SEO -->
+    <meta name="description" content="Rama Store is a premium, modern bookstore offering bestsellers, classic novels, and loyalty rewards in Samaur Bazar. Free shipping above ₹500.">
+    <meta property="og:title" content="Rama Store - Authentic Literature & Bookshop Counter">
+    <meta property="og:description" content="A curated literary experience. Explore premium books, earn 10% loyalty rewards, and enjoy free counter delivery.">
+    <meta property="og:image" content="/static/rama_store_logo.jpg">
+    <meta property="og:url" content="https://rama-store-3u49.onrender.com/">
+    <meta property="og:type" content="website">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/jpg" href="/static/rama_store_logo.jpg">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Outfit:wght@300;400;500;600;700;800&family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* Warm editorial color scheme */
+            --cream-bg: #FAF7F2;
+            --cream-dim: #F3ECE2;
+            --maroon: #6B1F28;
+            --maroon-dark: #4A1218;
+            --charcoal: #1F2022;
+            --charcoal-light: #34363A;
+            --gold: #B8892B;
+            --gold-light: #D4B066;
+            --white: #FFFFFF;
+            
+            --font-display: 'Fraunces', serif;
+            --font-body: 'Work Sans', sans-serif;
+            --font-ui: 'Outfit', sans-serif;
+            
+            --transition-smooth: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            --transition-quick: all 0.2s ease;
+            --radius-md: 8px;
+            --radius-sm: 4px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background-color: var(--cream-bg);
+            color: var(--charcoal);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Typography Helper utilities */
+        h1, h2, h3, h4 {
+            font-family: var(--font-display);
+            font-weight: 700;
+        }
+
+        /* Sticky Navigation Bar */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 1.5rem 10%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 1000;
+            transition: var(--transition-smooth);
+            background: transparent;
+        }
+
+        .navbar.scrolled {
+            padding: 0.9rem 10%;
+            background: rgba(250, 247, 242, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(107, 31, 40, 0.08);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.02);
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+        }
+
+        .nav-logo img {
+            width: 38px;
+            height: 38px;
+            border-radius: var(--radius-sm);
+            border: 1.5px solid var(--maroon);
+            object-fit: cover;
+        }
+
+        .nav-logo span {
+            font-family: var(--font-display);
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--maroon);
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 2.5rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--charcoal-light);
+            font-family: var(--font-ui);
+            font-weight: 500;
+            font-size: 0.9rem;
+            letter-spacing: 0.03em;
+            transition: var(--transition-quick);
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 1.5px;
+            background-color: var(--maroon);
+            transition: var(--transition-quick);
+        }
+
+        .nav-links a:hover {
+            color: var(--maroon);
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .nav-cta {
+            text-decoration: none;
+            background: var(--maroon);
+            color: var(--cream-bg) !important;
+            padding: 0.65rem 1.4rem;
+            border-radius: var(--radius-sm);
+            font-family: var(--font-ui);
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: var(--transition-smooth);
+            box-shadow: 0 4px 15px rgba(107, 31, 40, 0.15);
+            border: 1px solid var(--maroon);
+        }
+
+        .nav-cta:hover {
+            background: transparent;
+            color: var(--maroon) !important;
+            box-shadow: none;
+            transform: translateY(-2px);
+        }
+
+        /* Mobile Menu Toggle */
+        .menu-toggle {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
+            z-index: 1001;
+        }
+
+        .menu-toggle span {
+            width: 25px;
+            height: 2px;
+            background-color: var(--maroon);
+            transition: var(--transition-quick);
+        }
+
+        /* HERO SECTION */
+        .hero {
+            min-height: 100vh;
+            padding: 8rem 10% 4rem 10%;
+            display: flex;
+            align-items: center;
+            position: relative;
+            background: linear-gradient(135deg, #FAF7F2 0%, #F5ECE2 100%);
+            overflow: hidden;
+        }
+
+        /* Decorative radial vectors */
+        .hero-glow-1 {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(107, 31, 40, 0.04) 0%, transparent 70%);
+            top: -10%;
+            right: -10%;
+            pointer-events: none;
+        }
+
+        .hero-content {
+            width: 55%;
+            z-index: 10;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            background: rgba(107, 31, 40, 0.06);
+            color: var(--maroon);
+            padding: 0.35rem 0.9rem;
+            border-radius: 20px;
+            font-family: var(--font-ui);
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(107, 31, 40, 0.12);
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .hero-content h2 {
+            font-size: 4rem;
+            line-height: 1.1;
+            color: var(--charcoal);
+            margin-bottom: 1.5rem;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.15s forwards;
+        }
+
+        .hero-content h2 span {
+            color: var(--maroon);
+            font-style: italic;
+        }
+
+        .hero-content p {
+            font-size: 1.15rem;
+            color: var(--charcoal-light);
+            margin-bottom: 2.5rem;
+            max-width: 90%;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s forwards;
+        }
+
+        .hero-btns {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.45s forwards;
+        }
+
+        .btn-primary {
+            text-decoration: none;
+            background: var(--maroon);
+            color: var(--cream-bg);
+            padding: 1.1rem 2.2rem;
+            font-family: var(--font-ui);
+            font-weight: 700;
+            font-size: 0.95rem;
+            border-radius: var(--radius-sm);
+            box-shadow: 0 10px 25px rgba(107, 31, 40, 0.2);
+            transition: var(--transition-smooth);
+            border: 1px solid var(--maroon);
+        }
+
+        .btn-primary:hover {
+            background: transparent;
+            color: var(--maroon);
+            box-shadow: none;
+            transform: translateY(-3px);
+        }
+
+        .btn-secondary {
+            text-decoration: none;
+            color: var(--maroon);
+            font-family: var(--font-ui);
+            font-weight: 700;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: var(--transition-quick);
+        }
+
+        .btn-secondary:hover {
+            color: var(--maroon-dark);
+            transform: translateX(4px);
+        }
+
+        /* Hero visual decoration (book layout stack) */
+        .hero-visual {
+            width: 45%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            z-index: 5;
+            opacity: 0;
+            transform: scale(0.95);
+            animation: scaleReveal 1s cubic-bezier(0.16, 1, 0.3, 1) 0.3s forwards;
+        }
+
+        .book-stack-scene {
+            position: relative;
+            width: 320px;
+            height: 420px;
+        }
+
+        /* CSS styled 3D floating book */
+        .floating-book {
+            position: absolute;
+            width: 240px;
+            height: 340px;
+            background: var(--maroon);
+            border-radius: 4px 12px 12px 4px;
+            box-shadow: 20px 20px 50px rgba(0,0,0,0.3);
+            border-left: 8px solid var(--maroon-dark);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 2rem;
+            color: var(--cream-bg);
+            top: 10%;
+            left: 10%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .floating-book::before {
+            content: '';
+            position: absolute;
+            right: 4px;
+            top: 4px;
+            bottom: 4px;
+            width: 4px;
+            border-right: 1.5px solid rgba(255,255,255,0.15);
+        }
+
+        .floating-book-title {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            line-height: 1.1;
+            border-bottom: 2px solid var(--gold);
+            padding-bottom: 1rem;
+        }
+
+        .floating-book-author {
+            font-family: var(--font-ui);
+            font-weight: 500;
+            font-size: 0.85rem;
+            color: var(--gold);
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .book-shadow-stand {
+            position: absolute;
+            width: 280px;
+            height: 20px;
+            background: rgba(0,0,0,0.1);
+            border-radius: 50%;
+            bottom: 0;
+            left: 8%;
+            filter: blur(6px);
+            animation: shadowScale 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0) rotate(2deg); }
+            50% { transform: translateY(-15px) rotate(-1deg); }
+            100% { transform: translateY(0) rotate(2deg); }
+        }
+
+        @keyframes shadowScale {
+            0% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(0.9); opacity: 0.4; }
+            100% { transform: scale(1); opacity: 0.8; }
+        }
+
+        @keyframes fadeInUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes scaleReveal {
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* SECTION TEMPLATE */
+        .section {
+            padding: 8rem 10%;
+            position: relative;
+        }
+
+        .section-header {
+            text-align: center;
+            max-width: 650px;
+            margin: 0 auto 5rem auto;
+        }
+
+        .section-subtitle {
+            font-family: var(--font-ui);
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--maroon);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.75rem;
+        }
+
+        .section-title {
+            font-size: 2.6rem;
+            line-height: 1.2;
+            color: var(--charcoal);
+        }
+
+        /* WHY RAMA STORE SECTION */
+        .why-us {
+            background-color: var(--white);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: var(--cream-bg);
+            padding: 2.5rem 2rem;
+            border-radius: var(--radius-md);
+            border: 1px solid rgba(107, 31, 40, 0.05);
+            transition: var(--transition-smooth);
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 35px rgba(107, 31, 40, 0.05);
+            border-color: rgba(107, 31, 40, 0.15);
+            background: var(--white);
+        }
+
+        .feature-icon {
+            font-size: 2.2rem;
+            color: var(--maroon);
+        }
+
+        .feature-card h3 {
+            font-size: 1.3rem;
+            color: var(--charcoal);
+        }
+
+        .feature-card p {
+            font-size: 0.92rem;
+            color: var(--charcoal-light);
+        }
+
+        /* FEATURED BOOKS SECTION */
+        .books-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2.5rem;
+        }
+
+        .book-card {
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+            text-decoration: none;
+            color: inherit;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+
+        .book-cover-container {
+            width: 100%;
+            aspect-ratio: 2/3;
+            border-radius: 4px 10px 10px 4px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+            position: relative;
+            transition: var(--transition-smooth);
+        }
+
+        .book-card:hover .book-cover-container {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Flat premium styled CSS placeholder covers */
+        .book-cover {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 1.5rem;
+            color: var(--cream-bg);
+            border-left: 6px solid rgba(0,0,0,0.25);
+            position: relative;
+        }
+
+        .book-cover::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            width: 8px;
+            background: linear-gradient(90deg, rgba(255,255,255,0.12), transparent);
+        }
+
+        .book-cover h4 {
+            font-family: var(--font-display);
+            font-size: 1.4rem;
+            line-height: 1.15;
+        }
+
+        .book-cover span {
+            font-family: var(--font-ui);
+            font-size: 0.75rem;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            opacity: 0.85;
+        }
+
+        .book-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .book-title {
+            font-size: 1.15rem;
+            color: var(--charcoal);
+            font-weight: 700;
+        }
+
+        .book-author {
+            font-size: 0.85rem;
+            color: var(--charcoal-light);
+            font-weight: 500;
+        }
+
+        .book-price-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 0.5rem;
+        }
+
+        .book-price {
+            font-family: var(--font-display);
+            font-size: 1.25rem;
+            color: var(--maroon);
+            font-weight: 700;
+        }
+
+        .book-badge {
+            background: rgba(184, 137, 43, 0.1);
+            color: var(--gold);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            font-family: var(--font-ui);
+        }
+
+        /* REWARDS EXPLAINER SECTION */
+        .rewards-banner {
+            background-color: var(--charcoal);
+            color: var(--cream-bg);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(184, 137, 43, 0.15);
+        }
+
+        .rewards-content {
+            padding: 5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 1.5rem;
+        }
+
+        .rewards-content h2 {
+            font-size: 2.8rem;
+            line-height: 1.15;
+            color: var(--cream-bg);
+        }
+
+        .rewards-content h2 span {
+            color: var(--gold-light);
+        }
+
+        .rewards-content p {
+            color: var(--cream-dim);
+            font-size: 1.05rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .rewards-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            list-style: none;
+        }
+
+        .rewards-step-item {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+
+        .rewards-step-num {
+            background: var(--gold);
+            color: var(--charcoal);
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-ui);
+            font-weight: 700;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+            margin-top: 0.15rem;
+        }
+
+        .rewards-step-text h4 {
+            font-family: var(--font-ui);
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--cream-bg);
+            margin-bottom: 0.15rem;
+        }
+
+        .rewards-step-text p {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        .rewards-visual {
+            background: linear-gradient(135deg, var(--maroon) 0%, var(--maroon-dark) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 3rem;
+            border-left: 1px solid rgba(184, 137, 43, 0.2);
+        }
+
+        .rewards-visual-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 3rem;
+            border-radius: var(--radius-lg);
+            text-align: center;
+            width: 100%;
+            max-width: 320px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            transform: rotate(-3deg);
+            animation: gentleRotate 8s ease-in-out infinite alternate;
+        }
+
+        @keyframes gentleRotate {
+            0% { transform: rotate(-3deg) translateY(0); }
+            100% { transform: rotate(2deg) translateY(-8px); }
+        }
+
+        .rewards-visual-value {
+            font-family: var(--font-display);
+            font-size: 4.5rem;
+            font-weight: 800;
+            color: var(--gold-light);
+            line-height: 1;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0 20px rgba(184,137,43,0.3);
+        }
+
+        .rewards-visual-label {
+            font-family: var(--font-ui);
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--cream-bg);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        /* TRUST / TESTIMONIALS SECTION */
+        .testimonials {
+            background-color: var(--white);
+        }
+
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2.5rem;
+        }
+
+        .testimonial-card {
+            background: var(--cream-bg);
+            border: 1px solid rgba(107, 31, 40, 0.05);
+            padding: 3rem 2rem 2.5rem 2rem;
+            border-radius: var(--radius-md);
+            position: relative;
+        }
+
+        .quote-icon {
+            position: absolute;
+            top: 1rem;
+            left: 1.5rem;
+            font-size: 3.5rem;
+            font-family: var(--font-display);
+            color: rgba(107, 31, 40, 0.05);
+            line-height: 1;
+        }
+
+        .testimonial-text {
+            font-size: 0.98rem;
+            color: var(--charcoal-light);
+            margin-bottom: 2rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .author-initials {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--maroon);
+            color: var(--cream-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-ui);
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .author-details h4 {
+            font-family: var(--font-ui);
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--charcoal);
+        }
+
+        .author-details p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* FOOTER */
+        .footer {
+            background-color: var(--charcoal);
+            color: var(--cream-dim);
+            padding: 6rem 10% 3rem 10%;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr 1fr 1.2fr;
+            gap: 4rem;
+            margin-bottom: 5rem;
+        }
+
+        .footer-logo-row {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .footer-logo-row img {
+            width: 32px;
+            height: 32px;
+            border-radius: var(--radius-sm);
+            border: 1.5px solid var(--gold-light);
+            object-fit: cover;
+        }
+
+        .footer-logo-row span {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--cream-bg);
+        }
+
+        .footer-logo-row span span {
+            color: var(--gold-light);
+        }
+
+        .footer-description {
+            font-size: 0.88rem;
+            color: rgba(255, 255, 255, 0.5);
+            max-width: 90%;
+        }
+
+        .footer-col h3 {
+            font-family: var(--font-ui);
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--cream-bg);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 1.5rem;
+        }
+
+        .footer-col ul {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.85rem;
+        }
+
+        .footer-col ul a {
+            text-decoration: none;
+            color: rgba(255, 255, 255, 0.65);
+            font-size: 0.88rem;
+            transition: var(--transition-quick);
+        }
+
+        .footer-col ul a:hover {
+            color: var(--gold-light);
+        }
+
+        .footer-contact p {
+            font-size: 0.88rem;
+            color: rgba(255, 255, 255, 0.65);
+            margin-bottom: 0.75rem;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.82rem;
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .footer-socials {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .footer-socials a {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 1.1rem;
+            text-decoration: none;
+            transition: var(--transition-quick);
+        }
+
+        .footer-socials a:hover {
+            color: var(--gold-light);
+            transform: translateY(-2px);
+        }
+
+        /* Scroll reveal class animations */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), 
+                        transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* RESPONSIVE MEDIA QUERIES */
+        @media (max-width: 1024px) {
+            .navbar {
+                padding: 1.5rem 5%;
+            }
+            .navbar.scrolled {
+                padding: 0.9rem 5%;
+            }
+            .hero {
+                padding: 8rem 5% 4rem 5%;
+                flex-direction: column;
+                gap: 4rem;
+                text-align: center;
+            }
+            .hero-content {
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            .hero-content p {
+                max-width: 80%;
+            }
+            .hero-visual {
+                width: 100%;
+            }
+            .features-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .books-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .rewards-banner {
+                grid-template-columns: 1fr;
+            }
+            .rewards-content {
+                padding: 3rem;
+            }
+            .rewards-visual {
+                padding: 4rem 2rem;
+            }
+            .testimonials-grid {
+                grid-template-columns: 1fr;
+            }
+            .footer-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 3rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+                flex-direction: column;
+                position: fixed;
+                top: 70px;
+                left: 0;
+                width: 100%;
+                background: var(--cream-bg);
+                padding: 2rem 5%;
+                border-bottom: 1px solid rgba(107, 31, 40, 0.08);
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+                gap: 1.5rem;
+                align-items: flex-start;
+            }
+            .nav-links.mobile-active {
+                display: flex;
+            }
+            .menu-toggle {
+                display: flex;
+            }
+            .hero-content h2 {
+                font-size: 2.8rem;
+            }
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            .books-grid {
+                grid-template-columns: 1fr;
+            }
+            .footer-grid {
+                grid-template-columns: 1fr;
+            }
+            .footer-bottom {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- STICKY HEADER NAVIGATION -->
+    <nav class="navbar" id="main-navbar">
+        <a href="#" class="nav-logo">
+            <img src="/static/rama_store_logo.jpg" alt="Logo">
+            <span>RAMA <span>Store</span></span>
+        </a>
+        
+        <ul class="nav-links" id="nav-menu">
+            <li><a href="#why-us">Why Us</a></li>
+            <li><a href="#featured">Bestsellers</a></li>
+            <li><a href="#rewards">Rewards</a></li>
+            <li><a href="#testimonials">Reviews</a></li>
+            <li><a href="/login" class="nav-cta">Enter Store</a></li>
+        </ul>
+
+        <div class="menu-toggle" id="mobile-toggle" onclick="toggleMobileMenu()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </nav>
+
+    <!-- HERO SECTION -->
+    <section class="hero" id="hero">
+        <div class="hero-glow-1"></div>
+        <div class="hero-content">
+            <div class="hero-badge">Samaur Bazar, Fazilnagar</div>
+            <h2>Where literature meets the <span>modern counter.</span></h2>
+            <p>Explore a curated selection of premium books, classic novels, and quality stationary. Order online to earn 10% loyalty points back or visit our counter ledger for instant shopping.</p>
+            <div class="hero-btns">
+                <a href="/login" class="btn-primary">Shop Collection ➔</a>
+                <a href="#why-us" class="btn-secondary">Explore Highlights</a>
+            </div>
+        </div>
+        <div class="hero-visual">
+            <div class="book-stack-scene">
+                <div class="book-shadow-stand"></div>
+                <div class="floating-book">
+                    <span style="font-family: var(--font-ui); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; color: var(--gold);">Special Edition</span>
+                    <h3 class="floating-book-title">The Bookshop Ledger</h3>
+                    <div style="display:flex; justify-content: space-between; align-items:flex-end;">
+                        <span class="floating-book-author">Rama Store</span>
+                        <span style="font-family: var(--font-ui); font-size: 0.75rem; font-weight: 600; color: var(--gold);">Est. 2026</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 2: WHY RAMA STORE -->
+    <section class="section why-us" id="why-us">
+        <div class="section-header reveal">
+            <span class="section-subtitle">A Curated Retail Ledger</span>
+            <h2 class="section-title">Built for the Modern Book Collector</h2>
+        </div>
+
+        <div class="features-grid">
+            <div class="feature-card reveal" style="transition-delay: 0.1s;">
+                <span class="feature-icon">🚚</span>
+                <h3>Free Local Delivery</h3>
+                <p>Enjoy free doorstep shipping on all counter and catalog orders exceeding ₹500 directly to your home.</p>
+            </div>
+            <div class="feature-card reveal" style="transition-delay: 0.2s;">
+                <span class="feature-icon">✨</span>
+                <h3>Loyalty Rewards Points</h3>
+                <p>Earn 10% cash-back value in loyalty points credited directly to your digital account balance on checkout.</p>
+            </div>
+            <div class="feature-card reveal" style="transition-delay: 0.3s;">
+                <span class="feature-icon">🔒</span>
+                <h3>Secure Transactions</h3>
+                <p>Industry-grade secure checkout, sandbox payments, and instant printing of thermal cash counter bills.</p>
+            </div>
+            <div class="feature-card reveal" style="transition-delay: 0.4s;">
+                <span class="feature-icon">📖</span>
+                <h3>Curated Master Catalog</h3>
+                <p>Hand-picked bestseller lists, High-school classic copies, and premium bookmarks selected by readers.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 3: BESTSELLERS PREVIEW -->
+    <section class="section" id="featured" style="background-color: var(--cream-bg);">
+        <div class="section-header reveal">
+            <span class="section-subtitle">Exquisite Publications</span>
+            <h2 class="section-title">Explore Bestseller Preview</h2>
+        </div>
+
+        <div class="books-grid">
+            <a href="/login" class="book-card reveal" style="transition-delay: 0.1s;">
+                <div class="book-cover-container">
+                    <div class="book-cover" style="background: linear-gradient(135deg, #1C352D 0%, #11201B 100%);">
+                        <span>Classic Literature</span>
+                        <h4>The Great Gatsby</h4>
+                        <span>F. Scott Fitzgerald</span>
+                    </div>
+                </div>
+                <div class="book-info">
+                    <span class="book-title">The Great Gatsby</span>
+                    <span class="book-author">F. Scott Fitzgerald</span>
+                    <div class="book-price-row">
+                        <span class="book-price">₹450.00</span>
+                        <span class="book-badge">Popular</span>
+                    </div>
+                </div>
+            </a>
+
+            <a href="/login" class="book-card reveal" style="transition-delay: 0.2s;">
+                <div class="book-cover-container">
+                    <div class="book-cover" style="background: linear-gradient(135deg, #6B1F28 0%, #4A1218 100%);">
+                        <span>Pulitzer Winner</span>
+                        <h4>To Kill a Mockingbird</h4>
+                        <span>Harper Lee</span>
+                    </div>
+                </div>
+                <div class="book-info">
+                    <span class="book-title">To Kill a Mockingbird</span>
+                    <span class="book-author">Harper Lee</span>
+                    <div class="book-price-row">
+                        <span class="book-price">₹550.00</span>
+                        <span class="book-badge">Bestseller</span>
+                    </div>
+                </div>
+            </a>
+
+            <a href="/login" class="book-card reveal" style="transition-delay: 0.3s;">
+                <div class="book-cover-container">
+                    <div class="book-cover" style="background: linear-gradient(135deg, #2A3B4C 0%, #172432 100%);">
+                        <span>Sci-Fi Classic</span>
+                        <h4>1984 Modern Library</h4>
+                        <span>George Orwell</span>
+                    </div>
+                </div>
+                <div class="book-info">
+                    <span class="book-title">1984 Modern Library</span>
+                    <span class="book-author">George Orwell</span>
+                    <div class="book-price-row">
+                        <span class="book-price">₹390.00</span>
+                        <span class="book-badge">New Arrival</span>
+                    </div>
+                </div>
+            </a>
+
+            <a href="/login" class="book-card reveal" style="transition-delay: 0.4s;">
+                <div class="book-cover-container">
+                    <div class="book-cover" style="background: linear-gradient(135deg, #4A3E3D 0%, #2F2625 100%);">
+                        <span>Period Drama</span>
+                        <h4>Pride & Prejudice</h4>
+                        <span>Jane Austen</span>
+                    </div>
+                </div>
+                <div class="book-info">
+                    <span class="book-title">Pride & Prejudice</span>
+                    <span class="book-author">Jane Austen</span>
+                    <div class="book-price-row">
+                        <span class="book-price">₹499.00</span>
+                        <span class="book-badge">Must Read</span>
+                    </div>
+                </div>
+            </a>
+        </div>
+        
+        <div style="text-align: center; margin-top: 4rem;" class="reveal">
+            <a href="/login" class="btn-primary">Browse All Books ➔</a>
+        </div>
+    </section>
+
+    <!-- SECTION 4: REWARDS PROGRAM EXPLAINER -->
+    <section class="section" id="rewards" style="background-color: var(--white);">
+        <div class="rewards-banner reveal">
+            <div class="rewards-content">
+                <span class="section-subtitle" style="color: var(--gold-light);">Rama Loyalty Scheme</span>
+                <h2>Earn while you <span>read.</span></h2>
+                <p>Our exclusive Loyalty Rewards Program is designed to thank our bookstore community. Get immediate store credit back on every single transaction checkout.</p>
+                
+                <ul class="rewards-steps">
+                    <li class="rewards-step-item">
+                        <div class="rewards-step-num">1</div>
+                        <div class="rewards-step-text">
+                            <h4>Create Free Profile</h4>
+                            <p>Register via OTP with your email or phone number in seconds.</p>
+                        </div>
+                    </li>
+                    <li class="rewards-step-item">
+                        <div class="rewards-step-num">2</div>
+                        <div class="rewards-step-text">
+                            <h4>Buy & Checkout</h4>
+                            <p>Select your books, checkout securely, and 10% value is auto-credited.</p>
+                        </div>
+                    </li>
+                    <li class="rewards-step-item">
+                        <div class="rewards-step-num">3</div>
+                        <div class="rewards-step-text">
+                            <h4>Redeem Instantly</h4>
+                            <p>Apply your rewards points to get flat discounts on your next books.</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <div class="rewards-visual">
+                <div class="rewards-visual-card">
+                    <div class="rewards-visual-value">10%</div>
+                    <div class="rewards-visual-label">Cash-Back Rewards</div>
+                    <div style="border-top: 1px dashed rgba(255,255,255,0.2); margin-top: 2rem; padding-top: 1.5rem; color: var(--cream-dim); font-size: 0.8rem;">
+                        Automatically credited on checkout
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 5: TRUST / TESTIMONIALS -->
+    <section class="section testimonials" id="testimonials">
+        <div class="section-header reveal">
+            <span class="section-subtitle">Reader Community Voice</span>
+            <h2 class="section-title">Verified Reviews & Feedback</h2>
+        </div>
+
+        <div class="testimonials-grid">
+            <div class="testimonial-card reveal" style="transition-delay: 0.1s;">
+                <span class="quote-icon">“</span>
+                <p class="testimonial-text">Rama Store is easily the best local bookstore in Samaur. The UI is incredibly fast, and I earned 50 points back on my very first book purchase. Free home delivery saved my weekend read!</p>
+                <div class="testimonial-author">
+                    <div class="author-initials">RK</div>
+                    <div class="author-details">
+                        <h4>Rahul Kumar</h4>
+                        <p>Fazilnagar, UP</p>
+                    </div>
+                </div>
+            </div>
+            <div class="testimonial-card reveal" style="transition-delay: 0.2s;">
+                <span class="quote-icon">“</span>
+                <p class="testimonial-text">I ordered Gatsby and Pride & Prejudice. The CSS covers are simple but the physical copies were pristine. The checkout with the sandbox card was smooth, and printing receipts was clean.</p>
+                <div class="testimonial-author">
+                    <div class="author-initials">AP</div>
+                    <div class="author-details">
+                        <h4>Ankita Patel</h4>
+                        <p>Kasia Road, Tamkuhi</p>
+                    </div>
+                </div>
+            </div>
+            <div class="testimonial-card reveal" style="transition-delay: 0.3s;">
+                <span class="quote-icon">“</span>
+                <p class="testimonial-text">The owner dashboard and ledger counter system works beautifully. As an admin, logging in requires secure 2FA verification. The backend operations are highly optimized.</p>
+                <div class="testimonial-author">
+                    <div class="author-initials">SS</div>
+                    <div class="author-details">
+                        <h4>Sanjeev Sharma</h4>
+                        <p>Gorakhpur City</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="footer-grid">
+            <div class="footer-col">
+                <div class="footer-logo-row">
+                    <img src="/static/rama_store_logo.jpg" alt="Logo">
+                    <span>RAMA <span>Store</span></span>
+                </div>
+                <p class="footer-description">Rama Store is an Enterprise Monolithic Bookstore. Curated by book lovers, optimized with the latest counter technology for reliable, fast local book purchasing.</p>
+            </div>
+            <div class="footer-col">
+                <h3>Explore Store</h3>
+                <ul>
+                    <li><a href="/login">Online Catalog</a></li>
+                    <li><a href="/login">POS Counter</a></li>
+                    <li><a href="#why-us">Store Highlights</a></li>
+                    <li><a href="#rewards">Rewards Program</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h3>Contact Counter</h3>
+                <div class="footer-contact">
+                    <p>📍 Samaur Bazar, Fazilnagar Road, Kushinagar, 274401</p>
+                    <p>✉️ info@ramastore.com</p>
+                    <p>📞 +91 7268903804</p>
+                </div>
+            </div>
+            <div class="footer-col">
+                <h3>Operational Hours</h3>
+                <p style="font-size: 0.88rem; color: rgba(255,255,255,0.65); line-height: 1.8;">
+                    Counter Ledger: Open Daily<br>
+                    9:00 AM — 8:30 PM IST<br>
+                    Online Deliveries: 24/7 Service
+                </p>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>&copy; 2026 Rama Store Counter Services. All rights reserved.</p>
+            <div class="footer-socials">
+                <a href="#">𝕏</a>
+                <a href="#">💼</a>
+                <a href="#">📘</a>
+                <a href="#">📸</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Script for sticky navbar, mobile drawer and scroll reveal animations -->
+    <script>
+        // Sticky Navbar script
+        window.addEventListener('scroll', function() {
+            const nav = document.getElementById('main-navbar');
+            if (window.scrollY > 50) {
+                nav.classList.add('scrolled');
+            } else {
+                nav.classList.remove('scrolled');
+            }
+        });
+
+        // Toggle mobile drawer menu
+        function toggleMobileMenu() {
+            const menu = document.getElementById('nav-menu');
+            const toggleBtn = document.getElementById('mobile-toggle');
+            menu.classList.toggle('mobile-active');
+            
+            // Hamburger icon animation toggling
+            const spans = toggleBtn.querySelectorAll('span');
+            if (menu.classList.contains('mobile-active')) {
+                spans[0].style.transform = 'rotate(45deg) translate(5px, 5px)';
+                spans[1].style.opacity = '0';
+                spans[2].style.transform = 'rotate(-45deg) translate(5px, -5px)';
+            } else {
+                spans[0].style.transform = 'none';
+                spans[1].style.opacity = '1';
+                spans[2].style.transform = 'none';
+            }
+        }
+
+        // Close mobile drawer menu when link clicked
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', () => {
+                const menu = document.getElementById('nav-menu');
+                if (menu.classList.contains('mobile-active')) {
+                    toggleMobileMenu();
+                }
+            });
+        });
+
+        // Scroll Reveal Animations
+        function revealElements() {
+            const reveals = document.querySelectorAll('.reveal');
+            reveals.forEach(element => {
+                const windowHeight = window.innerHeight;
+                const elementTop = element.getBoundingClientRect().top;
+                const elementVisible = 120; // Reveal distance trigger offset
+                
+                if (elementTop < windowHeight - elementVisible) {
+                    element.classList.add('active');
+                }
+            });
+        }
+
+        window.addEventListener('scroll', revealElements);
+        window.addEventListener('DOMContentLoaded', () => {
+            revealElements(); // Trigger on initial render
+        });
+    </script>
+</body>
+</html>
