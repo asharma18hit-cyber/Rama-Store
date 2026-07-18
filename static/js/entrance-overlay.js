@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const canvasContainer = document.getElementById('shader-canvas-container');
     const wordmark = document.getElementById('entrance-wordmark');
     const tagline = document.getElementById('entrance-tagline');
+    const catCycle = document.getElementById('entrance-category-cycle');
     const enterBtn = document.getElementById('btn-enter-store');
     const skipBtn = document.getElementById('btn-skip-entrance');
     
@@ -31,6 +32,11 @@ document.addEventListener('DOMContentLoaded', () => {
         wordmark.classList.add('stage-visible');
         tagline.classList.remove('stage-hidden');
         tagline.classList.add('stage-visible');
+        if (catCycle) {
+            catCycle.innerText = "Bakery • Books • Grocery • Medicine • Sports • Gift Store";
+            catCycle.classList.remove('stage-hidden');
+            catCycle.classList.add('stage-visible');
+        }
         enterBtn.classList.remove('stage-hidden');
         enterBtn.classList.add('stage-visible');
         
@@ -64,18 +70,29 @@ document.addEventListener('DOMContentLoaded', () => {
         wordmark.classList.add('stage-visible');
     }, 1200);
     
-    // Stage 3: Tagline and Enter CTA fade-in
+    // Stage 2.5: Tagline & Category cycler reveal
+    let cycleInterval = null;
     setTimeout(() => {
         tagline.classList.remove('stage-hidden');
         tagline.classList.add('stage-visible');
+        
+        if (catCycle) {
+            catCycle.classList.remove('stage-hidden');
+            catCycle.classList.add('stage-visible');
+            startCategoryCycling(catCycle);
+        }
+    }, 2400);
+    
+    // Stage 3: Enter CTA button fades in
+    setTimeout(() => {
         enterBtn.classList.remove('stage-hidden');
         enterBtn.classList.add('stage-visible');
-    }, 2600);
+    }, 4500);
     
-    // Stage 4: Auto-dismiss backup after 8 seconds
+    // Stage 4: Auto-dismiss backup after 9.5 seconds
     const autoDismissTimeout = setTimeout(() => {
         dismissEntrance();
-    }, 8000);
+    }, 9500);
     
     // Click-to-dismiss handlers
     enterBtn.addEventListener('click', () => {
@@ -88,7 +105,28 @@ document.addEventListener('DOMContentLoaded', () => {
         dismissEntrance();
     });
     
+    function startCategoryCycling(el) {
+        const items = ["Bakery", "Grocery", "Medicine", "Sports"];
+        let idx = 0;
+        el.innerText = items[idx];
+        
+        cycleInterval = setInterval(() => {
+            if (!document.getElementById('entrance-overlay')) {
+                clearInterval(cycleInterval);
+                return;
+            }
+            el.style.opacity = '0';
+            setTimeout(() => {
+                idx = (idx + 1) % items.length;
+                el.innerText = items[idx];
+                el.style.opacity = '0.65';
+            }, 300);
+        }, 1200);
+    }
+    
     function dismissEntrance() {
+        if (cycleInterval) clearInterval(cycleInterval);
+        
         // Fade out overlay container
         overlay.style.opacity = '0';
         overlay.style.pointerEvents = 'none';
