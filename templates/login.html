@@ -103,18 +103,36 @@
                 </div>
                 
                 <form class="auth-form" onsubmit="submitLoginForm(event)">
+                    <!-- Sub-tabs: Password vs OTP -->
+                    <div class="login-method-tabs">
+                        <button type="button" class="tab-btn-sub active" id="btn-login-pwd" onclick="switchLoginMethod('password')">Password</button>
+                        <button type="button" class="tab-btn-sub" id="btn-login-otp" onclick="switchLoginMethod('otp')">Passwordless OTP</button>
+                    </div>
+
                     <div class="input-wrapper">
                         <input type="text" id="login-identifier" class="input-field" placeholder=" " required>
                         <label class="floating-label" for="login-identifier">Email or Registered Number</label>
                     </div>
                     
-                    <div class="input-wrapper">
+                    <!-- Password Input Wrapper -->
+                    <div class="input-wrapper" id="login-pwd-wrapper">
                         <input type="password" id="login-password" class="input-field" placeholder=" " required>
                         <label class="floating-label" for="login-password">Access Password</label>
                         <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('login-password', this)">👁️</button>
                     </div>
+
+                    <!-- OTP Code Input Wrapper (hidden initially) -->
+                    <div class="input-wrapper" id="login-otp-wrapper" style="display: none;">
+                        <div style="display: flex; gap: 0.5rem;">
+                            <div style="flex-grow: 1; position: relative;">
+                                <input type="text" id="login-otp-code" class="input-field" placeholder=" " pattern="\d{6}" maxlength="6" style="text-align: center; letter-spacing: 0.2em; font-family: monospace; font-size: 1.1rem; font-weight: 700;">
+                                <label class="floating-label" for="login-otp-code">6-Digit Code</label>
+                            </div>
+                            <button type="button" class="request-otp-btn" id="btn-send-login-otp" onclick="requestLoginOTP()">Request OTP</button>
+                        </div>
+                    </div>
                     
-                    <div class="remember-forgot-row">
+                    <div class="remember-forgot-row" id="login-remember-row">
                         <label class="checkbox-label">
                             <input type="checkbox" id="login-remember">
                             <span>Remember device</span>
@@ -267,6 +285,77 @@
             }
         }
 
+        // Switch between Password and OTP Login Methods
+        let activeLoginMethod = 'password';
+        function switchLoginMethod(method) {
+            activeLoginMethod = method;
+            const btnPwd = document.getElementById('btn-login-pwd');
+            const btnOtp = document.getElementById('btn-login-otp');
+            const pwdWrapper = document.getElementById('login-pwd-wrapper');
+            const otpWrapper = document.getElementById('login-otp-wrapper');
+            const pwdInput = document.getElementById('login-password');
+            const otpInput = document.getElementById('login-otp-code');
+            const rememberRow = document.getElementById('login-remember-row');
+            
+            if (method === 'password') {
+                btnPwd.classList.add('active');
+                btnOtp.classList.remove('active');
+                pwdWrapper.style.display = 'block';
+                otpWrapper.style.display = 'none';
+                pwdInput.setAttribute('required', 'true');
+                otpInput.removeAttribute('required');
+                if (rememberRow) rememberRow.style.display = 'flex';
+            } else {
+                btnPwd.classList.remove('active');
+                btnOtp.classList.add('active');
+                pwdWrapper.style.display = 'none';
+                otpWrapper.style.display = 'block';
+                pwdInput.removeAttribute('required');
+                otpInput.setAttribute('required', 'true');
+                if (rememberRow) rememberRow.style.display = 'none';
+            }
+        }
+
+        // Request Passwordless Login OTP (POST to backend API)
+        async function requestLoginOTP() {
+            const identifier = document.getElementById('login-identifier').value.trim();
+            if (!identifier) {
+                showToast("Please enter your Email or Phone Number first.", "error");
+                return;
+            }
+            
+            const btn = document.getElementById('btn-send-login-otp');
+            const originalText = btn.innerText;
+            btn.disabled = true;
+            btn.innerText = 'Sending...';
+            
+            try {
+                const response = await fetch('/api/auth/login-otp-request', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email_or_phone: identifier })
+                });
+                const data = await response.json();
+                
+                btn.disabled = false;
+                btn.innerText = originalText;
+                
+                if (response.ok) {
+                    showToast("Login OTP code sent!");
+                    if (data.debug_otp) {
+                        document.getElementById('login-otp-code').value = data.debug_otp;
+                        showToast(`[DEV] Login OTP: ${data.debug_otp}`, "success");
+                    }
+                } else {
+                    showToast(data.error || "Failed to generate Login OTP.", "error");
+                }
+            } catch(err) {
+                btn.disabled = false;
+                btn.innerText = originalText;
+                showToast("Connection failed: " + err.message, "error");
+            }
+        }
+
         // Sub-form visibility switching engine
         function switchFormSection(sectionName) {
             const containers = document.querySelectorAll('.form-container');
@@ -314,7 +403,6 @@
         async function submitLoginForm(e) {
             e.preventDefault();
             const identifier = document.getElementById('login-identifier').value.trim();
-            const password = document.getElementById('login-password').value;
             
             const btn = document.getElementById('login-submit-btn');
             const spinner = btn.querySelector('.btn-spinner');
@@ -325,10 +413,21 @@
             btnTxt.innerText = 'Logging In...';
             
             try {
-                const response = await fetch('/api/auth/login', {
+                let url, body;
+                if (activeLoginMethod === 'password') {
+                    const password = document.getElementById('login-password').value;
+                    url = '/api/auth/login';
+                    body = { email_or_phone: identifier, password: password };
+                } else {
+                    const otp = document.getElementById('login-otp-code').value.trim();
+                    url = '/api/auth/login-otp-verify';
+                    body = { email_or_phone: identifier, otp: otp };
+                }
+
+                const response = await fetch(url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email_or_phone: identifier, password: password })
+                    body: JSON.stringify(body)
                 });
                 const data = await response.json();
                 
@@ -344,7 +443,7 @@
                         window.location.href = redirectUrl;
                     }, 1000);
                 } else {
-                    showToast(data.error || "Authentication failed. Invalid password.", "error");
+                    showToast(data.error || "Authentication failed. Please verify credentials.", "error");
                 }
             } catch(err) {
                 btn.disabled = false;
