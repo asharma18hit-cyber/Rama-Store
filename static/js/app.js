@@ -1843,8 +1843,10 @@ function switchStorefrontTab(tab) {
     document.querySelectorAll('.mobile-nav-item').forEach(i => i.classList.remove('active'));
     
     // Check if redirecting from admin panel view back to storefront view
-    document.getElementById('admin-portal-view').style.display = 'none';
-    document.getElementById('customer-storefront-view').style.display = 'flex';
+    const adminPortal = document.getElementById('admin-portal-view');
+    if (adminPortal) adminPortal.style.display = 'none';
+    const storefront = document.getElementById('customer-storefront-view');
+    if (storefront) storefront.style.display = 'flex';
     
     if (tab === 'home') {
         state.activeView = 'Storefront';
