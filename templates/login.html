@@ -443,7 +443,7 @@
                 if (response.ok) {
                     showToast("Authentication successful! Redirecting...");
                     const params = new URLSearchParams(window.location.search);
-                    const redirectUrl = params.get('redirect') || '/';
+                    const redirectUrl = params.get('redirect') || '/store';
                     setTimeout(() => {
                         window.location.href = redirectUrl;
                     }, 1000);
@@ -536,7 +536,7 @@
                 if (response.ok) {
                     showToast("Account registered and logged in successfully!");
                     setTimeout(() => {
-                        window.location.href = '/';
+                        window.location.href = '/store';
                     }, 1200);
                 } else {
                     showToast(data.error || "Invalid registration OTP code.", "error");

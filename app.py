@@ -59,14 +59,21 @@ def admin_required(f):
 
 @app.route('/')
 def index_page():
-    """Renders the landing/intro page for guests, or store app for logged-in users."""
+    """Renders the landing/intro page for all visitors."""
+    return render_template('landing.html')
+
+@app.route('/store')
+def store_page():
+    """Renders the storefront index.html if logged in, or redirects to /login."""
     if 'user_id' in session:
         return render_template('index.html')
-    return render_template('landing.html')
+    return redirect(url_for('login_page', redirect='/store'))
 
 @app.route('/login')
 def login_page():
-    """Renders the theatrical split-screen authentication page."""
+    """Renders the theatrical split-screen authentication page. Redirects to /store if logged in."""
+    if 'user_id' in session:
+        return redirect(url_for('store_page'))
     return render_template('login.html')
 
 @app.route('/admin')

@@ -135,11 +135,11 @@ async function checkAuthStatus() {
             loginSession(data.user);
         } else {
             state.user = null;
-            routeUserLayout(null);
+            window.location.href = '/login?redirect=/store';
         }
     } catch (err) {
         state.user = null;
-        routeUserLayout(null);
+        window.location.href = '/login?redirect=/store';
     }
 }
 
