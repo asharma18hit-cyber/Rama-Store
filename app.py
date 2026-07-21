@@ -9,7 +9,7 @@ from functools import wraps
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 sys.path.insert(0, os.path.join(BASE_DIR, 'app'))
 
-from flask import Flask, request, jsonify, render_template, session, make_response
+from flask import Flask, request, jsonify, render_template, session, make_response, redirect, url_for
 from werkzeug.security import generate_password_hash, check_password_hash
 from database import (
     init_db, add_product, get_products, update_product, delete_product,
