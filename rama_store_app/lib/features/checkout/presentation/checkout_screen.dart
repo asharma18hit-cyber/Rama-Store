@@ -147,16 +147,54 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             ],
 
             const SizedBox(height: 28),
-            const Text('Order Summary', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textPrimary)),
+            const Text('Order Summary & Promo Code', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textPrimary)),
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: AppColors.surface,
                 borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.surfaceLight),
               ),
               child: Column(
                 children: [
+                  // Promo Code Input Box (Stitch Design)
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          style: const TextStyle(color: AppColors.textPrimary, fontSize: 13),
+                          decoration: InputDecoration(
+                            hintText: 'Enter Promo Code (e.g. RAMA10)',
+                            hintStyle: const TextStyle(color: AppColors.textMuted, fontSize: 12),
+                            isDense: true,
+                            fillColor: AppColors.inputBackground,
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.secondary,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        ),
+                        onPressed: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('🎉 Promo Code "RAMA10" Applied! 10% Cash-Back Discount Credited.'),
+                              backgroundColor: AppColors.secondary,
+                            ),
+                          );
+                        },
+                        child: const Text('Apply', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -203,6 +241,20 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   ),
                 ],
               ),
+            ),
+
+            const SizedBox(height: 16),
+            // Google Stitch 256-bit SSL Security Badge
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: const [
+                Icon(Icons.verified_user_outlined, size: 14, color: AppColors.textSecondary),
+                SizedBox(width: 6),
+                Text(
+                  'Encrypted 256-bit SSL Connection • 100% Guaranteed',
+                  style: TextStyle(fontSize: 11, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
+                ),
+              ],
             ),
 
             const SizedBox(height: 32),

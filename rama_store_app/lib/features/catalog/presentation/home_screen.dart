@@ -88,6 +88,16 @@ class HomeScreen extends ConsumerWidget {
 
               const SizedBox(height: 24),
 
+              // Google Stitch Featured Bento Grid
+              _buildStitchBentoGrid(context),
+
+              const SizedBox(height: 24),
+
+              // Google Stitch Emerald Vertex Highlight Card
+              _buildEmeraldVertexCard(context),
+
+              const SizedBox(height: 24),
+
               // Featured Bestsellers
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -440,6 +450,186 @@ class HomeScreen extends ConsumerWidget {
                 );
               },
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStitchBentoGrid(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Featured Stitch Collections', style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: 12),
+          // Large Bento Card
+          Container(
+            height: 180,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              gradient: const LinearGradient(
+                colors: [Color(0xFF1E1B4B), Color(0xFF3525CD), Color(0xFF0F172A)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              border: Border.all(color: AppColors.secondaryFixedDim.withOpacity(0.3)),
+            ),
+            child: Stack(
+              children: [
+                Positioned(
+                  right: -10,
+                  bottom: -10,
+                  child: Icon(Icons.flash_on, size: 140, color: Colors.white.withOpacity(0.06)),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: AppColors.secondaryFixedDim,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: const Text('NEW DROP', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Color(0xFF005236))),
+                      ),
+                      const SizedBox(height: 6),
+                      const Text('URBAN OVERDRIVE', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Colors.white)),
+                      const SizedBox(height: 2),
+                      const Text('Master the streets with reinforced technical fabrics.', style: TextStyle(fontSize: 11, color: Colors.white70)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          // Small Bento Cards Row
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  height: 110,
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: AppColors.surfaceLight),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: const [
+                        Icon(Icons.widgets, color: AppColors.secondaryFixedDim, size: 26),
+                        SizedBox(height: 6),
+                        Text('TECH-FAB', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                        Text('Honeycomb weave', style: TextStyle(fontSize: 10, color: AppColors.textSecondary)),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Container(
+                  height: 110,
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: AppColors.surfaceLight),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: const [
+                        Icon(Icons.precision_manufacturing, color: AppColors.primaryGoldLight, size: 26),
+                        SizedBox(height: 6),
+                        Text('GEAR+', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                        Text('Titanium essentials', style: TextStyle(fontSize: 10, color: AppColors.textSecondary)),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmeraldVertexCard(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0F2B20),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFF4EDEAE).withOpacity(0.5), width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF006C49).withOpacity(0.3),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 30,
+                height: 2,
+                color: const Color(0xFF4EDEAE),
+              ),
+              const SizedBox(width: 8),
+              const Text(
+                'LIMITED RELEASE',
+                style: TextStyle(color: Color(0xFF4EDEAE), fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.5),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'The Emerald Vertex Series',
+            style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w800),
+          ),
+          const SizedBox(height: 4),
+          const Text(
+            'Advanced compression layer with heat-mapping ventilation & 4-way stretch titanium fibers.',
+            style: TextStyle(color: Colors.white70, fontSize: 11),
+          ),
+          const SizedBox(height: 14),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  Text('PRICE', style: TextStyle(color: Colors.white38, fontSize: 9, fontWeight: FontWeight.bold)),
+                  Text('₹2,499', style: TextStyle(color: Color(0xFF4EDEAE), fontSize: 18, fontWeight: FontWeight.w800)),
+                ],
+              ),
+              ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF006C49),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                ),
+                onPressed: () => context.go('/catalog'),
+                icon: const Text('EXPLORE NOW', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                label: const Icon(Icons.arrow_forward, size: 14),
+              ),
+            ],
           ),
         ],
       ),
