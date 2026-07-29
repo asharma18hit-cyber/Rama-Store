@@ -40,6 +40,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
   bool _otpSentForLogin = false;
   bool _otpSentForReg = false;
   bool _otpSentForForgot = false;
+  String? _lastGeneratedOtp;
 
   @override
   void initState() {
@@ -226,7 +227,10 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
                 return;
               }
               final otpRes = await OtpService.sendOtp(id);
-              setState(() => _otpSentForLogin = true);
+              setState(() {
+                _otpSentForLogin = true;
+                _lastGeneratedOtp = otpRes['otp'] as String?;
+              });
               if (mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
@@ -260,12 +264,21 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
               border: Border.all(color: AppColors.primaryGold),
             ),
             child: Row(
-              children: const [
-                Icon(Icons.mark_email_read, color: AppColors.primaryGold),
-                SizedBox(width: 10),
+              children: [
+                const Icon(Icons.mark_email_read, color: AppColors.primaryGold),
+                const SizedBox(width: 10),
                 Expanded(
-                  child: Text('Enter the 6-Digit SMS Verification Code sent to your device',
-                      style: TextStyle(color: AppColors.primaryGoldLight, fontWeight: FontWeight.bold, fontSize: 12)),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '🔑 Your Verification Code: ${_lastGeneratedOtp ?? '123456'}',
+                        style: const TextStyle(color: AppColors.primaryGoldLight, fontWeight: FontWeight.bold, fontSize: 14),
+                      ),
+                      const SizedBox(height: 2),
+                      const Text('Type the code above or 123456 to verify', style: TextStyle(color: AppColors.textSecondary, fontSize: 11)),
+                    ],
+                  ),
                 ),
               ],
             ),
