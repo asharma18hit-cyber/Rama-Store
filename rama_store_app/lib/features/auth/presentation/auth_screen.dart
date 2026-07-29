@@ -233,20 +233,20 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
               });
               if (mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
+                  const SnackBar(
                     content: Row(
                       children: [
-                        const Icon(Icons.sms_rounded, color: AppColors.primaryGold),
-                        const SizedBox(width: 10),
+                        Icon(Icons.sms_rounded, color: AppColors.primaryGold),
+                        SizedBox(width: 10),
                         Expanded(
                           child: Text(
-                            '📱 Real-time SMS: Your Rama Store OTP code is ${otpRes['otp']} (Valid 5 mins)',
-                            style: const TextStyle(fontWeight: FontWeight.bold),
+                            '📱 OTP Code sent via SMS to your registered phone number.',
+                            style: TextStyle(fontWeight: FontWeight.bold),
                           ),
                         ),
                       ],
                     ),
-                    duration: const Duration(seconds: 12),
+                    duration: Duration(seconds: 5),
                     backgroundColor: AppColors.surface,
                   ),
                 );
@@ -272,11 +272,11 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '🔑 Your Verification Code: ${_lastGeneratedOtp ?? '123456'}',
-                        style: const TextStyle(color: AppColors.primaryGoldLight, fontWeight: FontWeight.bold, fontSize: 14),
+                        '📱 OTP Sent to ${_otpPhoneController.text.trim()}',
+                        style: const TextStyle(color: AppColors.primaryGoldLight, fontWeight: FontWeight.bold, fontSize: 13),
                       ),
                       const SizedBox(height: 2),
-                      const Text('Type the code above or 123456 to verify', style: TextStyle(color: AppColors.textSecondary, fontSize: 11)),
+                      const Text('Please enter the 6-digit verification code received on your phone', style: TextStyle(color: AppColors.textSecondary, fontSize: 11)),
                     ],
                   ),
                 ),
