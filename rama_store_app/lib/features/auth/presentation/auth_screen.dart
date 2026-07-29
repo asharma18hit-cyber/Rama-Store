@@ -219,57 +219,61 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
             isLoading: authState.isLoading,
             onPressed: () async {
               final id = _otpPhoneController.text.trim();
-              if (id.isEmpty) return;
-              final otpRes = await OtpService.sendOtp(id);
-              final ok = await ref.read(authNotifierProvider.notifier).loginOtpRequest(id);
-              if (ok) {
-                setState(() => _otpSentForLogin = true);
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Row(
-                        children: [
-                          const Icon(Icons.sms_rounded, color: AppColors.primaryGold),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Text(
-                              '📱 Real-time SMS: Your Rama Store OTP code is ${otpRes['otp']} (Valid 5 mins)',
-                              style: const TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        ],
-                      ),
-                      duration: const Duration(seconds: 8),
-                      backgroundColor: AppColors.surface,
-                    ),
-                  );
-                }
+              if (id.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Please enter phone or email address')),
+                );
+                return;
               }
+              final otpRes = await OtpService.sendOtp(id);
+              setState(() => _otpSentForLogin = true);
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Row(
+                      children: [
+                        const Icon(Icons.sms_rounded, color: AppColors.primaryGold),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            '📱 Real-time SMS: Your Rama Store OTP code is ${otpRes['otp']} (Valid 5 mins)',
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ],
+                    ),
+                    duration: const Duration(seconds: 12),
+                    backgroundColor: AppColors.surface,
+                  ),
+                );
+              }
+              ref.read(authNotifierProvider.notifier).loginOtpRequest(id);
             },
           ),
         ] else ...[
-          if (authState.pendingOtp != null)
-            Container(
-              margin: const EdgeInsets.only(bottom: 16),
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: AppColors.primaryGold),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.mark_email_read, color: AppColors.primaryGold),
-                  const SizedBox(width: 10),
-                  Text('SMS Verification Code: ${authState.pendingOtp}',
-                      style: const TextStyle(color: AppColors.primaryGoldLight, fontWeight: FontWeight.bold)),
-                ],
-              ),
+          Container(
+            margin: const EdgeInsets.only(bottom: 16),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: AppColors.primaryGold),
             ),
+            child: Row(
+              children: const [
+                Icon(Icons.mark_email_read, color: AppColors.primaryGold),
+                SizedBox(width: 10),
+                Expanded(
+                  child: Text('Enter the 6-Digit SMS Verification Code sent to your device',
+                      style: TextStyle(color: AppColors.primaryGoldLight, fontWeight: FontWeight.bold, fontSize: 12)),
+                ),
+              ],
+            ),
+          ),
           AppTextField(
             controller: _otpCodeController,
             label: '6-Digit Verification Code',
-            hint: '123456',
+            hint: 'Enter 6-digit OTP',
             keyboardType: TextInputType.number,
             prefixIcon: const Icon(Icons.pin, color: AppColors.textSecondary),
           ),
@@ -280,7 +284,14 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
             onPressed: () {
               final code = _otpCodeController.text.trim();
               if (code.isEmpty) return;
-              ref.read(authNotifierProvider.notifier).loginOtpVerify(code);
+              final isValid = OtpService.verifyOtp(_otpPhoneController.text, code);
+              if (isValid) {
+                ref.read(authNotifierProvider.notifier).loginOtpVerify(code);
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Invalid OTP code. Please check your SMS banner.'), backgroundColor: AppColors.error),
+                );
+              }
             },
           ),
           const SizedBox(height: 12),
