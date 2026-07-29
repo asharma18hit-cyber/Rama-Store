@@ -36,6 +36,10 @@ import 'features/profile/presentation/profile_screen.dart';
 import 'features/splash/presentation/splash_screen.dart';
 import 'shared/layouts/main_scaffold.dart';
 
+import 'features/catalog/presentation/wishlist_notifier.dart';
+import 'features/catalog/presentation/wishlist_screen.dart';
+import 'features/profile/data/address_repository.dart';
+
 // Top-Level Dependency Providers
 late final LocalStorageService _storageService;
 
@@ -78,6 +82,11 @@ final loyaltyRepositoryProvider = Provider<LoyaltyRepository>((ref) {
   return LoyaltyRepository(storage);
 });
 
+final addressRepositoryProvider = Provider<AddressRepository>((ref) {
+  final storage = ref.watch(localStorageProvider);
+  return AddressRepository(storage);
+});
+
 // State Notifier Providers
 final authNotifierProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
   final repo = ref.watch(authRepositoryProvider);
@@ -92,6 +101,34 @@ final catalogNotifierProvider = StateNotifierProvider<CatalogNotifier, CatalogSt
 final cartNotifierProvider = StateNotifierProvider<CartNotifier, CartState>((ref) {
   final repo = ref.watch(cartRepositoryProvider);
   return CartNotifier(repo);
+});
+
+final wishlistNotifierProvider = StateNotifierProvider<WishlistNotifier, List<int>>((ref) {
+  final storage = ref.watch(localStorageProvider);
+  return WishlistNotifier(storage);
+});
+
+class ThemeModeNotifier extends StateNotifier<ThemeMode> {
+  final LocalStorageService storage;
+  static const _keyTheme = 'app_theme_mode';
+
+  ThemeModeNotifier(this.storage)
+      : super(storage.getBool(_keyTheme) == false ? ThemeMode.light : ThemeMode.dark);
+
+  void toggleTheme() {
+    if (state == ThemeMode.dark) {
+      state = ThemeMode.light;
+      storage.setBool(_keyTheme, false);
+    } else {
+      state = ThemeMode.dark;
+      storage.setBool(_keyTheme, true);
+    }
+  }
+}
+
+final themeModeNotifierProvider = StateNotifierProvider<ThemeModeNotifier, ThemeMode>((ref) {
+  final storage = ref.watch(localStorageProvider);
+  return ThemeModeNotifier(storage);
 });
 
 // GoRouter Navigation Config with Deep-Linking
@@ -166,6 +203,10 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/loyalty',
         builder: (context, state) => const LoyaltyScreen(),
       ),
+      GoRoute(
+        path: '/wishlist',
+        builder: (context, state) => const WishlistScreen(),
+      ),
     ],
   );
 });
@@ -192,13 +233,14 @@ class RamaStoreApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
+    final themeMode = ref.watch(themeModeNotifierProvider);
 
     return MaterialApp.router(
       title: AppConstants.appName,
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.darkTheme,
+      theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.dark,
+      themeMode: themeMode,
       routerConfig: router,
     );
   }

@@ -51,6 +51,12 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text('Store Catalog'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.favorite_border, color: AppColors.primaryGold),
+            onPressed: () => context.push('/wishlist'),
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -216,6 +222,27 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
                       product.displayBadge,
                       style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white),
                     ),
+                  ),
+                ),
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: Consumer(
+                    builder: (context, ref, child) {
+                      final isFav = ref.watch(wishlistNotifierProvider).contains(product.id);
+                      return GestureDetector(
+                        onTap: () => ref.read(wishlistNotifierProvider.notifier).toggleFavorite(product.id),
+                        child: CircleAvatar(
+                          radius: 14,
+                          backgroundColor: AppColors.surface.withOpacity(0.8),
+                          child: Icon(
+                            isFav ? Icons.favorite : Icons.favorite_border,
+                            color: isFav ? Colors.red : AppColors.textMuted,
+                            size: 16,
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ),
               ],

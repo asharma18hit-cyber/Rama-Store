@@ -99,6 +99,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
             // Profile Menu List
             _buildProfileMenuItem(
+              icon: Icons.favorite_outline,
+              title: 'Saved Wishlist',
+              subtitle: 'View items saved to your favorites',
+              onTap: () => context.push('/wishlist'),
+            ),
+            _buildProfileMenuItem(
               icon: Icons.loyalty,
               title: 'Loyalty Rewards Wallet',
               subtitle: 'Check 10% cash-back points balance',
@@ -110,11 +116,26 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               subtitle: 'View trackings & reorder previous items',
               onTap: () => context.go('/orders'),
             ),
-            _buildProfileMenuItem(
-              icon: Icons.location_on_outlined,
-              title: 'Saved Delivery Addresses',
-              subtitle: 'Manage default shipping destinations',
-              onTap: () {},
+            Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: SwitchListTile(
+                secondary: Icon(
+                  ref.watch(themeModeNotifierProvider) == ThemeMode.dark ? Icons.dark_mode : Icons.light_mode,
+                  color: AppColors.primaryGold,
+                ),
+                title: const Text('Dark Mode Display', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.textPrimary)),
+                subtitle: Text(
+                  ref.watch(themeModeNotifierProvider) == ThemeMode.dark ? 'Enabled (Dark Ledger theme)' : 'Light Mode Enabled',
+                  style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                ),
+                value: ref.watch(themeModeNotifierProvider) == ThemeMode.dark,
+                activeColor: AppColors.primaryGold,
+                onChanged: (val) => ref.read(themeModeNotifierProvider.notifier).toggleTheme(),
+              ),
             ),
 
             // Owner 2FA Portal Security Gate section

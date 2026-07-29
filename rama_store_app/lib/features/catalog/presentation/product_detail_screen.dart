@@ -30,6 +30,20 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Text(p.name),
+        actions: [
+          Consumer(
+            builder: (context, ref, child) {
+              final isFav = ref.watch(wishlistNotifierProvider).contains(p.id);
+              return IconButton(
+                icon: Icon(
+                  isFav ? Icons.favorite : Icons.favorite_border,
+                  color: isFav ? Colors.red : AppColors.primaryGold,
+                ),
+                onPressed: () => ref.read(wishlistNotifierProvider.notifier).toggleFavorite(p.id),
+              );
+            },
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Column(

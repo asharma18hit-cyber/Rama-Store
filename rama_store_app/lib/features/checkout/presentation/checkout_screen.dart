@@ -19,7 +19,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   final _cardNumberController = TextEditingController(text: '4532 1111 2222 3333');
   final _cvvController = TextEditingController(text: '123');
   final _expiryController = TextEditingController(text: '12/28');
+  final _upiIdController = TextEditingController(text: 'user@upi');
 
+  String _selectedPaymentMethod = 'card'; // card, upi, cod
   bool _isProcessing = false;
 
   @override
@@ -28,6 +30,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     _cardNumberController.dispose();
     _cvvController.dispose();
     _expiryController.dispose();
+    _upiIdController.dispose();
     super.dispose();
   }
 
@@ -55,50 +58,93 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             ),
 
             const SizedBox(height: 24),
-            const Text('Payment Credentials (Sandbox)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textPrimary)),
-            const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: AppColors.primaryGold.withOpacity(0.3)),
-              ),
-              child: const Text(
-                'Tip: Use card ending in 4000 (e.g. 4000 0000 0000 4000) to test gateway declination & rollback simulation.',
-                style: TextStyle(fontSize: 12, color: AppColors.accentAmber),
-              ),
-            ),
-            const SizedBox(height: 12),
-            AppTextField(
-              controller: _cardNumberController,
-              label: 'Card Number (16 Digits)',
-              hint: '4532 1111 2222 3333',
-              keyboardType: TextInputType.number,
-              prefixIcon: const Icon(Icons.credit_card, color: AppColors.textSecondary),
-            ),
+            const Text('Select Payment Method', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textPrimary)),
             const SizedBox(height: 12),
             Row(
               children: [
-                Expanded(
-                  child: AppTextField(
-                    controller: _expiryController,
-                    label: 'Expiry (MM/YY)',
-                    hint: '12/28',
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: AppTextField(
-                    controller: _cvvController,
-                    label: 'CVV (3 Digits)',
-                    hint: '123',
-                    obscureText: true,
-                    keyboardType: TextInputType.number,
-                  ),
-                ),
+                _buildPaymentTab('card', 'Credit/Debit Card', Icons.credit_card),
+                const SizedBox(width: 8),
+                _buildPaymentTab('upi', 'UPI / GPay', Icons.account_balance_wallet),
+                const SizedBox(width: 8),
+                _buildPaymentTab('cod', 'Cash on Delivery', Icons.payments),
               ],
             ),
+            const SizedBox(height: 16),
+
+            if (_selectedPaymentMethod == 'card') ...[
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: AppColors.primaryGold.withOpacity(0.3)),
+                ),
+                child: const Text(
+                  'Tip: Card ending in 4000 simulates payment declination rollback test.',
+                  style: TextStyle(fontSize: 12, color: AppColors.accentAmber),
+                ),
+              ),
+              const SizedBox(height: 12),
+              AppTextField(
+                controller: _cardNumberController,
+                label: 'Card Number (16 Digits)',
+                hint: '4532 1111 2222 3333',
+                keyboardType: TextInputType.number,
+                prefixIcon: const Icon(Icons.credit_card, color: AppColors.textSecondary),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: AppTextField(
+                      controller: _expiryController,
+                      label: 'Expiry (MM/YY)',
+                      hint: '12/28',
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: AppTextField(
+                      controller: _cvvController,
+                      label: 'CVV (3 Digits)',
+                      hint: '123',
+                      obscureText: true,
+                      keyboardType: TextInputType.number,
+                    ),
+                  ),
+                ],
+              ),
+            ] else if (_selectedPaymentMethod == 'upi') ...[
+              AppTextField(
+                controller: _upiIdController,
+                label: 'Enter Virtual Payment Address (VPA / UPI ID)',
+                hint: 'username@okaxis / 9876543210@paytm',
+                prefixIcon: const Icon(Icons.qr_code, color: AppColors.primaryGold),
+              ),
+              const SizedBox(height: 8),
+              const Text('Supports Google Pay, PhonePe, Paytm & BHIM UPI', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+            ] else ...[
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: AppColors.success),
+                ),
+                child: Row(
+                  children: const [
+                    Icon(Icons.check_circle_outline, color: AppColors.success),
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'Cash on Delivery Selected. Pay cash or UPI directly to the delivery partner upon arrival.',
+                        style: TextStyle(fontSize: 13, color: AppColors.textPrimary),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
 
             const SizedBox(height: 28),
             const Text('Order Summary', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textPrimary)),
@@ -161,19 +207,28 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
             const SizedBox(height: 32),
             AppButton(
-              text: 'Place Order & Pay',
+              text: _selectedPaymentMethod == 'cod' ? 'Confirm Cash on Delivery Order' : 'Place Order & Pay Now',
               isLoading: _isProcessing,
               onPressed: _isProcessing ? null : () async {
                 final addr = _addressController.text.trim();
                 final card = _cardNumberController.text.replaceAll(' ', '').trim();
                 final cvv = _cvvController.text.trim();
                 final expiry = _expiryController.text.trim();
+                final upiId = _upiIdController.text.trim();
                 final messenger = ScaffoldMessenger.of(context);
 
-                if (addr.isEmpty || card.isEmpty || cvv.isEmpty || expiry.isEmpty) {
-                  messenger.showSnackBar(
-                    const SnackBar(content: Text('Please fill out all address & payment fields')),
-                  );
+                if (addr.isEmpty) {
+                  messenger.showSnackBar(const SnackBar(content: Text('Please enter delivery address')));
+                  return;
+                }
+
+                if (_selectedPaymentMethod == 'card' && (card.isEmpty || cvv.isEmpty || expiry.isEmpty)) {
+                  messenger.showSnackBar(const SnackBar(content: Text('Please enter card details')));
+                  return;
+                }
+
+                if (_selectedPaymentMethod == 'upi' && upiId.isEmpty) {
+                  messenger.showSnackBar(const SnackBar(content: Text('Please enter valid UPI ID')));
                   return;
                 }
 
@@ -185,8 +240,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   final sessionRes = await checkoutRepo.createCheckoutSession(cartState.items, addr);
                   final trackingNumber = sessionRes['session']['tracking_number'];
 
-                  // 2. Process payment
-                  await checkoutRepo.processPayment(trackingNumber, card, cvv, expiry);
+                  // 2. Process payment (mock / sandbox API)
+                  final payCard = _selectedPaymentMethod == 'card' ? card : '4532111122223333';
+                  await checkoutRepo.processPayment(trackingNumber, payCard, '123', '12/28');
 
                   // 3. Clear cart on success
                   await ref.read(cartNotifierProvider.notifier).clearCart();
@@ -209,6 +265,38 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               },
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPaymentTab(String id, String label, IconData icon) {
+    final isSelected = _selectedPaymentMethod == id;
+    return Expanded(
+      child: InkWell(
+        onTap: () => setState(() => _selectedPaymentMethod = id),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
+          decoration: BoxDecoration(
+            color: isSelected ? AppColors.primaryGold : AppColors.surface,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: isSelected ? AppColors.primaryGold : AppColors.surfaceLight),
+          ),
+          child: Column(
+            children: [
+              Icon(icon, size: 20, color: isSelected ? Colors.white : AppColors.textSecondary),
+              const SizedBox(height: 4),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  color: isSelected ? Colors.white : AppColors.textSecondary,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         ),
       ),
     );
