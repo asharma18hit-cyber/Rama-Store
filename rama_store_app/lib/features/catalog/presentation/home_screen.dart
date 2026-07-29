@@ -138,22 +138,29 @@ class HomeScreen extends ConsumerWidget {
   Widget _buildHeroBanner(BuildContext context) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
-      height: 160,
+      height: 170,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         gradient: const LinearGradient(
-          colors: [Color(0xFF1E293B), Color(0xFF0F172A)],
+          colors: [Color(0xFF3525CD), Color(0xFF1E293B), Color(0xFF0F172A)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        border: Border.all(color: AppColors.primaryGold.withOpacity(0.4)),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF3525CD).withOpacity(0.3),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
+        border: Border.all(color: const Color(0xFF4EDEAE).withOpacity(0.4), width: 1.2),
       ),
       child: Stack(
         children: [
           Positioned(
-            right: -20,
-            bottom: -20,
-            child: Icon(Icons.auto_stories, size: 180, color: AppColors.primaryGold.withOpacity(0.08)),
+            right: -15,
+            bottom: -15,
+            child: Icon(Icons.stars_rounded, size: 170, color: const Color(0xFF4EDEAE).withOpacity(0.12)),
           ),
           Padding(
             padding: const EdgeInsets.all(20.0),
@@ -161,26 +168,42 @@ class HomeScreen extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryGold,
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: const Text(
-                    'CURATED MASTER CATALOG',
-                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white),
-                  ),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF4EDEAE),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Text(
+                        '✨ RAMA STORE DESIGN SYSTEM',
+                        style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: Color(0xFF005236)),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryGold,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Text(
+                        '10% CASH-BACK',
+                        style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.white),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 10),
                 const Text(
-                  'Bakery, Books, Groceries & Medicine',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                  'Elite High-Performance Fashion & Essentials',
+                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: AppColors.textPrimary, letterSpacing: -0.3),
                 ),
                 const SizedBox(height: 4),
                 const Text(
-                  'Earn 10% Cash-Back Loyalty Rewards on all orders',
-                  style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                  'Bakery, Books, Groceries & Medicine • 100% Shared Database',
+                  style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
                 ),
               ],
             ),
