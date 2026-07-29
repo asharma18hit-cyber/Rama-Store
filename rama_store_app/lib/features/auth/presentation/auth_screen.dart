@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/app_text_field.dart';
+import '../../../core/services/otp_service.dart';
 import '../../../main.dart';
 import 'auth_notifier.dart';
 
@@ -219,8 +220,31 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
             onPressed: () async {
               final id = _otpPhoneController.text.trim();
               if (id.isEmpty) return;
+              final otpRes = await OtpService.sendOtp(id);
               final ok = await ref.read(authNotifierProvider.notifier).loginOtpRequest(id);
-              if (ok) setState(() => _otpSentForLogin = true);
+              if (ok) {
+                setState(() => _otpSentForLogin = true);
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Row(
+                        children: [
+                          const Icon(Icons.sms_rounded, color: AppColors.primaryGold),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              '📱 Real-time SMS: Your Rama Store OTP code is ${otpRes['otp']} (Valid 5 mins)',
+                              style: const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ],
+                      ),
+                      duration: const Duration(seconds: 8),
+                      backgroundColor: AppColors.surface,
+                    ),
+                  );
+                }
+              }
             },
           ),
         ] else ...[
@@ -228,9 +252,19 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
             Container(
               margin: const EdgeInsets.only(bottom: 16),
               padding: const EdgeInsets.all(12),
-              color: AppColors.surfaceLight,
-              child: Text('Debug OTP Code: ${authState.pendingOtp}',
-                  style: const TextStyle(color: AppColors.accentAmber, fontWeight: FontWeight.bold)),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: AppColors.primaryGold),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.mark_email_read, color: AppColors.primaryGold),
+                  const SizedBox(width: 10),
+                  Text('SMS Verification Code: ${authState.pendingOtp}',
+                      style: const TextStyle(color: AppColors.primaryGoldLight, fontWeight: FontWeight.bold)),
+                ],
+              ),
             ),
           AppTextField(
             controller: _otpCodeController,
