@@ -30,6 +30,10 @@ dependencies:
   google_fonts: ^6.1.0
   flutter_rating_bar: ^4.0.1
   intl: ^0.20.2
+  # Firebase Phone Auth (10,000 Free SMS / Month)
+  firebase_core: ^3.1.0
+  firebase_auth: ^5.1.0
+
   cupertino_icons: ^1.0.6
 
 dev_dependencies:
