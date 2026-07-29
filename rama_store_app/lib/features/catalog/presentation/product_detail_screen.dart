@@ -119,6 +119,76 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                     'High quality curated essential item from Rama Store catalog. Guarantees 100% authenticity and qualifies for 10% loyalty cashback.',
                     style: TextStyle(color: AppColors.textSecondary, height: 1.5),
                   ),
+                  const SizedBox(height: 20),
+                  // Google Stitch Bento Specs Grid
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: AppColors.surface,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: AppColors.surfaceLight),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: const [
+                              Icon(Icons.water_drop_outlined, color: AppColors.secondaryFixedDim, size: 22),
+                              SizedBox(height: 4),
+                              Text('200m Waterproof', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                              Text('Diving ready', style: TextStyle(fontSize: 10, color: AppColors.textSecondary)),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: AppColors.surface,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: AppColors.surfaceLight),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: const [
+                              Icon(Icons.bolt, color: AppColors.secondaryFixedDim, size: 22),
+                              SizedBox(height: 4),
+                              Text('72h Reserve', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                              Text('Automatic Caliber', style: TextStyle(fontSize: 10, color: AppColors.textSecondary)),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppColors.surface,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: AppColors.surfaceLight),
+                    ),
+                    child: Row(
+                      children: const [
+                        Icon(Icons.verified, color: AppColors.secondaryFixedDim, size: 28),
+                        SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('5 Year Global Warranty', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                              Text('Global elite coverage & maintenance guarantee', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                   const SizedBox(height: 24),
 
                   // Quantity Stepper & Add to Cart
