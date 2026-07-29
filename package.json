@@ -1,0 +1,8 @@
+{
+  "name": "rama-store",
+  "version": "1.0.0",
+  "description": "Rama Store Static Web Deployment",
+  "scripts": {
+    "build": "echo Prebuilt static site ready"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "name": "rama-store-app",
+  "version": "1.0.0",
+  "description": "Rama Store Web App Prebuilt",
+  "scripts": {
+    "build": "echo Prebuilt static site ready"
+  }
+}
