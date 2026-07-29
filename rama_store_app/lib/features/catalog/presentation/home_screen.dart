@@ -1,0 +1,425 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import '../../../core/constants/app_colors.dart';
+import '../../../core/utils/formatters.dart';
+import '../../../shared/widgets/offline_banner.dart';
+import '../../../shared/widgets/shimmer_loader.dart';
+import '../../../shared/widgets/rating_stars.dart';
+import '../../../main.dart';
+import '../data/catalog_models.dart';
+import 'catalog_notifier.dart';
+
+class HomeScreen extends ConsumerWidget {
+  const HomeScreen({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final catalogState = ref.watch(catalogNotifierProvider);
+
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        title: const Text('RAMA STORE'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () => context.go('/catalog'),
+          ),
+          IconButton(
+            icon: const Icon(Icons.loyalty),
+            color: AppColors.accentAmber,
+            onPressed: () => context.push('/loyalty'),
+          ),
+        ],
+      ),
+      body: RefreshIndicator(
+        onRefresh: () => ref.read(catalogNotifierProvider.notifier).initCatalog(),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              OfflineBanner(isOffline: catalogState.isOffline),
+
+              // Announcement Bar
+              if (catalogState.announcement != null)
+                Container(
+                  width: double.infinity,
+                  color: AppColors.surface,
+                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.stars, color: AppColors.primaryGoldLight, size: 18),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          catalogState.announcement!.loyaltyOffer,
+                          style: const TextStyle(fontSize: 13, color: AppColors.textPrimary),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+              const SizedBox(height: 16),
+
+              // Hero Banners Carousel
+              _buildHeroBanner(context),
+
+              const SizedBox(height: 24),
+
+              // "Why Us" Highlights
+              _buildWhyUsHighlights(context),
+
+              const SizedBox(height: 24),
+
+              // Department Grid
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Text(
+                  'Explore Store Departments',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+              ),
+              const SizedBox(height: 12),
+              _buildDepartmentGrid(context, catalogState, ref),
+
+              const SizedBox(height: 24),
+
+              // Featured Bestsellers
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Featured Collection', style: Theme.of(context).textTheme.titleLarge),
+                    TextButton(
+                      onPressed: () => context.go('/catalog'),
+                      child: const Text('View All', style: TextStyle(color: AppColors.primaryGold)),
+                    ),
+                  ],
+                ),
+              ),
+
+              if (catalogState.isLoading)
+                const Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: ProductCardShimmer(),
+                )
+              else
+                SizedBox(
+                  height: 230,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    itemCount: catalogState.products.length,
+                    itemBuilder: (context, index) {
+                      final product = catalogState.products[index];
+                      return _buildFeaturedProductCard(context, product, ref);
+                    },
+                  ),
+                ),
+
+              const SizedBox(height: 32),
+
+              // Customer Testimonials Carousel Section
+              _buildTestimonialsSection(context),
+
+              const SizedBox(height: 32),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeroBanner(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      height: 160,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        gradient: const LinearGradient(
+          colors: [Color(0xFF1E293B), Color(0xFF0F172A)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        border: Border.all(color: AppColors.primaryGold.withOpacity(0.4)),
+      ),
+      child: Stack(
+        children: [
+          Positioned(
+            right: -20,
+            bottom: -20,
+            child: Icon(Icons.auto_stories, size: 180, color: AppColors.primaryGold.withOpacity(0.08)),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryGold,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: const Text(
+                    'CURATED MASTER CATALOG',
+                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Bakery, Books, Groceries & Medicine',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                ),
+                const SizedBox(height: 4),
+                const Text(
+                  'Earn 10% Cash-Back Loyalty Rewards on all orders',
+                  style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWhyUsHighlights(BuildContext context) {
+    final highlights = [
+      {'icon': Icons.local_shipping_outlined, 'title': 'Free Local Delivery', 'subtitle': 'Orders above ₹500'},
+      {'icon': Icons.card_giftcard, 'title': '10% Loyalty Cash-Back', 'subtitle': 'Credited instantly'},
+      {'icon': Icons.verified_user_outlined, 'title': 'Secure Transactions', 'subtitle': '100% Guaranteed'},
+      {'icon': Icons.inventory_2_outlined, 'title': 'Curated Essentials', 'subtitle': 'Verified Quality'},
+    ];
+
+    return SizedBox(
+      height: 90,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        itemCount: highlights.length,
+        itemBuilder: (context, index) {
+          final h = highlights[index];
+          return Container(
+            width: 170,
+            margin: const EdgeInsets.only(right: 12),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              children: [
+                Icon(h['icon'] as IconData, color: AppColors.primaryGold, size: 28),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(h['title'] as String,
+                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                      Text(h['subtitle'] as String,
+                          style: const TextStyle(fontSize: 10, color: AppColors.textSecondary)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildDepartmentGrid(BuildContext context, CatalogState state, WidgetRef ref) {
+    final departments = [
+      {'name': 'Bakery', 'icon': Icons.bakery_dining, 'id': 1},
+      {'name': 'Groceries', 'icon': Icons.shopping_basket, 'id': 2},
+      {'name': 'Medicine', 'icon': Icons.medical_services, 'id': 3},
+      {'name': 'Books', 'icon': Icons.menu_book, 'id': 4},
+      {'name': 'Stationery', 'icon': Icons.edit_note, 'id': 5},
+      {'name': 'Sports Gear', 'icon': Icons.sports_tennis, 'id': 6},
+    ];
+
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+        childAspectRatio: 1.1,
+        crossAxisSpacing: 10,
+        mainAxisSpacing: 10,
+      ),
+      itemCount: departments.length,
+      itemBuilder: (context, index) {
+        final dept = departments[index];
+        return InkWell(
+          onTap: () {
+            ref.read(catalogNotifierProvider.notifier).setCategory(dept['id'] as int);
+            context.go('/catalog');
+          },
+          child: Container(
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppColors.surfaceLight),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(dept['icon'] as IconData, color: AppColors.primaryGoldLight, size: 28),
+                const SizedBox(height: 6),
+                Text(
+                  dept['name'] as String,
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildFeaturedProductCard(BuildContext context, Product product, WidgetRef ref) {
+    return Container(
+      width: 150,
+      margin: const EdgeInsets.only(right: 12),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: InkWell(
+        onTap: () => context.push('/product/${product.id}', extra: product),
+        child: Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: SizedBox(
+                  height: 90,
+                  width: double.infinity,
+                  child: product.imageUrl != null && product.imageUrl!.isNotEmpty
+                      ? CachedNetworkImage(
+                          imageUrl: product.imageUrl!,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) => const ShimmerLoader(width: double.infinity, height: 90),
+                          errorWidget: (context, url, error) => Container(color: AppColors.surfaceLight),
+                        )
+                      : Container(
+                          color: AppColors.surfaceLight,
+                          child: const Icon(Icons.store, color: AppColors.textMuted),
+                        ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                product.name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                product.categoryName ?? 'Essential',
+                style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+              ),
+              const Spacer(),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    Formatters.formatCurrency(product.sellingPrice),
+                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.primaryGoldLight),
+                  ),
+                  InkWell(
+                    onTap: () {
+                      ref.read(cartNotifierProvider.notifier).addItem(product);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Added ${product.name} to cart'), duration: const Duration(seconds: 1)),
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: const BoxDecoration(color: AppColors.primaryGold, shape: BoxShape.circle),
+                      child: const Icon(Icons.add, size: 16, color: Colors.white),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTestimonialsSection(BuildContext context) {
+    final reviews = [
+      {'name': 'Rahul S.', 'review': 'Best bookshop & bakery in town! Love the 10% cash-back rewards.', 'rating': 5.0},
+      {'name': 'Priya M.', 'review': 'Super fast local delivery above ₹500. Genuine products!', 'rating': 5.0},
+      {'name': 'Amit K.', 'review': 'Seamless ordering across web and mobile app!', 'rating': 4.5},
+    ];
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      color: AppColors.surface,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Customer Reviews & Ratings', style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: 12),
+          SizedBox(
+            height: 120,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: reviews.length,
+              itemBuilder: (context, index) {
+                final r = reviews[index];
+                return Container(
+                  width: 260,
+                  margin: const EdgeInsets.only(right: 12),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppColors.background,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.surfaceLight),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(r['name'] as String, style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                          RatingStars(rating: r['rating'] as double),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        r['review'] as String,
+                        style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

@@ -1,0 +1,394 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import '../../../core/constants/app_colors.dart';
+import '../../../shared/widgets/app_button.dart';
+import '../../../shared/widgets/app_text_field.dart';
+import '../../../main.dart';
+import 'auth_notifier.dart';
+
+class AuthScreen extends ConsumerStatefulWidget {
+  final int initialTabIndex;
+
+  const AuthScreen({Key? key, this.initialTabIndex = 0}) : super(key: key);
+
+  @override
+  ConsumerState<AuthScreen> createState() => _AuthScreenState();
+}
+
+class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
+  // Form Controllers
+  final _loginIdentifierController = TextEditingController();
+  final _loginPasswordController = TextEditingController();
+
+  final _otpPhoneController = TextEditingController();
+  final _otpCodeController = TextEditingController();
+
+  final _regUsernameController = TextEditingController();
+  final _regEmailController = TextEditingController();
+  final _regPasswordController = TextEditingController();
+  final _regOtpController = TextEditingController();
+
+  final _forgotEmailController = TextEditingController();
+  final _forgotOtpController = TextEditingController();
+  final _forgotNewPassController = TextEditingController();
+
+  bool _rememberDevice = true;
+  bool _otpSentForLogin = false;
+  bool _otpSentForReg = false;
+  bool _otpSentForForgot = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 4, vsync: this, initialIndex: widget.initialTabIndex);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    _loginIdentifierController.dispose();
+    _loginPasswordController.dispose();
+    _otpPhoneController.dispose();
+    _otpCodeController.dispose();
+    _regUsernameController.dispose();
+    _regEmailController.dispose();
+    _regPasswordController.dispose();
+    _regOtpController.dispose();
+    _forgotEmailController.dispose();
+    _forgotOtpController.dispose();
+    _forgotNewPassController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final authState = ref.watch(authNotifierProvider);
+
+    ref.listen(authNotifierProvider, (previous, next) {
+      if (next.errorMessage != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(next.errorMessage!), backgroundColor: AppColors.error),
+        );
+      }
+      if (next.infoMessage != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(next.infoMessage!), backgroundColor: AppColors.success),
+        );
+      }
+      if (next.isAuthenticated) {
+        context.go('/home');
+      }
+    });
+
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        title: const Text('Rama Store Auth'),
+        bottom: TabBar(
+          controller: _tabController,
+          indicatorColor: AppColors.primaryGold,
+          labelColor: AppColors.primaryGoldLight,
+          unselectedLabelColor: AppColors.textSecondary,
+          isScrollable: true,
+          tabs: const [
+            Tab(text: 'Password Login'),
+            Tab(text: 'OTP Login'),
+            Tab(text: 'Sign Up'),
+            Tab(text: 'Reset Password'),
+          ],
+        ),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          children: [
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.primaryGold.withOpacity(0.3)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.shield_outlined, color: AppColors.primaryGoldLight, size: 28),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: const [
+                        Text(
+                          'Rama Store Direct Account Access',
+                          style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                        ),
+                        Text(
+                          'Same account & loyalty points balance across mobile app and website',
+                          style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              height: 480,
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  _buildPasswordLoginTab(authState),
+                  _buildOtpLoginTab(authState),
+                  _buildRegisterTab(authState),
+                  _buildForgotPasswordTab(authState),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPasswordLoginTab(AuthState authState) {
+    return Column(
+      children: [
+        AppTextField(
+          controller: _loginIdentifierController,
+          label: 'Username or Registered Email',
+          hint: 'e.g. johndoe or john@example.com',
+          prefixIcon: const Icon(Icons.person_outline, color: AppColors.textSecondary),
+        ),
+        const SizedBox(height: 16),
+        AppTextField(
+          controller: _loginPasswordController,
+          label: 'Account Password',
+          hint: '••••••••',
+          obscureText: true,
+          prefixIcon: const Icon(Icons.lock_outline, color: AppColors.textSecondary),
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Checkbox(
+              value: _rememberDevice,
+              activeColor: AppColors.primaryGold,
+              onChanged: (val) => setState(() => _rememberDevice = val ?? true),
+            ),
+            const Text('Remember device', style: TextStyle(color: AppColors.textSecondary)),
+          ],
+        ),
+        const SizedBox(height: 24),
+        AppButton(
+          text: 'Sign In to Store',
+          isLoading: authState.isLoading,
+          onPressed: () {
+            final id = _loginIdentifierController.text.trim();
+            final pass = _loginPasswordController.text;
+            if (id.isEmpty || pass.isEmpty) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Please fill in both fields')),
+              );
+              return;
+            }
+            ref.read(authNotifierProvider.notifier).loginPassword(id, pass);
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildOtpLoginTab(AuthState authState) {
+    return Column(
+      children: [
+        if (!_otpSentForLogin) ...[
+          AppTextField(
+            controller: _otpPhoneController,
+            label: 'Registered Email or Mobile Number',
+            hint: 'Enter your email or phone',
+            prefixIcon: const Icon(Icons.phone_android, color: AppColors.textSecondary),
+          ),
+          const SizedBox(height: 24),
+          AppButton(
+            text: 'Send 6-Digit OTP Code',
+            isLoading: authState.isLoading,
+            onPressed: () async {
+              final id = _otpPhoneController.text.trim();
+              if (id.isEmpty) return;
+              final ok = await ref.read(authNotifierProvider.notifier).loginOtpRequest(id);
+              if (ok) setState(() => _otpSentForLogin = true);
+            },
+          ),
+        ] else ...[
+          if (authState.pendingOtp != null)
+            Container(
+              margin: const EdgeInsets.only(bottom: 16),
+              padding: const EdgeInsets.all(12),
+              color: AppColors.surfaceLight,
+              child: Text('Debug OTP Code: ${authState.pendingOtp}',
+                  style: const TextStyle(color: AppColors.accentAmber, fontWeight: FontWeight.bold)),
+            ),
+          AppTextField(
+            controller: _otpCodeController,
+            label: '6-Digit Verification Code',
+            hint: '123456',
+            keyboardType: TextInputType.number,
+            prefixIcon: const Icon(Icons.pin, color: AppColors.textSecondary),
+          ),
+          const SizedBox(height: 24),
+          AppButton(
+            text: 'Verify Code & Sign In',
+            isLoading: authState.isLoading,
+            onPressed: () {
+              final code = _otpCodeController.text.trim();
+              if (code.isEmpty) return;
+              ref.read(authNotifierProvider.notifier).loginOtpVerify(code);
+            },
+          ),
+          const SizedBox(height: 12),
+          TextButton(
+            onPressed: () => setState(() => _otpSentForLogin = false),
+            child: const Text('Change Email / Phone', style: TextStyle(color: AppColors.primaryGold)),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildRegisterTab(AuthState authState) {
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          if (!_otpSentForReg) ...[
+            AppTextField(
+              controller: _regUsernameController,
+              label: 'Full Name / Username',
+              hint: 'e.g. John Doe',
+              prefixIcon: const Icon(Icons.person, color: AppColors.textSecondary),
+            ),
+            const SizedBox(height: 12),
+            AppTextField(
+              controller: _regEmailController,
+              label: 'Email or Mobile Number',
+              hint: 'john@example.com',
+              prefixIcon: const Icon(Icons.email, color: AppColors.textSecondary),
+            ),
+            const SizedBox(height: 12),
+            AppTextField(
+              controller: _regPasswordController,
+              label: 'Create Password',
+              hint: 'At least 6 characters',
+              obscureText: true,
+              prefixIcon: const Icon(Icons.lock, color: AppColors.textSecondary),
+            ),
+            const SizedBox(height: 20),
+            AppButton(
+              text: 'Register Account & Get OTP',
+              isLoading: authState.isLoading,
+              onPressed: () async {
+                final uname = _regUsernameController.text.trim();
+                final email = _regEmailController.text.trim();
+                final pass = _regPasswordController.text;
+                if (uname.isEmpty || email.isEmpty) return;
+                final ok = await ref.read(authNotifierProvider.notifier).registerRequest(uname, email, pass);
+                if (ok) setState(() => _otpSentForReg = true);
+              },
+            ),
+          ] else ...[
+            if (authState.pendingOtp != null)
+              Container(
+                margin: const EdgeInsets.only(bottom: 16),
+                padding: const EdgeInsets.all(12),
+                color: AppColors.surfaceLight,
+                child: Text('Debug OTP Code: ${authState.pendingOtp}',
+                    style: const TextStyle(color: AppColors.accentAmber, fontWeight: FontWeight.bold)),
+              ),
+            AppTextField(
+              controller: _regOtpController,
+              label: 'Enter Registration Verification Code',
+              hint: '6-digit OTP',
+              keyboardType: TextInputType.number,
+            ),
+            const SizedBox(height: 20),
+            AppButton(
+              text: 'Complete Signup',
+              isLoading: authState.isLoading,
+              onPressed: () {
+                final otp = _regOtpController.text.trim();
+                if (otp.isEmpty) return;
+                ref.read(authNotifierProvider.notifier).registerVerify(otp);
+              },
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildForgotPasswordTab(AuthState authState) {
+    return Column(
+      children: [
+        if (!_otpSentForForgot) ...[
+          AppTextField(
+            controller: _forgotEmailController,
+            label: 'Registered Email or Phone',
+            hint: 'Enter your account email',
+            prefixIcon: const Icon(Icons.mail_outline, color: AppColors.textSecondary),
+          ),
+          const SizedBox(height: 24),
+          AppButton(
+            text: 'Request Reset Code',
+            isLoading: authState.isLoading,
+            onPressed: () async {
+              final id = _forgotEmailController.text.trim();
+              if (id.isEmpty) return;
+              final ok = await ref.read(authNotifierProvider.notifier).forgotPasswordRequest(id);
+              if (ok) setState(() => _otpSentForForgot = true);
+            },
+          ),
+        ] else ...[
+          if (authState.pendingOtp != null)
+            Container(
+              margin: const EdgeInsets.only(bottom: 16),
+              padding: const EdgeInsets.all(12),
+              color: AppColors.surfaceLight,
+              child: Text('Debug Reset OTP: ${authState.pendingOtp}',
+                  style: const TextStyle(color: AppColors.accentAmber, fontWeight: FontWeight.bold)),
+            ),
+          AppTextField(
+            controller: _forgotOtpController,
+            label: '6-Digit Reset Code',
+            hint: 'OTP code',
+          ),
+          const SizedBox(height: 12),
+          AppTextField(
+            controller: _forgotNewPassController,
+            label: 'New Password',
+            hint: 'At least 6 characters',
+            obscureText: true,
+          ),
+          const SizedBox(height: 24),
+          AppButton(
+            text: 'Save New Password & Sign In',
+            isLoading: authState.isLoading,
+            onPressed: () async {
+              final email = _forgotEmailController.text.trim();
+              final otp = _forgotOtpController.text.trim();
+              final pass = _forgotNewPassController.text;
+              if (otp.isEmpty || pass.isEmpty) return;
+              final ok = await ref.read(authNotifierProvider.notifier).resetPassword(email, otp, pass);
+              if (ok) {
+                _tabController.animateTo(0);
+                setState(() => _otpSentForForgot = false);
+              }
+            },
+          ),
+        ],
+      ],
+    );
+  }
+}
