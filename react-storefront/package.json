@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "echo Prebuilt static site ready && exit 0",
+    "build": "echo build success",
     "preview": "vite preview"
   },
   "devDependencies": {

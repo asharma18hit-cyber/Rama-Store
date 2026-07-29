@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: rama-store
+    env: static
+    buildCommand: echo "Prebuilt Flutter Web App"
+    staticPublishPath: ./rama_store_app/build/web

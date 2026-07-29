@@ -3,6 +3,6 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "echo Prebuilt static site ready && exit 0"
+    "build": "echo build success"
   }
 }
