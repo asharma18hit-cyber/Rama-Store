@@ -1,8 +1,8 @@
 {
   "name": "rama-store",
   "version": "1.0.0",
-  "description": "Rama Store Static Web Deployment",
+  "private": true,
   "scripts": {
-    "build": "echo Prebuilt static site ready"
+    "build": "echo Prebuilt static site ready && exit 0"
   }
 }
