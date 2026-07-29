@@ -50,10 +50,21 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Store Catalog'),
+        title: const Text('ELITE COLLECTION'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.favorite_border, color: AppColors.primaryGold),
+            icon: const Icon(Icons.tune_rounded, color: AppColors.secondaryFixedDim),
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('✨ Google Stitch Filter Drawer Active: Filter by Material, Technical Weave & Water Resistance'),
+                  backgroundColor: AppColors.primary,
+                ),
+              );
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.favorite_border, color: AppColors.secondaryFixedDim),
             onPressed: () => context.push('/wishlist'),
           ),
         ],
@@ -61,6 +72,27 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
       body: Column(
         children: [
           OfflineBanner(isOffline: catalogState.isOffline),
+
+          // Google Stitch Elite Banner Pill
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
+            color: AppColors.surface,
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: AppColors.secondaryFixedDim,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: const Text('STITCH SYNCED', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Color(0xFF005236))),
+                ),
+                const SizedBox(width: 8),
+                const Text('Precision Engineered Fashion & Essentials', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+              ],
+            ),
+          ),
 
           // Search Bar
           Padding(
