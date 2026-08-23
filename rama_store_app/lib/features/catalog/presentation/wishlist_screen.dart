@@ -8,7 +8,7 @@ import '../../../shared/widgets/app_button.dart';
 import '../../../main.dart';
 
 class WishlistScreen extends ConsumerWidget {
-  const WishlistScreen({Key? key}) : super(key: key);
+  const WishlistScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

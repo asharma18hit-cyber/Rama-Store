@@ -5,7 +5,7 @@ import '../../../core/constants/app_constants.dart';
 import '../../../shared/widgets/app_button.dart';
 
 class SplashScreen extends StatelessWidget {
-  const SplashScreen({Key? key}) : super(key: key);
+  const SplashScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +28,7 @@ class SplashScreen extends StatelessWidget {
                       border: Border.all(color: AppColors.primaryGold, width: 2),
                       boxShadow: [
                         BoxShadow(
-                          color: AppColors.primaryGold.withOpacity(0.3),
+                          color: AppColors.primaryGold.withValues(alpha: 0.3),
                           blurRadius: 20,
                           spreadRadius: 2,
                         ),

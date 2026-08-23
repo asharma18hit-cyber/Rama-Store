@@ -9,10 +9,10 @@ class MainScaffold extends ConsumerWidget {
   final String location;
 
   const MainScaffold({
-    Key? key,
+    super.key,
     required this.child,
     required this.location,
-  }) : super(key: key);
+  });
 
   int _calculateSelectedIndex(BuildContext context) {
     if (location.startsWith('/home')) return 0;

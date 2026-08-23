@@ -233,7 +233,7 @@ void main() async {
 }
 
 class RamaStoreApp extends ConsumerWidget {
-  const RamaStoreApp({Key? key}) : super(key: key);
+  const RamaStoreApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

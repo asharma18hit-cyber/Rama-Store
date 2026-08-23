@@ -4,7 +4,7 @@ import '../../core/constants/app_colors.dart';
 class OfflineBanner extends StatelessWidget {
   final bool isOffline;
 
-  const OfflineBanner({Key? key, required this.isOffline}) : super(key: key);
+  const OfflineBanner({super.key, required this.isOffline});
 
   @override
   Widget build(BuildContext context) {

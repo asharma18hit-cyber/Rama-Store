@@ -6,7 +6,7 @@ import '../../../shared/widgets/app_button.dart';
 import '../../../main.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
-  const ProfileScreen({Key? key}) : super(key: key);
+  const ProfileScreen({super.key});
 
   @override
   ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
@@ -46,7 +46,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               decoration: BoxDecoration(
                 color: AppColors.surface,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppColors.primaryGold.withOpacity(0.3)),
+                border: Border.all(color: AppColors.primaryGold.withValues(alpha: 0.3)),
               ),
               child: Row(
                 children: [
@@ -76,7 +76,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                           decoration: BoxDecoration(
-                            color: user?.isAdmin == true ? AppColors.accentAmber.withOpacity(0.2) : AppColors.surfaceLight,
+                            color: user?.isAdmin == true ? AppColors.accentAmber.withValues(alpha: 0.2) : AppColors.surfaceLight,
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
@@ -139,7 +139,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
                 ),
                 value: ref.watch(themeModeNotifierProvider) == ThemeMode.dark,
-                activeColor: AppColors.primaryGold,
+                activeThumbColor: AppColors.primaryGold,
                 onChanged: (val) => ref.read(themeModeNotifierProvider.notifier).toggleTheme(),
               ),
             ),

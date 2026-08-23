@@ -158,19 +158,19 @@ class HomeScreen extends ConsumerWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF3525CD).withOpacity(0.3),
+            color: const Color(0xFF3525CD).withValues(alpha: 0.3),
             blurRadius: 16,
             offset: const Offset(0, 6),
           ),
         ],
-        border: Border.all(color: const Color(0xFF4EDEAE).withOpacity(0.4), width: 1.2),
+        border: Border.all(color: const Color(0xFF4EDEAE).withValues(alpha: 0.4), width: 1.2),
       ),
       child: Stack(
         children: [
           Positioned(
             right: -15,
             bottom: -15,
-            child: Icon(Icons.stars_rounded, size: 170, color: const Color(0xFF4EDEAE).withOpacity(0.12)),
+            child: Icon(Icons.stars_rounded, size: 170, color: const Color(0xFF4EDEAE).withValues(alpha: 0.12)),
           ),
           Padding(
             padding: const EdgeInsets.all(20.0),
@@ -475,14 +475,14 @@ class HomeScreen extends ConsumerWidget {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
-              border: Border.all(color: AppColors.secondaryFixedDim.withOpacity(0.3)),
+              border: Border.all(color: AppColors.secondaryFixedDim.withValues(alpha: 0.3)),
             ),
             child: Stack(
               children: [
                 Positioned(
                   right: -10,
                   bottom: -10,
-                  child: Icon(Icons.flash_on, size: 140, color: Colors.white.withOpacity(0.06)),
+                  child: Icon(Icons.flash_on, size: 140, color: Colors.white.withValues(alpha: 0.06)),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(16.0),
@@ -571,10 +571,10 @@ class HomeScreen extends ConsumerWidget {
       decoration: BoxDecoration(
         color: const Color(0xFF0F2B20),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFF4EDEAE).withOpacity(0.5), width: 1.5),
+        border: Border.all(color: const Color(0xFF4EDEAE).withValues(alpha: 0.5), width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF006C49).withOpacity(0.3),
+            color: const Color(0xFF006C49).withValues(alpha: 0.3),
             blurRadius: 16,
             offset: const Offset(0, 4),
           ),

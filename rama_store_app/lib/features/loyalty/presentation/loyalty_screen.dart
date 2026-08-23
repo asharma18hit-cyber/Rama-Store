@@ -6,7 +6,7 @@ import '../../../shared/widgets/app_button.dart';
 import '../../../main.dart';
 
 class LoyaltyScreen extends ConsumerWidget {
-  const LoyaltyScreen({Key? key}) : super(key: key);
+  const LoyaltyScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -36,7 +36,7 @@ class LoyaltyScreen extends ConsumerWidget {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.primaryGold.withOpacity(0.3),
+                    color: AppColors.primaryGold.withValues(alpha: 0.3),
                     blurRadius: 16,
                     spreadRadius: 2,
                   ),

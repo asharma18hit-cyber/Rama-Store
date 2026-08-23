@@ -12,7 +12,7 @@ import 'auth_notifier.dart';
 class AuthScreen extends ConsumerStatefulWidget {
   final int initialTabIndex;
 
-  const AuthScreen({Key? key, this.initialTabIndex = 0}) : super(key: key);
+  const AuthScreen({super.key, this.initialTabIndex = 0});
 
   @override
   ConsumerState<AuthScreen> createState() => _AuthScreenState();
@@ -133,7 +133,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
               decoration: BoxDecoration(
                 color: AppColors.surface,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.primaryGold.withOpacity(0.3)),
+                border: Border.all(color: AppColors.primaryGold.withValues(alpha: 0.3)),
               ),
               child: Row(
                 children: [
@@ -416,14 +416,6 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
               },
             ),
           ] else ...[
-            if (authState.pendingOtp != null)
-              Container(
-                margin: const EdgeInsets.only(bottom: 16),
-                padding: const EdgeInsets.all(12),
-                color: AppColors.surfaceLight,
-                child: Text('Debug OTP Code: ${authState.pendingOtp}',
-                    style: const TextStyle(color: AppColors.accentAmber, fontWeight: FontWeight.bold)),
-              ),
             AppTextField(
               controller: _regOtpController,
               label: 'Enter Registration Verification Code',
@@ -468,14 +460,6 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
             },
           ),
         ] else ...[
-          if (authState.pendingOtp != null)
-            Container(
-              margin: const EdgeInsets.only(bottom: 16),
-              padding: const EdgeInsets.all(12),
-              color: AppColors.surfaceLight,
-              child: Text('Debug Reset OTP: ${authState.pendingOtp}',
-                  style: const TextStyle(color: AppColors.accentAmber, fontWeight: FontWeight.bold)),
-            ),
           AppTextField(
             controller: _forgotOtpController,
             label: '6-Digit Reset Code',

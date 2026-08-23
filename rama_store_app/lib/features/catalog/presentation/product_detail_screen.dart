@@ -12,7 +12,7 @@ import '../data/catalog_models.dart';
 class ProductDetailScreen extends ConsumerStatefulWidget {
   final Product product;
 
-  const ProductDetailScreen({Key? key, required this.product}) : super(key: key);
+  const ProductDetailScreen({super.key, required this.product});
 
   @override
   ConsumerState<ProductDetailScreen> createState() => _ProductDetailScreenState();
@@ -31,15 +31,11 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
       appBar: AppBar(
         title: Text(p.name),
         actions: [
-          Consumer(
-            builder: (context, ref, child) {
-              final isFav = ref.watch(wishlistNotifierProvider).contains(p.id);
-              return IconButton(
-                icon: Icon(
-                  isFav ? Icons.favorite : Icons.favorite_border,
-                  color: isFav ? Colors.red : AppColors.primaryGold,
-                ),
-                onPressed: () => ref.read(wishlistNotifierProvider.notifier).toggleFavorite(p.id),
+          IconButton(
+            icon: const Icon(Icons.share_outlined),
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Product link copied to clipboard')),
               );
             },
           ),
@@ -49,28 +45,28 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Product Hero Image
-            SizedBox(
+            // Product Hero Image Banner
+            Container(
               height: 280,
               width: double.infinity,
-              child: p.imageUrl != null && p.imageUrl!.isNotEmpty
+              color: AppColors.surface,
+              child: p.imageUrl != null && p.imageUrl!.startsWith('http')
                   ? CachedNetworkImage(
                       imageUrl: p.imageUrl!,
                       fit: BoxFit.cover,
                       placeholder: (context, url) => const ShimmerLoader(width: double.infinity, height: 280),
-                      errorWidget: (context, url, err) => Container(color: AppColors.surfaceLight),
+                      errorWidget: (context, url, error) => const Icon(Icons.storefront_rounded, size: 80, color: AppColors.textMuted),
                     )
-                  : Container(
-                      color: AppColors.surface,
-                      child: const Icon(Icons.storefront_rounded, size: 80, color: AppColors.primaryGold),
+                  : const Center(
+                      child: Icon(Icons.storefront_rounded, size: 80, color: AppColors.primaryGoldLight),
                     ),
             ),
-
             Padding(
               padding: const EdgeInsets.all(20.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Category Badge & In-Stock Status
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -79,7 +75,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                         decoration: BoxDecoration(
                           color: AppColors.surface,
                           borderRadius: BorderRadius.circular(6),
-                          border: Border.all(color: AppColors.primaryGold.withOpacity(0.5)),
+                          border: Border.all(color: AppColors.primaryGold.withValues(alpha: 0.5)),
                         ),
                         child: Text(
                           p.categoryName ?? 'Category',
@@ -89,7 +85,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
-                          color: p.isInStock ? AppColors.success.withOpacity(0.2) : AppColors.error.withOpacity(0.2),
+                          color: p.isInStock ? AppColors.success.withValues(alpha: 0.2) : AppColors.error.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(

@@ -8,7 +8,7 @@ import '../../../shared/widgets/app_text_field.dart';
 import '../../../main.dart';
 
 class CheckoutScreen extends ConsumerStatefulWidget {
-  const CheckoutScreen({Key? key}) : super(key: key);
+  const CheckoutScreen({super.key});
 
   @override
   ConsumerState<CheckoutScreen> createState() => _CheckoutScreenState();
@@ -20,9 +20,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   final _cvvController = TextEditingController(text: '123');
   final _expiryController = TextEditingController(text: '12/28');
   final _upiIdController = TextEditingController(text: 'user@upi');
+  final _promoController = TextEditingController();
 
-  String _selectedPaymentMethod = 'card'; // card, upi, cod
   bool _isProcessing = false;
+  String _selectedPaymentMethod = 'card';
 
   @override
   void dispose() {
@@ -31,12 +32,14 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     _cvvController.dispose();
     _expiryController.dispose();
     _upiIdController.dispose();
+    _promoController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final cartState = ref.watch(cartNotifierProvider);
+    final cartNotifier = ref.read(cartNotifierProvider.notifier);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -48,25 +51,35 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Delivery Address', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textPrimary)),
-            const SizedBox(height: 12),
-            AppTextField(
-              controller: _addressController,
-              label: 'Shipping Address',
-              hint: 'Full street address, city & postal code',
-              prefixIcon: const Icon(Icons.location_on_outlined, color: AppColors.textSecondary),
+            // Order Summary Header
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('${cartState.totalItemCount} Items in Order',
+                      style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                  Text(Formatters.formatCurrency(cartState.grandTotal),
+                      style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primaryGoldLight, fontSize: 18)),
+                ],
+              ),
             ),
+            const SizedBox(height: 20),
 
-            const SizedBox(height: 24),
+            // Payment Methods Tabs
             const Text('Select Payment Method', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textPrimary)),
             const SizedBox(height: 12),
             Row(
               children: [
                 _buildPaymentTab('card', 'Credit/Debit Card', Icons.credit_card),
                 const SizedBox(width: 8),
-                _buildPaymentTab('upi', 'UPI / GPay', Icons.account_balance_wallet),
+                _buildPaymentTab('upi', 'UPI / GPay', Icons.qr_code_2),
                 const SizedBox(width: 8),
-                _buildPaymentTab('cod', 'Cash on Delivery', Icons.payments),
+                _buildPaymentTab('cod', 'Cash on Delivery', Icons.local_atm),
               ],
             ),
             const SizedBox(height: 16),
@@ -77,7 +90,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                 decoration: BoxDecoration(
                   color: AppColors.surface,
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: AppColors.primaryGold.withOpacity(0.3)),
+                  border: Border.all(color: AppColors.primaryGold.withValues(alpha: 0.3)),
                 ),
                 child: const Text(
                   'Tip: Card ending in 4000 simulates payment declination rollback test.',

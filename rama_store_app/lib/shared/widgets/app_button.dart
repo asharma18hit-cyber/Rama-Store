@@ -12,7 +12,7 @@ class AppButton extends StatelessWidget {
   final double height;
 
   const AppButton({
-    Key? key,
+    super.key,
     required this.text,
     this.onPressed,
     this.isLoading = false,
@@ -21,7 +21,7 @@ class AppButton extends StatelessWidget {
     this.color,
     this.width,
     this.height = 48.0,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -76,7 +76,7 @@ class AppButton extends StatelessWidget {
         onPressed: isLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(
           backgroundColor: buttonColor,
-          disabledBackgroundColor: buttonColor.withOpacity(0.5),
+          disabledBackgroundColor: buttonColor.withValues(alpha: 0.5),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
           ),
