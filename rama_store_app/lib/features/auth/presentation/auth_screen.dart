@@ -41,7 +41,6 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
   bool _otpSentForLogin = false;
   bool _otpSentForReg = false;
   bool _otpSentForForgot = false;
-  String? _lastGeneratedOtp;
   Timer? _resendTimer;
   int _resendSeconds = 0;
 
@@ -249,7 +248,6 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
               final otpRes = await OtpService.sendOtp(id);
               setState(() {
                 _otpSentForLogin = true;
-                _lastGeneratedOtp = otpRes['otp'] as String?;
               });
               _startResendTimer();
               if (mounted) {
@@ -354,8 +352,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
                     : () async {
                         final id = _otpPhoneController.text.trim();
                         if (id.isEmpty) return;
-                        final otpRes = await OtpService.sendOtp(id);
-                        setState(() => _lastGeneratedOtp = otpRes['otp'] as String?);
+                        await OtpService.sendOtp(id);
                         _startResendTimer();
                         if (mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
