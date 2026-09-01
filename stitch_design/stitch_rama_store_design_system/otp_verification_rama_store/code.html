@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Verify OTP | RAMA STORE</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Geist:wght@500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "inverse-surface": "#2e3132",
+                    "on-background": "#191c1d",
+                    "secondary": "#006c49",
+                    "on-tertiary-container": "#d4dbf5",
+                    "on-primary-fixed-variant": "#3323cc",
+                    "primary": "#3525cd",
+                    "tertiary-fixed-dim": "#bec6e0",
+                    "on-surface": "#191c1d",
+                    "surface-variant": "#e1e3e4",
+                    "surface-container-highest": "#e1e3e4",
+                    "outline-variant": "#c7c4d8",
+                    "error-container": "#ffdad6",
+                    "secondary-fixed-dim": "#4edea3",
+                    "on-tertiary-fixed": "#131b2e",
+                    "on-surface-variant": "#464555",
+                    "primary-fixed": "#e2dfff",
+                    "on-tertiary-fixed-variant": "#3f465c",
+                    "tertiary-container": "#586076",
+                    "surface-container-high": "#e7e8e9",
+                    "on-primary-fixed": "#0f0069",
+                    "secondary-container": "#6cf8bb",
+                    "inverse-primary": "#c3c0ff",
+                    "on-tertiary": "#ffffff",
+                    "on-secondary": "#ffffff",
+                    "on-error-container": "#93000a",
+                    "background": "#f8f9fa",
+                    "tertiary": "#41485e",
+                    "surface-container-low": "#f3f4f5",
+                    "outline": "#777587",
+                    "surface-container-lowest": "#ffffff",
+                    "primary-fixed-dim": "#c3c0ff",
+                    "surface-tint": "#4d44e3",
+                    "surface-bright": "#f8f9fa",
+                    "surface-dim": "#d9dadb",
+                    "inverse-on-surface": "#f0f1f2",
+                    "tertiary-fixed": "#dae2fd",
+                    "secondary-fixed": "#6ffbbe",
+                    "surface": "#f8f9fa",
+                    "on-error": "#ffffff",
+                    "primary-container": "#4f46e5",
+                    "on-secondary-container": "#00714d",
+                    "on-secondary-fixed-variant": "#005236",
+                    "on-secondary-fixed": "#002113",
+                    "on-primary-container": "#dad7ff",
+                    "error": "#ba1a1a",
+                    "surface-container": "#edeeef",
+                    "on-primary": "#ffffff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "lg": "24px",
+                    "xs": "4px",
+                    "gutter": "24px",
+                    "base": "8px",
+                    "3xl": "64px",
+                    "container-max": "1280px",
+                    "xl": "32px",
+                    "md": "16px",
+                    "2xl": "48px",
+                    "sm": "8px"
+            },
+            "fontFamily": {
+                    "label-md": ["Geist"],
+                    "label-sm": ["Geist"],
+                    "body-md": ["Inter"],
+                    "headline-md": ["Geist"],
+                    "headline-lg": ["Geist"],
+                    "headline-lg-mobile": ["Geist"],
+                    "display-lg": ["Geist"],
+                    "body-lg": ["Inter"]
+            },
+            "fontSize": {
+                    "label-md": ["14px", {"lineHeight": "1", "letterSpacing": "0.02em", "fontWeight": "600"}],
+                    "label-sm": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                    "body-md": ["16px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}],
+                    "headline-md": ["24px", {"lineHeight": "1.3", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-lg-mobile": ["28px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.04em", "fontWeight": "800"}],
+                    "body-lg": ["18px", {"lineHeight": "1.6", "letterSpacing": "0", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .otp-input:focus {
+            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+        }
+        .glass-card {
+            backdrop-filter: blur(12px);
+            background: rgba(255, 255, 255, 0.85);
+        }
+        @keyframes subtle-float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .animate-float {
+            animation: subtle-float 6s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body-md min-h-screen flex flex-col">
+<!-- Top Navigation Bar (Partial usage as per Task Focus Rule: Suppression of Global Nav for Transactional Screens) -->
+<header class="fixed top-0 w-full z-50 backdrop-blur-md bg-surface/80 border-b border-outline-variant/30 h-16 flex items-center px-md shadow-sm">
+<div class="max-w-container-max mx-auto w-full flex items-center justify-between">
+<button class="p-sm hover:bg-surface-container-low rounded-full transition-colors active:scale-95 duration-200" onclick="history.back()">
+<span class="material-symbols-outlined text-primary">arrow_back</span>
+</button>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-primary">RAMA STORE</h1>
+<div class="w-10"></div> <!-- Spacer for centering -->
+</div>
+</header>
+<main class="flex-grow flex items-center justify-center px-md pt-20 pb-32">
+<!-- Abstract Background Element -->
+<div class="fixed inset-0 overflow-hidden pointer-events-none -z-10">
+<div class="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] animate-float"></div>
+<div class="absolute bottom-[-10%] left-[-10%] w-[400px] h-[400px] bg-secondary/5 rounded-full blur-[100px] animate-float" style="animation-delay: -3s;"></div>
+</div>
+<div class="w-full max-w-md">
+<!-- Hero Illustration/Icon -->
+<div class="flex justify-center mb-xl">
+<div class="w-20 h-20 bg-primary-container/10 rounded-3xl flex items-center justify-center text-primary-container shadow-sm border border-primary-container/20">
+<span class="material-symbols-outlined text-[40px]" style="font-variation-settings: 'wght' 300;">shield_person</span>
+</div>
+</div>
+<!-- Content -->
+<div class="text-center mb-xl">
+<h2 class="font-headline-lg text-headline-lg text-on-surface mb-sm">Two-Step Verification</h2>
+<p class="text-on-surface-variant font-body-md">
+                    OTP sent to <span class="font-semibold text-on-surface">+91 ******7890</span>
+</p>
+</div>
+<!-- OTP Form -->
+<form class="space-y-xl" id="otpForm">
+<div class="flex justify-between gap-sm" id="otp-container">
+<!-- OTP Inputs -->
+<input autocomplete="one-time-code" class="otp-input w-12 h-14 md:w-16 md:h-16 text-center text-headline-md font-bold border border-outline-variant bg-surface-container-lowest rounded-xl focus:border-primary focus:outline-none transition-all duration-200" inputmode="numeric" maxlength="1" pattern="[0-9]*" type="text"/>
+<input class="otp-input w-12 h-14 md:w-16 md:h-16 text-center text-headline-md font-bold border border-outline-variant bg-surface-container-lowest rounded-xl focus:border-primary focus:outline-none transition-all duration-200" inputmode="numeric" maxlength="1" pattern="[0-9]*" type="text"/>
+<input class="otp-input w-12 h-14 md:w-16 md:h-16 text-center text-headline-md font-bold border border-outline-variant bg-surface-container-lowest rounded-xl focus:border-primary focus:outline-none transition-all duration-200" inputmode="numeric" maxlength="1" pattern="[0-9]*" type="text"/>
+<input class="otp-input w-12 h-14 md:w-16 md:h-16 text-center text-headline-md font-bold border border-outline-variant bg-surface-container-lowest rounded-xl focus:border-primary focus:outline-none transition-all duration-200" inputmode="numeric" maxlength="1" pattern="[0-9]*" type="text"/>
+<input class="otp-input w-12 h-14 md:w-16 md:h-16 text-center text-headline-md font-bold border border-outline-variant bg-surface-container-lowest rounded-xl focus:border-primary focus:outline-none transition-all duration-200" inputmode="numeric" maxlength="1" pattern="[0-9]*" type="text"/>
+<input class="otp-input w-12 h-14 md:w-16 md:h-16 text-center text-headline-md font-bold border border-outline-variant bg-surface-container-lowest rounded-xl focus:border-primary focus:outline-none transition-all duration-200" inputmode="numeric" maxlength="1" pattern="[0-9]*" type="text"/>
+</div>
+<!-- Timer & Resend -->
+<div class="flex flex-col items-center gap-sm">
+<div class="flex items-center gap-xs text-label-md font-label-md text-on-surface-variant" id="countdown-wrapper">
+<span class="material-symbols-outlined text-sm">schedule</span>
+<span>Resend OTP in <span class="text-primary font-bold" id="timer">00:59</span></span>
+</div>
+<button class="hidden text-primary font-label-md text-label-md hover:underline active:scale-95 transition-transform" id="resend-btn" onclick="resetTimer()" type="button">
+                        Resend OTP
+                    </button>
+</div>
+<!-- CTA -->
+<button class="w-full h-14 bg-secondary text-on-secondary rounded-xl font-label-md text-label-md flex items-center justify-center gap-sm shadow-md hover:opacity-90 active:scale-[0.98] transition-all duration-200" type="submit">
+                    Verify &amp; Continue
+                    <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</form>
+<p class="mt-2xl text-center text-label-sm text-on-surface-variant px-lg">
+                By continuing, you agree to Rama Store's <a class="underline" href="#">Terms of Service</a> and <a class="underline" href="#">Privacy Policy</a>.
+            </p>
+</div>
+</main>
+<!-- Success Feedback Overlay (Hidden by default) -->
+<div class="fixed inset-0 z-[100] bg-black/40 backdrop-blur-sm flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-500" id="success-overlay">
+<div class="bg-surface p-xl rounded-2xl shadow-2xl flex flex-col items-center text-center max-w-sm mx-md scale-90 transition-transform duration-500" id="success-card">
+<div class="w-20 h-20 bg-secondary/10 text-secondary rounded-full flex items-center justify-center mb-lg">
+<span class="material-symbols-outlined text-[48px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-xs">Verification Successful</h3>
+<p class="text-on-surface-variant font-body-md mb-lg">Your account security is our priority. Welcome back to the elite shopping experience.</p>
+<div class="w-full h-1 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-secondary w-0" id="progress-bar"></div>
+</div>
+</div>
+</div>
+<script>
+        // OTP Input Logic: Auto-focus next field
+        const inputs = document.querySelectorAll('.otp-input');
+        inputs.forEach((input, index) => {
+            input.addEventListener('input', (e) => {
+                if (e.target.value.length === 1 && index < inputs.length - 1) {
+                    inputs[index + 1].focus();
+                }
+            });
+
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && !e.target.value && index > 0) {
+                    inputs[index - 1].focus();
+                }
+            });
+        });
+
+        // Countdown Timer Logic
+        let timeLeft = 59;
+        const timerDisplay = document.getElementById('timer');
+        const resendBtn = document.getElementById('resend-btn');
+        const countdownWrapper = document.getElementById('countdown-wrapper');
+
+        function updateTimer() {
+            if (timeLeft <= 0) {
+                countdownWrapper.classList.add('hidden');
+                resendBtn.classList.remove('hidden');
+                clearInterval(timerInterval);
+            } else {
+                const seconds = timeLeft < 10 ? `0${timeLeft}` : timeLeft;
+                timerDisplay.textContent = `00:${seconds}`;
+                timeLeft--;
+            }
+        }
+
+        let timerInterval = setInterval(updateTimer, 1000);
+
+        function resetTimer() {
+            timeLeft = 59;
+            countdownWrapper.classList.remove('hidden');
+            resendBtn.classList.add('hidden');
+            timerInterval = setInterval(updateTimer, 1000);
+            // Simulate resending
+            console.log("OTP Resent");
+        }
+
+        // Form Submission Micro-interaction
+        document.getElementById('otpForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const overlay = document.getElementById('success-overlay');
+            const card = document.getElementById('success-card');
+            const progress = document.getElementById('progress-bar');
+            
+            overlay.classList.remove('opacity-0', 'pointer-events-none');
+            overlay.classList.add('opacity-100');
+            card.classList.remove('scale-90');
+            card.classList.add('scale-100');
+
+            setTimeout(() => {
+                progress.style.transition = 'width 1.5s linear';
+                progress.style.width = '100%';
+            }, 100);
+
+            // Redirect simulation
+            setTimeout(() => {
+                window.location.reload(); 
+            }, 2000);
+        });
+    </script>
+</body></html>

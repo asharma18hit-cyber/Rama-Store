@@ -11,7 +11,7 @@ import '../../../main.dart';
 import '../data/catalog_models.dart';
 
 class CatalogScreen extends ConsumerStatefulWidget {
-  const CatalogScreen({Key? key}) : super(key: key);
+  const CatalogScreen({super.key});
 
   @override
   ConsumerState<CatalogScreen> createState() => _CatalogScreenState();
@@ -46,6 +46,9 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
   @override
   Widget build(BuildContext context) {
     final catalogState = ref.watch(catalogNotifierProvider);
+    final visibleProducts = catalogState.products
+        .where((p) => p.status == 'published' || p.status.isEmpty)
+        .toList();
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -158,7 +161,7 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
                     itemCount: 6,
                     itemBuilder: (context, index) => const ProductCardShimmer(),
                   )
-                : catalogState.products.isEmpty
+                : visibleProducts.isEmpty
                     ? Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -180,12 +183,12 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
                             crossAxisSpacing: 12,
                             mainAxisSpacing: 12,
                           ),
-                          itemCount: catalogState.products.length + (catalogState.isMoreLoading ? 2 : 0),
+                          itemCount: visibleProducts.length + (catalogState.isMoreLoading ? 2 : 0),
                           itemBuilder: (context, index) {
-                            if (index >= catalogState.products.length) {
+                            if (index >= visibleProducts.length) {
                               return const ProductCardShimmer();
                             }
-                            final product = catalogState.products[index];
+                            final product = visibleProducts[index];
                             return _buildProductGridCard(context, product, ref);
                           },
                         ),

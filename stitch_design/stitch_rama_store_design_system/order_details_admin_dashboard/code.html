@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Order Details #RE-9201 | Rama Store Admin</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Geist:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-header {
+            backdrop-filter: blur(12px);
+            background: rgba(255, 255, 255, 0.8);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #E5E7EB;
+            border-radius: 10px;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                "primary-fixed": "#e2dfff",
+                "on-tertiary-fixed-variant": "#3f465c",
+                "on-secondary-fixed": "#002113",
+                "secondary-container": "#6cf8bb",
+                "secondary": "#006c49",
+                "surface-container-high": "#e7e8e9",
+                "on-surface": "#191c1d",
+                "on-background": "#191c1d",
+                "on-error-container": "#93000a",
+                "tertiary-fixed-dim": "#bec6e0",
+                "tertiary-fixed": "#dae2fd",
+                "surface-tint": "#4d44e3",
+                "surface-container-highest": "#e1e3e4",
+                "secondary-fixed": "#6ffbbe",
+                "error-container": "#ffdad6",
+                "surface-container-low": "#f3f4f5",
+                "surface-container": "#edeeef",
+                "error": "#ba1a1a",
+                "surface-variant": "#e1e3e4",
+                "on-surface-variant": "#464555",
+                "on-secondary": "#ffffff",
+                "primary": "#3525cd",
+                "tertiary": "#41485e",
+                "surface": "#f8f9fa",
+                "on-primary-fixed-variant": "#3323cc",
+                "on-primary-container": "#dad7ff",
+                "background": "#f8f9fa",
+                "tertiary-container": "#586076",
+                "on-secondary-fixed-variant": "#005236",
+                "on-tertiary-fixed": "#131b2e",
+                "inverse-on-surface": "#f0f1f2",
+                "outline-variant": "#c7c4d8",
+                "on-primary-fixed": "#0f0069",
+                "inverse-surface": "#2e3132",
+                "on-error": "#ffffff",
+                "surface-container-lowest": "#ffffff",
+                "primary-container": "#4f46e5",
+                "secondary-fixed-dim": "#4edea3",
+                "on-primary": "#ffffff",
+                "surface-dim": "#d9dadb",
+                "surface-bright": "#f8f9fa",
+                "on-tertiary": "#ffffff",
+                "on-tertiary-container": "#d4dbf5",
+                "inverse-primary": "#c3c0ff",
+                "on-secondary-container": "#00714d",
+                "outline": "#777587",
+                "primary-fixed-dim": "#c3c0ff"
+              },
+              "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+              },
+              "spacing": {
+                "2xl": "48px",
+                "xl": "32px",
+                "container-max": "1280px",
+                "sm": "8px",
+                "lg": "24px",
+                "gutter": "24px",
+                "md": "16px",
+                "base": "8px",
+                "xs": "4px",
+                "3xl": "64px"
+              },
+              "fontFamily": {
+                "headline-md": ["Geist"],
+                "body-lg": ["Inter"],
+                "label-md": ["Geist"],
+                "headline-lg": ["Geist"],
+                "display-lg": ["Geist"],
+                "body-md": ["Inter"]
+              },
+              "fontSize": {
+                "headline-md": ["24px", {"lineHeight": "1.3", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                "body-lg": ["18px", {"lineHeight": "1.6", "letterSpacing": "0", "fontWeight": "400"}],
+                "label-md": ["14px", {"lineHeight": "1", "letterSpacing": "0.02em", "fontWeight": "600"}],
+                "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.04em", "fontWeight": "800"}],
+                "body-md": ["16px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}]
+              }
+            }
+          }
+        }
+    </script>
+</head>
+<body class="bg-surface text-on-surface">
+<!-- SideNavBar Anchor -->
+<aside class="h-screen w-64 fixed left-0 top-0 border-r border-outline-variant flex flex-col py-lg px-md bg-surface z-50">
+<div class="mb-xl px-4">
+<h1 class="text-headline-md font-headline-md font-bold text-primary">Rama Store</h1>
+<p class="text-label-sm text-outline font-label-md">Elite Management</p>
+</div>
+<nav class="flex-1 space-y-2 overflow-y-auto custom-scrollbar">
+<!-- Dashboard -->
+<a class="flex items-center gap-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors duration-200 px-4 py-3 rounded-lg" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-label-md font-label-md">Dashboard</span>
+</a>
+<!-- Orders (ACTIVE) -->
+<a class="flex items-center gap-md bg-primary-container text-on-primary-container rounded-lg px-4 py-3 scale-[0.98] transition-transform duration-150" href="#">
+<span class="material-symbols-outlined">shopping_cart</span>
+<span class="text-label-md font-label-md">Orders</span>
+</a>
+<!-- Inventory -->
+<a class="flex items-center gap-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors duration-200 px-4 py-3 rounded-lg" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="text-label-md font-label-md">Inventory</span>
+</a>
+<!-- Customers -->
+<a class="flex items-center gap-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors duration-200 px-4 py-3 rounded-lg" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="text-label-md font-label-md">Customers</span>
+</a>
+<!-- Analytics -->
+<a class="flex items-center gap-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors duration-200 px-4 py-3 rounded-lg" href="#">
+<span class="material-symbols-outlined">monitoring</span>
+<span class="text-label-md font-label-md">Analytics</span>
+</a>
+<!-- Settings -->
+<a class="flex items-center gap-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors duration-200 px-4 py-3 rounded-lg" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-label-md font-label-md">Settings</span>
+</a>
+</nav>
+<div class="mt-auto pt-lg border-t border-outline-variant">
+<button class="w-full mb-md bg-primary text-on-primary py-3 rounded-lg font-label-md text-label-md flex items-center justify-center gap-2 hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined text-[20px]">add</span>
+                New Product
+            </button>
+<a class="flex items-center gap-md text-on-surface-variant hover:text-on-surface px-4 py-3 transition-colors" href="#">
+<span class="material-symbols-outlined">help</span>
+<span class="text-label-md font-label-md">Support</span>
+</a>
+<a class="flex items-center gap-md text-on-surface-variant hover:text-on-surface px-4 py-3 transition-colors" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span class="text-label-md font-label-md">Log Out</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Wrapper -->
+<main class="ml-64 min-h-screen">
+<!-- TopNavBar Anchor -->
+<header class="h-16 glass-header border-b border-outline-variant flex justify-between items-center px-lg sticky top-0 z-40">
+<div class="flex items-center gap-lg flex-1">
+<div class="relative w-full max-w-md">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
+<input class="w-full bg-surface-container-low border border-outline-variant rounded-full py-2 pl-10 pr-4 text-body-md focus:outline-none focus:border-primary transition-all" placeholder="Search orders, customers..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<button class="p-2 text-on-surface-variant hover:bg-surface-container rounded-full transition-colors relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full border-2 border-white"></span>
+</button>
+<button class="p-2 text-on-surface-variant hover:bg-surface-container rounded-full transition-colors">
+<span class="material-symbols-outlined">chat_bubble</span>
+</button>
+<div class="flex items-center gap-sm ml-4 pl-4 border-l border-outline-variant">
+<div class="text-right">
+<p class="text-label-md font-bold leading-none">Rama Admin</p>
+<p class="text-[10px] text-outline uppercase tracking-wider">Superuser</p>
+</div>
+<img class="w-8 h-8 rounded-full border border-outline-variant object-cover" data-alt="Professional studio portrait of a corporate executive for a profile avatar. The background is a clean, neutral gradient with soft cinematic lighting. The image maintains a high-end, premium aesthetic with sharp focus and professional color grading in a light-mode industrial luxury style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAYUh-j1iSTWa79MvrCac_XjegDwoDsLgtA-OsOtk1n--wnPttpg_21FSxAqm5cg2pJbCHeLUTIe359ZvmfeWtolJq5UejeIdoAQfi1uVtv9kgC3GsbiBCHOLhyCA118eRArH7a-SfkLPUsed3UBHjK3cR4P7ULNeFJWaxmSttiy2wkJ1NpoFHxfruRw-fY55VnWYcIMI_QZzubFJG98rmXr5E7AoAA2pMZBmIhXVPsrNZR6_hm0rOp"/>
+</div>
+</div>
+</header>
+<!-- Page Canvas -->
+<div class="p-xl max-w-container-max mx-auto">
+<!-- Breadcrumbs & Header -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-md mb-xl">
+<div>
+<div class="flex items-center gap-xs text-outline text-label-sm mb-sm">
+<span>Orders</span>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+<span class="text-primary font-semibold">RE-9201</span>
+</div>
+<h2 class="text-display-lg font-display-lg">Order #RE-9201</h2>
+<p class="text-body-md text-on-surface-variant">Placed on October 24, 2023 at 02:45 PM</p>
+</div>
+<div class="flex gap-sm">
+<button class="px-md py-sm border border-outline-variant text-on-surface font-label-md text-label-md rounded-lg hover:bg-surface-container-low transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">print</span>
+                        Print Packing Slip
+                    </button>
+<button class="px-md py-sm bg-error-container text-on-error-container font-label-md text-label-md rounded-lg hover:opacity-90 transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">undo</span>
+                        Refund Order
+                    </button>
+</div>
+</div>
+<!-- Order Timeline -->
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant p-lg shadow-sm mb-lg">
+<h3 class="text-label-md font-bold text-outline uppercase tracking-widest mb-lg">Shipment Status</h3>
+<div class="relative flex justify-between">
+<!-- Progress Line Background -->
+<div class="absolute top-[18px] left-[40px] right-[40px] h-[2px] bg-surface-variant"></div>
+<!-- Progress Line Active -->
+<div class="absolute top-[18px] left-[40px] w-1/3 h-[2px] bg-primary"></div>
+<!-- Step 1: Pending (Completed) -->
+<div class="relative flex flex-col items-center z-10 w-32">
+<div class="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-white shadow-lg">
+<span class="material-symbols-outlined text-[20px]">check</span>
+</div>
+<p class="text-label-md font-bold mt-sm">Pending</p>
+<p class="text-[11px] text-outline">Oct 24, 02:45 PM</p>
+</div>
+<!-- Step 2: Confirmed (Completed) -->
+<div class="relative flex flex-col items-center z-10 w-32">
+<div class="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-white shadow-lg">
+<span class="material-symbols-outlined text-[20px]">check</span>
+</div>
+<p class="text-label-md font-bold mt-sm">Confirmed</p>
+<p class="text-[11px] text-outline">Oct 24, 03:12 PM</p>
+</div>
+<!-- Step 3: Shipped (Current) -->
+<div class="relative flex flex-col items-center z-10 w-32">
+<div class="w-9 h-9 rounded-full bg-white border-4 border-primary flex items-center justify-center text-primary shadow-md">
+<span class="material-symbols-outlined text-[20px]">local_shipping</span>
+</div>
+<p class="text-label-md font-bold mt-sm text-primary">Shipped</p>
+<p class="text-[11px] text-primary-container font-semibold">In Transit</p>
+</div>
+<!-- Step 4: Delivered (Future) -->
+<div class="relative flex flex-col items-center z-10 w-32 opacity-40">
+<div class="w-9 h-9 rounded-full bg-surface-variant flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px]">home</span>
+</div>
+<p class="text-label-md font-bold mt-sm">Delivered</p>
+<p class="text-[11px] text-outline">Expected Oct 27</p>
+</div>
+</div>
+</div>
+<!-- Bento Grid Content -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-lg">
+<!-- Main Order Details -->
+<div class="lg:col-span-2 space-y-lg">
+<!-- Products Table -->
+<div class="bg-white border border-outline-variant rounded-xl overflow-hidden shadow-sm">
+<div class="p-lg border-b border-outline-variant flex justify-between items-center">
+<h3 class="text-headline-md font-headline-md">Items Ordered</h3>
+<span class="px-3 py-1 bg-secondary-container text-on-secondary-container rounded-full text-label-sm font-bold">3 items</span>
+</div>
+<table class="w-full text-left">
+<thead class="bg-surface-container-low text-label-sm text-outline uppercase tracking-wider">
+<tr>
+<th class="px-lg py-md">Product</th>
+<th class="px-md py-md">SKU</th>
+<th class="px-md py-md">Price</th>
+<th class="px-md py-md">Qty</th>
+<th class="px-lg py-md text-right">Total</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant">
+<!-- Product 1 -->
+<tr class="hover:bg-surface-container-lowest transition-colors group">
+<td class="px-lg py-md">
+<div class="flex items-center gap-md">
+<div class="w-16 h-16 rounded-lg bg-surface border border-outline-variant overflow-hidden flex-shrink-0">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" data-alt="High-resolution product photography of a sleek, matte charcoal noise-cancelling headphone. The product is presented against a soft-focus industrial concrete background with dramatic indigo side-lighting. The image exudes premium luxury and technical precision, fitting a high-performance admin dashboard aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDXfYU5OlScP-ewrf8IIepFQPMymb9szm2LO9rfmBkLFhnromD_Ti_xfgWoc0Uz89IX61IMNs6rZ2lkxIDMsf-9_XKM-5fU30AW_eCkkJzzE0s0SJ0muziq1gT_QwdMDVOSe8judussvmIIKMGCYKqskVcx1_bKKsqHwhf_QmCh_iR5U_f1-x9dqyYZg0aig-aW-xlZxLmc3gMams7f9acqAoD8jX22utVXvGVaAvzwE5pY_nrfK7CE"/>
+</div>
+<div>
+<p class="text-body-md font-bold">Obsidian Wireless X-1</p>
+<p class="text-label-sm text-outline">Matte Charcoal / One Size</p>
+</div>
+</div>
+</td>
+<td class="px-md py-md text-label-md font-mono text-on-surface-variant">HW-X1-OBS</td>
+<td class="px-md py-md text-label-md">$299.00</td>
+<td class="px-md py-md text-label-md">1</td>
+<td class="px-lg py-md text-label-md font-bold text-right">$299.00</td>
+</tr>
+<!-- Product 2 -->
+<tr class="hover:bg-surface-container-lowest transition-colors group">
+<td class="px-lg py-md">
+<div class="flex items-center gap-md">
+<div class="w-16 h-16 rounded-lg bg-surface border border-outline-variant overflow-hidden flex-shrink-0">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" data-alt="Studio product shot of a high-end minimalist smartwatch with a silver titanium case and an indigo silicone strap. The lighting is crisp and bright, highlighting the metallic texture and the vibrant screen display. The background is a clean white marble, reinforcing the industrial luxury design language." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCJDLp-JCVrF5qzgy8Xw4LzKSSt15ql4Zlwo2gMhSsBZvFJJsUZgYXHxzRRy5gJXfz5gNOAwvPdb8FkcnjMjtV3rx4dVRougg-GkRoOXOVV6N2h-cmpG5GQhYwZJJSIBBFd7DlMH6w1Sr33ykowqCtuK50MlJRAxRlTjZYBQSPjY12f-lOVbHw4eoNdRRNUDIhpeHQ8IGdsADviDIRaOQVIv6Ca92y7X3eawYvbAzIy83UNWrN8MmqU"/>
+</div>
+<div>
+<p class="text-body-md font-bold">Titanium Chronos v4</p>
+<p class="text-label-sm text-outline">Indigo / 44mm</p>
+</div>
+</div>
+</td>
+<td class="px-md py-md text-label-md font-mono text-on-surface-variant">SW-V4-TIN</td>
+<td class="px-md py-md text-label-md">$450.00</td>
+<td class="px-md py-md text-label-md">1</td>
+<td class="px-lg py-md text-label-md font-bold text-right">$450.00</td>
+</tr>
+<!-- Product 3 -->
+<tr class="hover:bg-surface-container-lowest transition-colors group">
+<td class="px-lg py-md">
+<div class="flex items-center gap-md">
+<div class="w-16 h-16 rounded-lg bg-surface border border-outline-variant overflow-hidden flex-shrink-0">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" data-alt="A premium desk accessory, a precision-machined aluminum laptop stand with a minimalist design. The surface has a fine-beaded texture that reflects soft studio lights. The aesthetic is clean, modern, and high-performance, set against a dark oak wooden surface with high-contrast shadows." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBYLZemGynRjQSugXCEhTiNHdo3U_GBBtxD9fQQhYg58vzp84zmk8lEjr9uzbNozECVTgGX_XAPHD0O6mYXbRo3j2xltFl39GFRhb5OXwTbtiFD_JgPKcSta9SwHoaEB7QGjM9wm-lNul1r2psKUX8ln966zmRuqJK_q93eUPzH7k4qm8Jtij-m-p10-aMpKTTgOZQvBruKT5aiB1Ovmx8zRcg0bmx9_5s7Me9o5fHq0TPCaDVt4H3e"/>
+</div>
+<div>
+<p class="text-body-md font-bold">AeroStand Pro</p>
+<p class="text-label-sm text-outline">Space Grey</p>
+</div>
+</div>
+</td>
+<td class="px-md py-md text-label-md font-mono text-on-surface-variant">ACC-AS-SG</td>
+<td class="px-md py-md text-label-md">$85.00</td>
+<td class="px-md py-md text-label-md">1</td>
+<td class="px-lg py-md text-label-md font-bold text-right">$85.00</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Internal Notes -->
+<div class="bg-surface-container-low border border-outline-variant rounded-xl p-lg">
+<div class="flex items-center gap-sm mb-md">
+<span class="material-symbols-outlined text-primary">sticky_note_2</span>
+<h3 class="text-label-md font-bold text-on-surface uppercase tracking-widest">Internal Order Notes</h3>
+</div>
+<textarea class="w-full min-h-[100px] p-md bg-white border border-outline-variant rounded-lg text-body-md focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none" placeholder="Add a private note for staff..."></textarea>
+<div class="mt-md flex justify-end">
+<button class="bg-primary-container text-on-primary-container px-lg py-sm rounded-lg text-label-md font-bold hover:brightness-110 transition-all">Save Note</button>
+</div>
+</div>
+</div>
+<!-- Sidebar Details -->
+<div class="space-y-lg">
+<!-- Customer Overview -->
+<div class="bg-white border border-outline-variant rounded-xl p-lg shadow-sm">
+<div class="flex justify-between items-start mb-lg">
+<h3 class="text-label-md font-bold text-outline uppercase tracking-widest">Customer Overview</h3>
+<button class="text-primary hover:underline text-label-md font-bold">Edit</button>
+</div>
+<div class="flex items-center gap-md mb-xl">
+<div class="w-12 h-12 rounded-full bg-primary-fixed text-on-primary-fixed flex items-center justify-center font-bold text-lg">JS</div>
+<div>
+<p class="text-headline-md font-headline-md">Julian Sterling</p>
+<p class="text-body-md text-on-surface-variant">julian.s@elitecorp.com</p>
+</div>
+</div>
+<div class="space-y-md">
+<div>
+<p class="text-label-sm text-outline mb-xs">Shipping Address</p>
+<p class="text-body-md leading-relaxed">
+                                    482 High-Performance Way<br/>
+                                    Suite 900, Silicon District<br/>
+                                    San Francisco, CA 94105<br/>
+                                    United States
+                                </p>
+</div>
+<div class="pt-md border-t border-outline-variant">
+<p class="text-label-sm text-outline mb-xs">Phone Number</p>
+<p class="text-body-md">+1 (555) 902-1249</p>
+</div>
+</div>
+</div>
+<!-- Financial Summary -->
+<div class="bg-inverse-surface text-inverse-on-surface rounded-xl p-lg shadow-xl relative overflow-hidden">
+<!-- Decorative background element -->
+<div class="absolute -right-10 -bottom-10 w-40 h-40 bg-primary opacity-20 blur-3xl rounded-full"></div>
+<h3 class="text-label-md font-bold opacity-60 uppercase tracking-widest mb-lg">Order Summary</h3>
+<div class="space-y-md text-label-md">
+<div class="flex justify-between">
+<span class="opacity-70">Subtotal (3 items)</span>
+<span>$834.00</span>
+</div>
+<div class="flex justify-between">
+<span class="opacity-70">Tax (8.5%)</span>
+<span>$70.89</span>
+</div>
+<div class="flex justify-between">
+<span class="opacity-70">Shipping (Express)</span>
+<span class="text-secondary-fixed">FREE</span>
+</div>
+<div class="pt-lg mt-lg border-t border-white/10 flex justify-between items-end">
+<div>
+<p class="text-label-sm opacity-60 uppercase tracking-widest">Grand Total</p>
+<p class="text-display-lg font-display-lg leading-none mt-xs">$904.89</p>
+</div>
+<div class="bg-secondary px-3 py-1 rounded text-label-sm font-bold uppercase tracking-widest flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">verified</span>
+                                    Paid
+                                </div>
+</div>
+</div>
+</div>
+<!-- Payment Details -->
+<div class="bg-surface-container rounded-xl p-lg border border-outline-variant">
+<h3 class="text-label-md font-bold text-outline uppercase tracking-widest mb-md">Payment Method</h3>
+<div class="flex items-center gap-md">
+<div class="w-12 h-8 bg-white border border-outline-variant rounded-md flex items-center justify-center font-bold italic text-primary">
+                                VISA
+                            </div>
+<div>
+<p class="text-body-md font-bold">Visa ending in 4242</p>
+<p class="text-label-sm text-outline">Auth Code: #778219</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Micro-interaction Scripts -->
+<script>
+        document.querySelectorAll('button, a').forEach(el => {
+            el.addEventListener('mousedown', () => {
+                el.style.transform = 'scale(0.97)';
+            });
+            el.addEventListener('mouseup', () => {
+                el.style.transform = '';
+            });
+            el.addEventListener('mouseleave', () => {
+                el.style.transform = '';
+            });
+        });
+
+        // Simple theme toggle logic (not required but nice for preview)
+        window.toggleDarkMode = () => {
+            document.documentElement.classList.toggle('dark');
+        }
+    </script>
+</body></html>

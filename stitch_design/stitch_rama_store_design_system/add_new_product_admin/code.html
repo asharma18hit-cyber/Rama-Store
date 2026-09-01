@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Add Product | RAMA STORE Admin</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Geist:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #e5e7eb;
+            border-radius: 10px;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "background": "#f8f9fa",
+                        "on-error-container": "#93000a",
+                        "error": "#ba1a1a",
+                        "primary": "#3525cd",
+                        "on-tertiary-container": "#d4dbf5",
+                        "surface-bright": "#f8f9fa",
+                        "primary-fixed-dim": "#c3c0ff",
+                        "on-tertiary-fixed-variant": "#3f465c",
+                        "surface-dim": "#d9dadb",
+                        "on-secondary-container": "#00714d",
+                        "on-primary-container": "#dad7ff",
+                        "surface": "#f8f9fa",
+                        "primary-container": "#4f46e5",
+                        "surface-container": "#edeeef",
+                        "inverse-on-surface": "#f0f1f2",
+                        "tertiary-fixed-dim": "#bec6e0",
+                        "on-background": "#191c1d",
+                        "on-primary-fixed": "#0f0069",
+                        "outline-variant": "#c7c4d8",
+                        "outline": "#777587",
+                        "tertiary-fixed": "#dae2fd",
+                        "on-secondary-fixed": "#002113",
+                        "on-primary": "#ffffff",
+                        "surface-container-highest": "#e1e3e4",
+                        "on-primary-fixed-variant": "#3323cc",
+                        "secondary-fixed": "#6ffbbe",
+                        "surface-tint": "#4d44e3",
+                        "tertiary": "#41485e",
+                        "on-tertiary-fixed": "#131b2e",
+                        "on-surface": "#191c1d",
+                        "surface-container-low": "#f3f4f5",
+                        "on-surface-variant": "#464555",
+                        "inverse-surface": "#2e3132",
+                        "secondary": "#006c49",
+                        "primary-fixed": "#e2dfff",
+                        "secondary-fixed-dim": "#4edea3",
+                        "surface-container-high": "#e7e8e9",
+                        "secondary-container": "#6cf8bb",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "surface-variant": "#e1e3e4",
+                        "inverse-primary": "#c3c0ff",
+                        "error-container": "#ffdad6",
+                        "on-secondary-fixed-variant": "#005236",
+                        "tertiary-container": "#586076",
+                        "surface-container-lowest": "#ffffff",
+                        "on-error": "#ffffff",
+                        "success-emerald": "#10B981"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "md": "16px",
+                        "lg": "24px",
+                        "sm": "8px",
+                        "xs": "4px",
+                        "3xl": "64px",
+                        "2xl": "48px",
+                        "xl": "32px",
+                        "base": "8px",
+                        "container-max": "1280px",
+                        "gutter": "24px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Geist"],
+                        "label-sm": ["Geist"],
+                        "label-md": ["Geist"],
+                        "headline-lg": ["Geist"],
+                        "display-lg": ["Geist"],
+                        "body-md": ["Inter"],
+                        "body-lg": ["Inter"]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background font-body-md text-on-surface custom-scrollbar">
+<!-- Top Navigation Anchor (Based on JSON) -->
+<header class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-xl border-b border-outline-variant/30 shadow-sm">
+<div class="flex items-center justify-between px-gutter py-4 max-w-container-max mx-auto">
+<div class="flex items-center gap-md">
+<button class="material-symbols-outlined text-primary scale-95 active:scale-90 transition-transform">menu</button>
+<h1 class="font-display-lg text-headline-md font-extrabold tracking-tighter text-primary">RAMA STORE</h1>
+</div>
+<div class="hidden md:flex items-center gap-lg">
+<span class="font-label-md text-on-surface-variant bg-surface-container-low px-4 py-2 rounded-lg cursor-default">Search (Ctrl+K)</span>
+<div class="w-10 h-10 rounded-full overflow-hidden border border-outline-variant/50">
+<img class="w-full h-full object-cover" data-alt="A professional close-up portrait of a high-end fashion retailer manager. The setting is a minimalist office with sleek charcoal furniture and bright indigo accents. The lighting is crisp and cinematic, emphasizing a premium and elite professional atmosphere. The aesthetic is modern, clean, and authoritative, matching an industrial luxury brand identity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD5r73uI3mtqXwyE2e2lugr6fz-p5JyYJPLP6nI4WBn1hweeay4aa2FI3UX0j8tfXTtw3YeVf6ETn8rqwJBmtuhnaF1qqnRi1ppCjHsvIQTf2SF1OtBaenEx109e_Iq6x1wBau4KP_prdXC0nFd4RLsS3HoNNXLaBmRZq_p1U3hCLQDR0KeD_D_LpY7ntYRXIiarRtBhSt6RFm2Cnpz40t-kKZQQyfLVVnMjSQ-fThyJz4QJc5ITS0H"/>
+</div>
+</div>
+</div>
+</header>
+<main class="pt-32 pb-24 px-gutter max-w-container-max mx-auto min-h-screen">
+<!-- Breadcrumbs & Title -->
+<div class="mb-xl">
+<nav class="flex items-center gap-sm text-on-surface-variant font-label-sm mb-xs">
+<span>Inventory</span>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+<span class="text-primary font-bold">Add New Product</span>
+</nav>
+<h2 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">Create Listing</h2>
+<p class="text-on-surface-variant mt-xs">Add a high-performance product to your premium collection.</p>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-xl">
+<!-- Form Canvas -->
+<div class="lg:col-span-8 space-y-lg">
+<div class="glass-panel p-lg rounded-xl border border-outline-variant/20 shadow-sm">
+<h3 class="font-headline-md text-headline-md mb-lg border-b border-outline-variant/10 pb-md">Basic Information</h3>
+<div class="space-y-md">
+<div class="group">
+<label class="block font-label-md text-on-surface-variant mb-xs group-focus-within:text-primary transition-colors">Product Name</label>
+<input class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-3 focus:border-primary transition-all font-body-md" placeholder="e.g. Carbon Fiber Performance Watch" type="text"/>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-md">
+<div class="group">
+<label class="block font-label-md text-on-surface-variant mb-xs group-focus-within:text-primary transition-colors">Category</label>
+<div class="relative">
+<select class="w-full appearance-none bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-3 focus:border-primary transition-all font-body-md pr-10">
+<option>Select Category</option>
+<option>Electronics</option>
+<option>Apparel</option>
+<option>Home Decór</option>
+<option>Accessories</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant">expand_more</span>
+</div>
+</div>
+<div class="group">
+<label class="block font-label-md text-on-surface-variant mb-xs group-focus-within:text-primary transition-colors">Stock Quantity</label>
+<input class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-3 focus:border-primary transition-all font-body-md" placeholder="0" type="number"/>
+</div>
+</div>
+</div>
+</div>
+<div class="glass-panel p-lg rounded-xl border border-outline-variant/20 shadow-sm">
+<h3 class="font-headline-md text-headline-md mb-lg border-b border-outline-variant/10 pb-md">Pricing Details</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-md">
+<div class="group">
+<label class="block font-label-md text-on-surface-variant mb-xs group-focus-within:text-primary transition-colors">Base Price (INR)</label>
+<div class="relative">
+<span class="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-on-surface-variant">₹</span>
+<input class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg pl-8 pr-4 py-3 focus:border-primary transition-all font-body-md" placeholder="0.00" type="number"/>
+</div>
+</div>
+<div class="group">
+<label class="block font-label-md text-on-surface-variant mb-xs group-focus-within:text-primary transition-colors">Discounted Price (INR)</label>
+<div class="relative">
+<span class="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-on-surface-variant">₹</span>
+<input class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg pl-8 pr-4 py-3 focus:border-primary transition-all font-body-md" placeholder="Optional" type="number"/>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Side Actions & Upload -->
+<div class="lg:col-span-4 space-y-lg">
+<div class="glass-panel p-lg rounded-xl border border-outline-variant/20 shadow-sm">
+<h3 class="font-headline-md text-headline-md mb-lg">Product Media</h3>
+<div class="border-2 border-dashed border-outline-variant rounded-xl p-xl flex flex-col items-center justify-center text-center cursor-pointer hover:bg-surface-container-low transition-all group" id="drop-area">
+<div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-md group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-primary text-3xl">cloud_upload</span>
+</div>
+<p class="font-label-md text-on-surface mb-xs">Drag and drop images here</p>
+<p class="font-label-sm text-on-surface-variant">SVG, PNG, or JPG (max. 5MB)</p>
+<button class="mt-md font-label-md text-primary border border-primary/30 px-4 py-2 rounded-lg hover:bg-primary/5 transition-colors">Browse Files</button>
+</div>
+<div class="mt-lg grid grid-cols-3 gap-sm">
+<div class="aspect-square rounded-lg border border-outline-variant overflow-hidden group relative">
+<img class="w-full h-full object-cover" data-alt="A high-resolution product photography shot of a sleek industrial designer watch. The product is placed on a matte black stone surface with sharp, controlled shadows. The lighting is dramatic and cold, with deep indigo highlights reflecting off the metallic edges. This image represents the premium elite quality of the Rama Store collection." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDukCqQb14DGWwk4LSlQPKA70fxbFEYDvJt9Kq4tqxl5Jqo2d0Z9cbb_7eQoJ_9TV6oegkEkZzyjO9WJyy3Id33HbHFY_GItwyBBSyhRABwTcLt6vigbD9Y2zyrv3pttm9NLxIuGK1Ny9iAKvT9_7FWNutS6mh7qpVGH25qfTvdbXk3LzpipKl_DChMtS9wg3sK6jA3tlg9CYzSqVsG5p5mdgBrsrATn3d7fn7zTmv2dAQiRN-_sM9X"/>
+<button class="absolute top-1 right-1 bg-white/80 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-[16px] text-error">close</span>
+</button>
+</div>
+<div class="aspect-square rounded-lg border border-dashed border-outline-variant flex items-center justify-center text-on-surface-variant/40">
+<span class="material-symbols-outlined">add</span>
+</div>
+<div class="aspect-square rounded-lg border border-dashed border-outline-variant flex items-center justify-center text-on-surface-variant/40">
+<span class="material-symbols-outlined">add</span>
+</div>
+</div>
+</div>
+<div class="glass-panel p-lg rounded-xl border border-outline-variant/20 shadow-sm space-y-md">
+<h3 class="font-headline-md text-headline-md mb-md">Publication</h3>
+<div class="flex items-center justify-between p-sm rounded-lg bg-surface-container-low">
+<span class="font-label-md text-on-surface-variant">Status</span>
+<span class="flex items-center gap-xs font-label-md text-primary">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                            Draft
+                        </span>
+</div>
+<button class="w-full bg-success-emerald text-on-primary font-label-md py-4 rounded-xl flex items-center justify-center gap-sm hover:brightness-110 active:scale-95 transition-all shadow-lg shadow-success-emerald/20">
+<span class="material-symbols-outlined">send</span>
+                        Publish Product
+                    </button>
+<button class="w-full bg-white border border-outline-variant text-on-surface-variant font-label-md py-4 rounded-xl hover:bg-surface-container-low transition-all">
+                        Save to Drafts
+                    </button>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Nav for Mobile Only (Based on JSON) -->
+<nav class="fixed bottom-0 w-full z-50 rounded-t-xl md:hidden bg-white/90 backdrop-blur-md border-t border-outline-variant/30 shadow-lg">
+<div class="flex justify-around items-center h-16 px-4 pb-safe">
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">home</span>
+<span class="font-label-sm">Home</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">category</span>
+<span class="font-label-sm">Categories</span>
+</button>
+<button class="flex flex-col items-center justify-center bg-primary/10 text-primary font-bold rounded-xl px-4 py-2">
+<span class="material-symbols-outlined">add_box</span>
+<span class="font-label-sm">Add</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">person</span>
+<span class="font-label-sm">Profile</span>
+</button>
+</div>
+</nav>
+<!-- Side Drawer (Based on JSON - Hidden by default) -->
+<aside class="fixed inset-y-0 right-0 w-96 z-[60] bg-surface border-l border-outline-variant/20 shadow-2xl translate-x-full transition-transform duration-500 cubic-bezier(0.16, 1, 0.3, 1)" id="side-drawer">
+<div class="flex flex-col h-full p-lg">
+<div class="flex items-center justify-between mb-xl">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 rounded-lg bg-primary-container/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">account_circle</span>
+</div>
+<div>
+<h4 class="font-headline-md text-headline-md leading-none">Elite Member</h4>
+<p class="font-label-sm text-on-surface-variant">Premium Tier</p>
+</div>
+</div>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary" onclick="toggleDrawer()">close</button>
+</div>
+<nav class="space-y-sm flex-1">
+<a class="flex items-center gap-md p-md bg-primary-container text-on-primary-container rounded-lg group transition-all" href="#">
+<span class="material-symbols-outlined">shopping_cart</span>
+<span class="font-label-md flex-1">My Cart</span>
+<span class="material-symbols-outlined text-[18px] opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all">chevron_right</span>
+</a>
+<a class="flex items-center gap-md p-md text-on-surface-variant hover:bg-surface-container-high rounded-lg group transition-all" href="#">
+<span class="material-symbols-outlined">favorite</span>
+<span class="font-label-md flex-1">Wishlist</span>
+<span class="material-symbols-outlined text-[18px] opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all">chevron_right</span>
+</a>
+<a class="flex items-center gap-md p-md text-on-surface-variant hover:bg-surface-container-high rounded-lg group transition-all" href="#">
+<span class="material-symbols-outlined">history</span>
+<span class="font-label-md flex-1">Recent Orders</span>
+<span class="material-symbols-outlined text-[18px] opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all">chevron_right</span>
+</a>
+<a class="flex items-center gap-md p-md text-on-surface-variant hover:bg-surface-container-high rounded-lg group transition-all" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-md flex-1">Settings</span>
+<span class="material-symbols-outlined text-[18px] opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all">chevron_right</span>
+</a>
+</nav>
+<div class="mt-auto pt-lg border-t border-outline-variant/20">
+<button class="w-full text-left font-label-md text-error px-md py-sm">Log Out</button>
+</div>
+</div>
+</aside>
+<script>
+        function toggleDrawer() {
+            const drawer = document.getElementById('side-drawer');
+            drawer.classList.toggle('translate-x-full');
+        }
+
+        // Drop Area Interactions
+        const dropArea = document.getElementById('drop-area');
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropArea.addEventListener(eventName, () => dropArea.classList.add('bg-primary/5', 'border-primary'), false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, () => dropArea.classList.remove('bg-primary/5', 'border-primary'), false);
+        });
+
+        // Simple scale effect on CTA
+        document.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('mousedown', () => btn.classList.add('scale-95'));
+            btn.addEventListener('mouseup', () => btn.classList.remove('scale-95'));
+            btn.addEventListener('mouseleave', () => btn.classList.remove('scale-95'));
+        });
+    </script>
+</body></html>

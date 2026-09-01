@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Inventory Management | Rama Elite Admin</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Geist:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-secondary-fixed": "#002113",
+                    "tertiary-fixed": "#dae2fd",
+                    "on-tertiary": "#ffffff",
+                    "background": "#f8f9fa",
+                    "on-error-container": "#93000a",
+                    "on-error": "#ffffff",
+                    "inverse-on-surface": "#f0f1f2",
+                    "on-surface-variant": "#464555",
+                    "surface-dim": "#d9dadb",
+                    "on-secondary-container": "#00714d",
+                    "surface-container": "#edeeef",
+                    "on-secondary": "#ffffff",
+                    "surface-tint": "#4d44e3",
+                    "surface-variant": "#e1e3e4",
+                    "outline-variant": "#c7c4d8",
+                    "on-primary-fixed-variant": "#3323cc",
+                    "inverse-primary": "#c3c0ff",
+                    "surface-container-highest": "#e1e3e4",
+                    "on-tertiary-fixed": "#131b2e",
+                    "on-surface": "#191c1d",
+                    "secondary-fixed": "#6ffbbe",
+                    "outline": "#777587",
+                    "on-background": "#191c1d",
+                    "on-primary-container": "#dad7ff",
+                    "tertiary-fixed-dim": "#bec6e0",
+                    "on-tertiary-fixed-variant": "#3f465c",
+                    "tertiary": "#41485e",
+                    "primary-fixed-dim": "#c3c0ff",
+                    "primary-fixed": "#e2dfff",
+                    "on-secondary-fixed-variant": "#005236",
+                    "surface": "#f8f9fa",
+                    "on-primary": "#ffffff",
+                    "surface-container-lowest": "#ffffff",
+                    "inverse-surface": "#2e3132",
+                    "surface-container-low": "#f3f4f5",
+                    "tertiary-container": "#586076",
+                    "on-tertiary-container": "#d4dbf5",
+                    "surface-bright": "#f8f9fa",
+                    "error-container": "#ffdad6",
+                    "surface-container-high": "#e7e8e9",
+                    "secondary-container": "#6cf8bb",
+                    "error": "#ba1a1a",
+                    "secondary-fixed-dim": "#4edea3",
+                    "secondary": "#006c49",
+                    "primary-container": "#4f46e5",
+                    "primary": "#3525cd",
+                    "on-primary-fixed": "#0f0069"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "md": "16px",
+                    "3xl": "64px",
+                    "container-max": "1280px",
+                    "base": "8px",
+                    "xs": "4px",
+                    "lg": "24px",
+                    "xl": "32px",
+                    "sm": "8px",
+                    "gutter": "24px",
+                    "2xl": "48px"
+            },
+            "fontFamily": {
+                    "display-lg": ["Geist"],
+                    "label-md": ["Geist"],
+                    "label-sm": ["Geist"],
+                    "headline-md": ["Geist"],
+                    "body-md": ["Inter"],
+                    "headline-lg": ["Geist"],
+                    "body-lg": ["Inter"],
+                    "headline-lg-mobile": ["Geist"]
+            },
+            "fontSize": {
+                    "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.04em", "fontWeight": "800"}],
+                    "label-md": ["14px", {"lineHeight": "1", "letterSpacing": "0.02em", "fontWeight": "600"}],
+                    "label-sm": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                    "headline-md": ["24px", {"lineHeight": "1.3", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "body-md": ["16px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}],
+                    "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-lg": ["18px", {"lineHeight": "1.6", "letterSpacing": "0", "fontWeight": "400"}],
+                    "headline-lg-mobile": ["28px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { -webkit-tap-highlight-color: transparent; }
+        .glass { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md text-body-md overflow-x-hidden min-h-screen">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 backdrop-blur-md bg-surface/80 border-b border-outline-variant/30 shadow-sm h-16">
+<div class="flex items-center justify-between px-md h-full w-full max-w-container-max mx-auto">
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-highest/50 transition-colors active:scale-95 duration-200">
+<span class="material-symbols-outlined text-primary" data-icon="menu">menu</span>
+</button>
+<h1 class="font-display-lg text-headline-md font-bold text-primary">Rama Elite Admin</h1>
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-highest/50 transition-colors active:scale-95 duration-200 relative">
+<span class="material-symbols-outlined text-primary" data-icon="notifications">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full ring-2 ring-surface"></span>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="pt-20 pb-24 px-md space-y-lg">
+<!-- Search and Stats Bento Row -->
+<section class="grid grid-cols-1 gap-base">
+<div class="bg-surface-container-lowest p-md rounded-xl border border-outline-variant/30 shadow-sm">
+<div class="flex items-center bg-surface-container-low px-md py-sm rounded-full border border-outline-variant/20 focus-within:ring-2 focus-within:ring-primary/20 transition-all">
+<span class="material-symbols-outlined text-on-surface-variant text-[20px]" data-icon="search">search</span>
+<input class="bg-transparent border-none focus:ring-0 w-full text-label-md font-label-md text-on-surface placeholder:text-outline" placeholder="Search inventory..." type="text"/>
+<span class="material-symbols-outlined text-on-surface-variant text-[20px]" data-icon="filter_list">filter_list</span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-base">
+<div class="bg-surface-container-lowest p-md rounded-xl border border-outline-variant/30 shadow-sm flex flex-col justify-between h-32">
+<div class="flex justify-between items-start">
+<span class="material-symbols-outlined text-primary" data-icon="inventory_2">inventory_2</span>
+<span class="text-label-sm font-label-sm text-on-secondary-container bg-secondary-container px-2 py-0.5 rounded-full">Total</span>
+</div>
+<div>
+<p class="text-display-lg text-[28px] font-display-lg text-on-surface leading-none">1,284</p>
+<p class="text-label-sm font-label-sm text-on-surface-variant mt-1">SKUs Active</p>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-md rounded-xl border border-outline-variant/30 shadow-sm flex flex-col justify-between h-32">
+<div class="flex justify-between items-start">
+<span class="material-symbols-outlined text-error" data-icon="warning">warning</span>
+<span class="text-label-sm font-label-sm text-on-error-container bg-error-container px-2 py-0.5 rounded-full">Low Stock</span>
+</div>
+<div>
+<p class="text-display-lg text-[28px] font-display-lg text-error leading-none">12</p>
+<p class="text-label-sm font-label-sm text-on-surface-variant mt-1">Items Warning</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Inventory List Section -->
+<section class="space-y-sm">
+<div class="flex items-center justify-between">
+<h2 class="font-headline-md text-[18px] text-on-surface">Inventory List</h2>
+<button class="text-primary font-label-md text-label-md flex items-center gap-1 active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-[18px]" data-icon="add_box">add_box</span>
+                    Add SKU
+                </button>
+</div>
+<div class="space-y-base">
+<!-- Product Card: In Stock -->
+<div class="bg-surface-container-lowest p-md rounded-xl border border-outline-variant/30 shadow-sm hover:shadow-md transition-all active:scale-[0.99]">
+<div class="flex gap-md">
+<div class="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 bg-surface-container-low">
+<img class="w-full h-full object-cover" data-alt="Close up studio shot of high-end purple wireless noise canceling headphones, minimalist industrial design, soft studio lighting on a light gray background, luxury tech aesthetic, crisp detail." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDqvTTzX5kvg6nIxMtowGlj_WvByVjTdyOWVOtUZKaWuC3L-hN0GyVyFSEvWQeGRW3Wfg8o5gtRNiOdB_9W-SnZ8iySXiBYh43geIYMhsIZeC1C9jBwq1zMYj4EJaTvYpTovbYqxZ-5KKpGhm7vaW-LPMTJzMqa9YCkQY1uhpQqOfJrxS4LeCHxi7PAUxwtTgaiAa9DW--4TXTiPx05fkYzH2Ei2b9_lfSltigimGn4oyk3zJyDpf7D"/>
+</div>
+<div class="flex-1 flex flex-col justify-between">
+<div>
+<div class="flex justify-between items-start">
+<h3 class="font-label-md text-label-md text-on-surface leading-tight">Rama Elite Soundpods X2</h3>
+<span class="text-[10px] font-label-sm bg-secondary-container/20 text-secondary border border-secondary/20 px-2 py-0.5 rounded-full">In Stock</span>
+</div>
+<p class="text-label-sm font-label-sm text-on-surface-variant mt-0.5">SKU: RMS-99234</p>
+</div>
+<div class="flex items-center justify-between mt-2">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-primary text-[18px]" data-icon="database">database</span>
+<span class="font-label-md text-label-md text-on-surface">42 Units</span>
+</div>
+<div class="flex gap-2">
+<button class="w-8 h-8 rounded-full flex items-center justify-center bg-surface-container-high text-on-surface-variant active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-[20px]" data-icon="edit_square">edit_square</span>
+</button>
+<button class="w-8 h-8 rounded-full flex items-center justify-center bg-primary text-on-primary active:scale-90 transition-transform shadow-sm">
+<span class="material-symbols-outlined text-[20px]" data-icon="add">add</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Product Card: Low Stock -->
+<div class="bg-surface-container-lowest p-md rounded-xl border border-outline-variant/30 shadow-sm hover:shadow-md transition-all active:scale-[0.99]">
+<div class="flex gap-md">
+<div class="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 bg-surface-container-low">
+<img class="w-full h-full object-cover" data-alt="A premium matte charcoal smartwatch with a minimalist leather band, resting on a white marble surface, clean lighting, high performance luxury gadgets, elite admin theme colors, deep shadows." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBgGuavG4Gwni5U2bhS6wYMBqWBr5o75CTJ9nNnnSJ3hO9WECsgVkuuXjE-6J0JyCIltxvdM2EmWu1eKS4DtAnT5dfrFA4sVyS_xlLbX2QgJXlDznS6QJgenRi_TQx08OPOaLtN31NUI9V3qrWD3V2ib2QTIvayhMnq7zvDQggf0Ru0toisyCkNGdhcqGEgpaFzaO13yaL4PccxybjMF13Tz3JNUwQZDd-BAM-2r3pMAxIHK21zrmSV"/>
+</div>
+<div class="flex-1 flex flex-col justify-between">
+<div>
+<div class="flex justify-between items-start">
+<h3 class="font-label-md text-label-md text-on-surface leading-tight">Rama Chronos V3 Matte</h3>
+<span class="text-[10px] font-label-sm bg-error-container/20 text-error border border-error/20 px-2 py-0.5 rounded-full">Low Stock</span>
+</div>
+<p class="text-label-sm font-label-sm text-on-surface-variant mt-0.5">SKU: RMS-77121</p>
+</div>
+<div class="flex items-center justify-between mt-2">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-error text-[18px]" data-icon="database">database</span>
+<span class="font-label-md text-label-md text-error">3 Units</span>
+</div>
+<div class="flex gap-2">
+<button class="w-8 h-8 rounded-full flex items-center justify-center bg-surface-container-high text-on-surface-variant active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-[20px]" data-icon="edit_square">edit_square</span>
+</button>
+<button class="w-8 h-8 rounded-full flex items-center justify-center bg-primary text-on-primary active:scale-90 transition-transform shadow-sm">
+<span class="material-symbols-outlined text-[20px]" data-icon="add">add</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Product Card: Out of Stock -->
+<div class="bg-surface-container-low opacity-80 p-md rounded-xl border border-outline-variant/30 shadow-sm active:scale-[0.99]">
+<div class="flex gap-md">
+<div class="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 grayscale">
+<img class="w-full h-full object-cover" data-alt="Minimalist design of a sleek indigo-colored smart home hub device, soft glowing accent light, high-performance technology, industrial luxury aesthetic, clean light mode environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA0NFMzAPIkGe8WyvFSAQaeoRz19qddUmKvnBu--D8GHMPJsts3TaVzCq-lRgmgFe_lq03MAYKstHH8O4Lljlk95ivSdi-UD_Hus_BYPnj6EIx-h-xGeqw4pNocej0xMvX83yynm244UWB5PDUEilogpCx0R_NKwnkHPIMI0B2hXAnnceCc9WJCpHxvy1s9wzki_ifeMK_odDTHdmjmgazRrotGVkfPUEzLnBb-9G2O_yBMRdA8-BFw"/>
+</div>
+<div class="flex-1 flex flex-col justify-between">
+<div>
+<div class="flex justify-between items-start">
+<h3 class="font-label-md text-label-md text-on-surface-variant leading-tight">Elite Home Hub Gen 4</h3>
+<span class="text-[10px] font-label-sm bg-on-surface-variant/10 text-on-surface-variant border border-on-surface-variant/20 px-2 py-0.5 rounded-full">Sold Out</span>
+</div>
+<p class="text-label-sm font-label-sm text-on-surface-variant mt-0.5">SKU: RMS-44501</p>
+</div>
+<div class="flex items-center justify-between mt-2">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-outline text-[18px]" data-icon="database">database</span>
+<span class="font-label-md text-label-md text-on-surface-variant">0 Units</span>
+</div>
+<div class="flex gap-2">
+<button class="w-8 h-8 rounded-full flex items-center justify-center bg-surface-container-high text-on-surface-variant active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-[20px]" data-icon="edit_square">edit_square</span>
+</button>
+<button class="w-8 h-8 rounded-full flex items-center justify-center bg-primary text-on-primary active:scale-90 transition-transform shadow-sm">
+<span class="material-symbols-outlined text-[20px]" data-icon="add">add</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Product Card: In Stock 2 -->
+<div class="bg-surface-container-lowest p-md rounded-xl border border-outline-variant/30 shadow-sm hover:shadow-md transition-all active:scale-[0.99]">
+<div class="flex gap-md">
+<div class="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 bg-surface-container-low">
+<img class="w-full h-full object-cover" data-alt="Luxury designer leather travel bag in deep charcoal, sleek minimalist lines, industrial performance style, studio lighting, neutral background, high-end product photography." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBs8j_yWlhlp8lkj0sgwZ5_ccxFNwYnjjnB_KVybq_O5OFSACGX_Acuje4Yet9KCPYrBMlSGqF-N3ww1ba-K3j2kPRv3vf_zbI2xWkGb_BFZVfB-ajouK_v6H_0zYZOz0BLLwBLALVKok9M0I2Y-UnU7TMRLiuDSlHOx36LsXU4CKqyFuuorUx1tXJdiKISUgJCMUQOVYzGNCbw7bQFvInECgSfEmqk_mIKHPlAABNbtbOa5U0j5_rR"/>
+</div>
+<div class="flex-1 flex flex-col justify-between">
+<div>
+<div class="flex justify-between items-start">
+<h3 class="font-label-md text-label-md text-on-surface leading-tight">Executive Series Carry-On</h3>
+<span class="text-[10px] font-label-sm bg-secondary-container/20 text-secondary border border-secondary/20 px-2 py-0.5 rounded-full">In Stock</span>
+</div>
+<p class="text-label-sm font-label-sm text-on-surface-variant mt-0.5">SKU: RMS-11005</p>
+</div>
+<div class="flex items-center justify-between mt-2">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-primary text-[18px]" data-icon="database">database</span>
+<span class="font-label-md text-label-md text-on-surface">156 Units</span>
+</div>
+<div class="flex gap-2">
+<button class="w-8 h-8 rounded-full flex items-center justify-center bg-surface-container-high text-on-surface-variant active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-[20px]" data-icon="edit_square">edit_square</span>
+</button>
+<button class="w-8 h-8 rounded-full flex items-center justify-center bg-primary text-on-primary active:scale-90 transition-transform shadow-sm">
+<span class="material-symbols-outlined text-[20px]" data-icon="add">add</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- FAB for Quick Actions -->
+<button class="fixed bottom-24 right-md w-14 h-14 bg-primary text-on-primary rounded-2xl shadow-xl flex items-center justify-center z-40 active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-[28px]" data-icon="inventory">inventory</span>
+</button>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 bg-surface/80 rounded-t-xl backdrop-blur-md border-t border-outline-variant/30 shadow-[0_-4px_12px_rgba(15,23,42,0.03)]">
+<div class="flex justify-around items-center py-2 px-md pb-safe">
+<!-- Home -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors active:scale-90 duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-label-sm text-label-sm mt-1">Home</span>
+</a>
+<!-- Orders -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors active:scale-90 duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="receipt_long">receipt_long</span>
+<span class="font-label-sm text-label-sm mt-1">Orders</span>
+</a>
+<!-- Stock (Active) -->
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-2xl px-4 py-1 active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="analytics" style="font-variation-settings: 'FILL' 1;">analytics</span>
+<span class="font-label-sm text-label-sm mt-1 font-bold">Stock</span>
+</a>
+<!-- Users -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors active:scale-90 duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-label-sm text-label-sm mt-1">Users</span>
+</a>
+<!-- Config -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors active:scale-90 duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="tune">tune</span>
+<span class="font-label-sm text-label-sm mt-1">Config</span>
+</a>
+</div>
+</nav>
+<script>
+        // Micro-interaction for search input focus
+        const searchInput = document.querySelector('input');
+        const searchContainer = searchInput?.parentElement;
+        
+        searchInput?.addEventListener('focus', () => {
+            searchContainer.classList.add('border-primary/50', 'shadow-md');
+        });
+        
+        searchInput?.addEventListener('blur', () => {
+            searchContainer.classList.remove('border-primary/50', 'shadow-md');
+        });
+
+        // Simple haptic-like feedback simulation for buttons
+        document.querySelectorAll('button, a').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (window.navigator.vibrate) {
+                    window.navigator.vibrate(5);
+                }
+            });
+        });
+    </script>
+</body></html>

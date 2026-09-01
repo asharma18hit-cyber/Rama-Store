@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Track Order - RAMA STORE</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Geist:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-secondary": "#ffffff",
+                    "surface-container-highest": "#e1e3e4",
+                    "surface-container-lowest": "#ffffff",
+                    "outline": "#777587",
+                    "surface-container": "#edeeef",
+                    "on-surface": "#191c1d",
+                    "primary-container": "#4f46e5",
+                    "tertiary-fixed-dim": "#bec6e0",
+                    "secondary-fixed": "#6ffbbe",
+                    "tertiary-fixed": "#dae2fd",
+                    "tertiary-container": "#586076",
+                    "tertiary": "#41485e",
+                    "primary": "#3525cd",
+                    "on-surface-variant": "#464555",
+                    "primary-fixed-dim": "#c3c0ff",
+                    "on-tertiary-fixed-variant": "#3f465c",
+                    "background": "#f8f9fa",
+                    "on-secondary-container": "#00714d",
+                    "secondary": "#006c49",
+                    "on-primary-fixed-variant": "#3323cc",
+                    "surface-dim": "#d9dadb",
+                    "surface-bright": "#f8f9fa",
+                    "on-error-container": "#93000a",
+                    "inverse-surface": "#2e3132",
+                    "error": "#ba1a1a",
+                    "surface-variant": "#e1e3e4",
+                    "on-tertiary-fixed": "#131b2e",
+                    "on-primary-fixed": "#0f0069",
+                    "on-background": "#191c1d",
+                    "inverse-on-surface": "#f0f1f2",
+                    "surface-container-low": "#f3f4f5",
+                    "on-tertiary": "#ffffff",
+                    "on-primary-container": "#dad7ff",
+                    "surface": "#f8f9fa",
+                    "on-tertiary-container": "#d4dbf5",
+                    "on-secondary-fixed-variant": "#005236",
+                    "surface-container-high": "#e7e8e9",
+                    "outline-variant": "#c7c4d8",
+                    "error-container": "#ffdad6",
+                    "secondary-container": "#6cf8bb",
+                    "primary-fixed": "#e2dfff",
+                    "on-error": "#ffffff",
+                    "secondary-fixed-dim": "#4edea3",
+                    "on-secondary-fixed": "#002113",
+                    "inverse-primary": "#c3c0ff",
+                    "surface-tint": "#4d44e3",
+                    "on-primary": "#ffffff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "gutter": "24px",
+                    "2xl": "48px",
+                    "sm": "8px",
+                    "xl": "32px",
+                    "md": "16px",
+                    "3xl": "64px",
+                    "lg": "24px",
+                    "xs": "4px",
+                    "container-max": "1280px",
+                    "base": "8px"
+            },
+            "fontFamily": {
+                    "headline-md": ["Geist"],
+                    "headline-lg": ["Geist"],
+                    "display-lg": ["Geist"],
+                    "label-md": ["Geist"],
+                    "body-lg": ["Inter"],
+                    "headline-lg-mobile": ["Geist"],
+                    "label-sm": ["Geist"],
+                    "body-md": ["Inter"]
+            },
+            "fontSize": {
+                    "headline-md": ["24px", {"lineHeight": "1.3", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.04em", "fontWeight": "800"}],
+                    "label-md": ["14px", {"lineHeight": "1", "letterSpacing": "0.02em", "fontWeight": "600"}],
+                    "body-lg": ["18px", {"lineHeight": "1.6", "letterSpacing": "0", "fontWeight": "400"}],
+                    "headline-lg-mobile": ["28px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "label-sm": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                    "body-md": ["16px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #f8f9fa;
+            color: #191c1d;
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-header {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+        }
+        .timeline-line {
+            width: 2px;
+            background: #E5E7EB;
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 15px;
+            z-index: 0;
+        }
+        .timeline-line-active {
+            background: #10B981;
+            z-index: 1;
+        }
+        .custom-shadow {
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03);
+        }
+        .hover-lift {
+            transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
+        }
+        .hover-lift:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+        }
+        .route-path {
+            stroke-dasharray: 8;
+            animation: dash 20s linear infinite;
+        }
+        @keyframes dash {
+            to { stroke-dashoffset: -100; }
+        }
+    </style>
+</head>
+<body class="min-h-screen pb-24">
+<!-- Top Navigation Bar -->
+<header class="fixed top-0 w-full z-50 glass-header border-b border-outline-variant/30">
+<div class="flex justify-between items-center px-gutter h-16 w-full max-w-container-max mx-auto">
+<button class="active:scale-95 transition-transform duration-200">
+<span class="material-symbols-outlined text-primary">arrow_back</span>
+</button>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tighter text-on-surface">RAMA STORE</h1>
+<button class="active:scale-95 transition-transform duration-200">
+<span class="material-symbols-outlined text-primary">shopping_bag</span>
+</button>
+</div>
+</header>
+<main class="pt-16 max-w-container-max mx-auto">
+<!-- Top Section: Minimalist Map View -->
+<section class="relative w-full h-[40vh] md:h-[50vh] overflow-hidden bg-surface-container-low">
+<div class="absolute inset-0 w-full h-full grayscale opacity-40" data-location="Mumbai, India" style="">
+<!-- Using a decorative placeholder representing a minimalist urban grid -->
+<div class="w-full h-full bg-cover bg-center" data-alt="A minimalist architectural map illustration of a modern Indian city grid like Mumbai, featuring clean lines, off-white and soft grey tones, with a subtle blue-indigo highlight indicating a delivery route. The aesthetic is elite and high-performance, reflecting a technical precision and industrial luxury style with vast whitespace." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDdZf3ditV7IQVNWxJGOJwYZ9daW1hCxNwI9Eu_ZOqIns5Ahfy_8wue5XwpKJaBQyyDu5rUHqRLS7gYhBAT1FCIuzPO-bZj9KTzE3MNjIKiPxdGx9xqrMYF2LMS2qIVrqJ5Uqy9Iz6YitAtgLr1ZiFAsivsz-0VEpRDC93AbXjxX9COuWmx3RZFA-stPjIk9kRso3lkP90kx7Q_nVi6PmTFuQiKRbgJGqSGvguV84-wnyLh3WtAwrC6')"></div>
+</div>
+<!-- Delivery Path SVG Overlay -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none" preserveaspectratio="none" viewbox="0 0 400 600">
+<path class="route-path opacity-30" d="M50,500 C100,450 300,350 350,100" fill="none" stroke="#3525cd" stroke-linecap="round" stroke-width="3"></path>
+<!-- Warehouse Pin -->
+<circle cx="50" cy="500" fill="#464555" r="6"></circle>
+<!-- User Home Pin -->
+<circle cx="350" cy="100" fill="#3525cd" r="8"></circle>
+<circle class="animate-ping opacity-25" cx="350" cy="100" fill="none" r="12" stroke="#3525cd" stroke-width="2"></circle>
+</svg>
+<!-- Delivery Van Icon Moving along path (Simplified position) -->
+<div class="absolute top-[30%] left-[60%] flex flex-col items-center animate-bounce duration-1000">
+<div class="bg-primary p-2 rounded-full shadow-lg text-white">
+<span class="material-symbols-outlined text-[20px]">local_shipping</span>
+</div>
+<div class="bg-white px-2 py-1 rounded-full text-[10px] font-bold mt-1 shadow-md border border-outline-variant/30">
+                    RAMA EXPRESS
+                </div>
+</div>
+<!-- Floating Back Button (Mobile only) -->
+<div class="absolute top-4 left-4 md:hidden">
+<!-- Navigation is already in header, this is for visual weight -->
+</div>
+</section>
+<!-- Middle Section: Status Card -->
+<section class="relative -mt-12 px-gutter z-10">
+<div class="bg-white rounded-xl p-6 custom-shadow border border-outline-variant/20 hover-lift">
+<div class="flex justify-between items-start mb-4">
+<div>
+<span class="bg-secondary-container text-on-secondary-container text-label-sm font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                            Out for Delivery
+                        </span>
+<h2 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg mt-2 text-on-surface">
+                            Arriving Today
+                        </h2>
+</div>
+<div class="text-right">
+<p class="text-on-surface-variant font-label-sm uppercase">Est. Arrival</p>
+<p class="font-headline-md text-primary">2:00 PM - 4:00 PM</p>
+</div>
+</div>
+<div class="flex items-center gap-4 py-4 border-t border-outline-variant/10">
+<div class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 border-2 border-primary-fixed">
+<img class="w-full h-full object-cover" data-alt="A professional headshot of a friendly delivery partner in a minimalist technical uniform. High-key lighting, clean white background, professional and elite appearance in line with the industrial luxury brand aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDXk-t0viWg2oK_lvaEpp_JZJoCDLe6hcaax9pue0NdlM0GQphy4oq-xSPMLMkF0VwSBLtr4IL1C4Rec4YbXNa8m5UPt9S_M-JSQq6LYeamv0vxHGArvNxKCTPAbJeY3q-LrZCa_vCJ7USYtffG3YkOE4Pet56fx74rVxRcUq_3ZDwbLqIJTZ9kXTpc10sPvr_yqMOlURU86eRLMVJ4pzgfhpvHnWatdRrJoFzToRPvO2CKw5o_1esf"/>
+</div>
+<div class="flex-grow">
+<h3 class="font-body-md font-bold text-on-surface">Rajesh Kumar</h3>
+<p class="text-label-sm text-on-surface-variant">Elite Delivery Partner • 4.9 ★</p>
+</div>
+<div class="flex gap-2">
+<button class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-primary active:scale-90 transition-transform">
+<span class="material-symbols-outlined">call</span>
+</button>
+<button class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-primary active:scale-90 transition-transform">
+<span class="material-symbols-outlined">chat</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Bottom Section: Vertical Status Timeline -->
+<section class="px-gutter py-xl">
+<div class="max-w-md mx-auto">
+<h3 class="font-headline-md text-headline-md mb-lg text-on-surface">Delivery Progress</h3>
+<div class="relative space-y-10 pl-4">
+<!-- Progress Line (Background) -->
+<div class="timeline-line h-full"></div>
+<!-- Progress Line (Active Part) -->
+<div class="timeline-line timeline-line-active h-[75%]"></div>
+<!-- Step 1: Ordered -->
+<div class="relative z-10 flex items-start gap-6">
+<div class="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-white ring-4 ring-white">
+<span class="material-symbols-outlined text-[16px]">check</span>
+</div>
+<div>
+<h4 class="font-body-md font-bold text-on-surface">Order Placed</h4>
+<p class="text-label-sm text-on-surface-variant">Yesterday, 10:45 AM</p>
+</div>
+</div>
+<!-- Step 2: Packed -->
+<div class="relative z-10 flex items-start gap-6">
+<div class="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-white ring-4 ring-white">
+<span class="material-symbols-outlined text-[16px]">check</span>
+</div>
+<div>
+<h4 class="font-body-md font-bold text-on-surface">Packed &amp; Inspected</h4>
+<p class="text-label-sm text-on-surface-variant">Yesterday, 2:15 PM</p>
+</div>
+</div>
+<!-- Step 3: Shipped -->
+<div class="relative z-10 flex items-start gap-6">
+<div class="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-white ring-4 ring-white">
+<span class="material-symbols-outlined text-[16px]">check</span>
+</div>
+<div>
+<h4 class="font-body-md font-bold text-on-surface">Shipped from Hub</h4>
+<p class="text-label-sm text-on-surface-variant">Today, 6:30 AM • Mumbai Sorting Center</p>
+</div>
+</div>
+<!-- Step 4: Out for Delivery (CURRENT) -->
+<div class="relative z-10 flex items-start gap-6">
+<div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white ring-4 ring-white animate-pulse">
+<span class="material-symbols-outlined text-[16px]">local_shipping</span>
+</div>
+<div>
+<h4 class="font-body-md font-bold text-primary">Out for Delivery</h4>
+<p class="text-label-sm text-on-surface-variant">Today, 11:15 AM • On the way to your location</p>
+</div>
+</div>
+<!-- Step 5: Delivered -->
+<div class="relative z-10 flex items-start gap-6 opacity-40">
+<div class="w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center text-on-surface-variant ring-4 ring-white">
+<span class="material-symbols-outlined text-[16px]">inventory_2</span>
+</div>
+<div>
+<h4 class="font-body-md font-bold text-on-surface">Delivered</h4>
+<p class="text-label-sm text-on-surface-variant">Expected by 4:00 PM</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Actions Section -->
+<section class="px-gutter pb-xl flex flex-col md:flex-row gap-4 max-w-md mx-auto">
+<button class="flex-1 bg-primary text-white py-4 rounded-lg font-bold flex items-center justify-center gap-2 hover:opacity-90 active:scale-95 transition-all">
+<span class="material-symbols-outlined">call</span>
+                Call Delivery Partner
+            </button>
+<button class="flex-1 bg-white border border-outline-variant text-on-surface py-4 rounded-lg font-bold flex items-center justify-center gap-2 hover:bg-surface-container-low active:scale-95 transition-all">
+<span class="material-symbols-outlined">support_agent</span>
+                Help Center
+            </button>
+</section>
+</main>
+<!-- Bottom Navigation Shell (Persistent) -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center py-3 px-4 pb-safe bg-white/90 backdrop-blur-md border-t border-outline-variant/30 z-50">
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">grid_view</span>
+<span class="font-label-sm text-label-sm">Shop</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">search</span>
+<span class="font-label-sm text-label-sm">Explore</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary font-bold" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">local_shipping</span>
+<span class="font-label-sm text-label-sm">Orders</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-label-sm text-label-sm">Profile</span>
+</a>
+</nav>
+<script>
+        // Simple micro-interaction for the map delivery van
+        const van = document.querySelector('.animate-bounce');
+        if (van) {
+            window.addEventListener('scroll', () => {
+                const scrolled = window.scrollY;
+                van.style.transform = `translateY(${scrolled * 0.1}px)`;
+            });
+        }
+    </script>
+</body></html>

@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Rama Store - Help Center</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Geist:wght@500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-effect {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .accordion-item.active .accordion-content {
+            max-height: 200px;
+        }
+        .accordion-item.active .chevron-icon {
+            transform: rotate(180deg);
+        }
+        .industrial-shadow {
+            shadow: 0 4px 12px rgba(15, 23, 42, 0.03);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container": "#edeeef",
+                        "on-tertiary-fixed": "#131b2e",
+                        "on-primary-fixed-variant": "#3323cc",
+                        "primary-fixed-dim": "#c3c0ff",
+                        "secondary": "#006c49",
+                        "surface-tint": "#4d44e3",
+                        "tertiary-fixed-dim": "#bec6e0",
+                        "surface-container-lowest": "#ffffff",
+                        "outline": "#777587",
+                        "primary-container": "#4f46e5",
+                        "outline-variant": "#c7c4d8",
+                        "on-primary": "#ffffff",
+                        "inverse-primary": "#c3c0ff",
+                        "tertiary": "#41485e",
+                        "on-tertiary-container": "#d4dbf5",
+                        "error-container": "#ffdad6",
+                        "on-secondary": "#ffffff",
+                        "secondary-container": "#6cf8bb",
+                        "on-surface": "#191c1d",
+                        "on-error": "#ffffff",
+                        "inverse-surface": "#2e3132",
+                        "secondary-fixed-dim": "#4edea3",
+                        "primary-fixed": "#e2dfff",
+                        "tertiary-fixed": "#dae2fd",
+                        "surface-container-highest": "#e1e3e4",
+                        "surface-bright": "#f8f9fa",
+                        "on-tertiary-fixed-variant": "#3f465c",
+                        "on-background": "#191c1d",
+                        "on-secondary-fixed-variant": "#005236",
+                        "on-secondary-fixed": "#002113",
+                        "on-primary-container": "#dad7ff",
+                        "error": "#ba1a1a",
+                        "on-primary-fixed": "#0f0069",
+                        "background": "#f8f9fa",
+                        "surface-variant": "#e1e3e4",
+                        "surface": "#f8f9fa",
+                        "tertiary-container": "#586076",
+                        "on-surface-variant": "#464555",
+                        "secondary-fixed": "#6ffbbe",
+                        "inverse-on-surface": "#f0f1f2",
+                        "surface-container-high": "#e7e8e9",
+                        "on-error-container": "#93000a",
+                        "surface-dim": "#d9dadb",
+                        "surface-container-low": "#f3f4f5",
+                        "primary": "#3525cd",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-container": "#00714d"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xs": "4px",
+                        "xl": "32px",
+                        "lg": "24px",
+                        "base": "8px",
+                        "2xl": "48px",
+                        "md": "16px",
+                        "sm": "8px",
+                        "3xl": "64px",
+                        "gutter": "24px",
+                        "container-max": "1280px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Inter"],
+                        "label-md": ["Geist"],
+                        "headline-lg": ["Geist"],
+                        "label-sm": ["Geist"],
+                        "headline-md": ["Geist"],
+                        "headline-lg-mobile": ["Geist"],
+                        "display-lg": ["Geist"],
+                        "body-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["18px", {"lineHeight": "1.6", "letterSpacing": "0", "fontWeight": "400"}],
+                        "label-md": ["14px", {"lineHeight": "1", "letterSpacing": "0.02em", "fontWeight": "600"}],
+                        "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "label-sm": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                        "headline-md": ["24px", {"lineHeight": "1.3", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "headline-lg-mobile": ["28px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.04em", "fontWeight": "800"}],
+                        "body-md": ["16px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background text-on-surface font-body-md selection:bg-primary-fixed selection:text-on-primary-fixed">
+<!-- Top Navigation Anchor -->
+<header class="bg-white/80 backdrop-blur-md fixed top-0 w-full z-50 border-b border-outline-variant/30 shadow-sm h-16 flex justify-between items-center px-gutter max-w-container-max mx-auto">
+<button class="text-on-surface-variant hover:opacity-80 transition-opacity active:scale-95 duration-200">
+<span class="material-symbols-outlined" data-icon="close">close</span>
+</button>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tighter text-on-surface">RAMA STORE</h1>
+<button class="text-on-surface-variant hover:opacity-80 transition-opacity active:scale-95 duration-200">
+<span class="material-symbols-outlined" data-icon="headset_mic">headset_mic</span>
+</button>
+</header>
+<main class="pt-24 pb-32 px-gutter space-y-3xl max-w-lg mx-auto">
+<!-- Search Section -->
+<section class="space-y-lg">
+<div class="text-center space-y-xs">
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface">How can we help?</h2>
+<p class="font-body-md text-on-surface-variant">Find support for your premium gear.</p>
+</div>
+<div class="relative group">
+<div class="absolute inset-y-0 left-4 flex items-center pointer-events-none text-on-surface-variant group-focus-within:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="search">search</span>
+</div>
+<input class="w-full h-14 pl-12 pr-4 bg-white border border-outline-variant rounded-xl font-body-md focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm outline-none" placeholder="Search for help" type="text"/>
+</div>
+</section>
+<!-- Category Grid (Bento Style) -->
+<section class="space-y-lg">
+<h3 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest">Support Categories</h3>
+<div class="grid grid-cols-2 gap-md">
+<!-- Orders -->
+<button class="flex flex-col items-center justify-center p-lg bg-white border border-outline-variant/30 rounded-2xl shadow-[0_4px_12px_rgba(15,23,42,0.03)] hover:shadow-[0_12px_24px_rgba(15,23,42,0.08)] transition-all active:scale-95 duration-200 group">
+<div class="w-12 h-12 rounded-full bg-primary/5 flex items-center justify-center mb-md group-hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined text-primary" data-icon="local_shipping">local_shipping</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface">Orders</span>
+</button>
+<!-- Payments -->
+<button class="flex flex-col items-center justify-center p-lg bg-white border border-outline-variant/30 rounded-2xl shadow-[0_4px_12px_rgba(15,23,42,0.03)] hover:shadow-[0_12px_24px_rgba(15,23,42,0.08)] transition-all active:scale-95 duration-200 group">
+<div class="w-12 h-12 rounded-full bg-primary/5 flex items-center justify-center mb-md group-hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined text-primary" data-icon="account_balance_wallet">account_balance_wallet</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface">Payments</span>
+</button>
+<!-- Account -->
+<button class="flex flex-col items-center justify-center p-lg bg-white border border-outline-variant/30 rounded-2xl shadow-[0_4px_12px_rgba(15,23,42,0.03)] hover:shadow-[0_12px_24px_rgba(15,23,42,0.08)] transition-all active:scale-95 duration-200 group">
+<div class="w-12 h-12 rounded-full bg-primary/5 flex items-center justify-center mb-md group-hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined text-primary" data-icon="person">person</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface">Account</span>
+</button>
+<!-- Delivery -->
+<button class="flex flex-col items-center justify-center p-lg bg-white border border-outline-variant/30 rounded-2xl shadow-[0_4px_12px_rgba(15,23,42,0.03)] hover:shadow-[0_12px_24px_rgba(15,23,42,0.08)] transition-all active:scale-95 duration-200 group">
+<div class="w-12 h-12 rounded-full bg-primary/5 flex items-center justify-center mb-md group-hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined text-primary" data-icon="inventory_2">inventory_2</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface">Returns</span>
+</button>
+</div>
+</section>
+<!-- Trending FAQs -->
+<section class="space-y-lg">
+<h3 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest">Trending FAQs</h3>
+<div class="space-y-md">
+<!-- FAQ 1 -->
+<div class="accordion-item border border-outline-variant/30 rounded-xl bg-white overflow-hidden shadow-[0_4px_12px_rgba(15,23,42,0.03)]" onclick="toggleAccordion(this)">
+<button class="w-full flex justify-between items-center p-lg text-left">
+<span class="font-body-md font-semibold text-on-surface">How do I track my Elite shipment?</span>
+<span class="material-symbols-outlined text-on-surface-variant chevron-icon transition-transform duration-300" data-icon="expand_more">expand_more</span>
+</button>
+<div class="accordion-content px-lg pb-lg">
+<p class="font-body-md text-on-surface-variant">Log into your account and navigate to 'Orders'. You'll find real-time tracking for all active Elite shipments provided by our logistics partners.</p>
+</div>
+</div>
+<!-- FAQ 2 -->
+<div class="accordion-item border border-outline-variant/30 rounded-xl bg-white overflow-hidden shadow-[0_4px_12px_rgba(15,23,42,0.03)]" onclick="toggleAccordion(this)">
+<button class="w-full flex justify-between items-center p-lg text-left">
+<span class="font-body-md font-semibold text-on-surface">What is the Rama return policy?</span>
+<span class="material-symbols-outlined text-on-surface-variant chevron-icon transition-transform duration-300" data-icon="expand_more">expand_more</span>
+</button>
+<div class="accordion-content px-lg pb-lg">
+<p class="font-body-md text-on-surface-variant">We offer a 30-day premium return policy for all unworn gear. Elite members enjoy complimentary home collection for returns.</p>
+</div>
+</div>
+<!-- FAQ 3 -->
+<div class="accordion-item border border-outline-variant/30 rounded-xl bg-white overflow-hidden shadow-[0_4px_12px_rgba(15,23,42,0.03)]" onclick="toggleAccordion(this)">
+<button class="w-full flex justify-between items-center p-lg text-left">
+<span class="font-body-md font-semibold text-on-surface">Can I change my delivery address?</span>
+<span class="material-symbols-outlined text-on-surface-variant chevron-icon transition-transform duration-300" data-icon="expand_more">expand_more</span>
+</button>
+<div class="accordion-content px-lg pb-lg">
+<p class="font-body-md text-on-surface-variant">Address changes are possible within 2 hours of order placement. Contact our elite support team immediately for assistance.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Decorative Spacer -->
+<div class="h-8"></div>
+</main>
+<!-- Sticky Contact Bar -->
+<div class="fixed bottom-0 left-0 w-full p-lg bg-white/90 backdrop-blur-md border-t border-outline-variant/30 z-[60]">
+<div class="max-w-lg mx-auto grid grid-cols-2 gap-md">
+<button class="flex items-center justify-center space-x-sm h-12 rounded-xl bg-white border border-outline-variant text-on-surface font-label-md active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="call">call</span>
+<span>Call Us</span>
+</button>
+<button class="flex items-center justify-center space-x-sm h-12 rounded-xl bg-primary text-white font-label-md active:scale-95 transition-transform shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined" data-icon="chat_bubble">chat_bubble</span>
+<span>Live Chat</span>
+</button>
+</div>
+</div>
+<!-- Background Decoration -->
+<div class="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
+<div class="absolute -top-24 -right-24 w-96 h-96 bg-primary/5 rounded-full blur-3xl"></div>
+<div class="absolute top-1/2 -left-24 w-64 h-64 bg-secondary/5 rounded-full blur-3xl"></div>
+</div>
+<script>
+        function toggleAccordion(element) {
+            // Close other items
+            const allItems = document.querySelectorAll('.accordion-item');
+            allItems.forEach(item => {
+                if (item !== element && item.classList.contains('active')) {
+                    item.classList.remove('active');
+                }
+            });
+            // Toggle current
+            element.classList.toggle('active');
+        }
+
+        // Initialize micro-interactions
+        document.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('touchstart', () => {
+                btn.classList.add('opacity-80');
+            });
+            btn.addEventListener('touchend', () => {
+                btn.classList.remove('opacity-80');
+            });
+        });
+    </script>
+</body></html>

@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Rama Elite Admin - Sales &amp; Notifications</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Geist:wght@100;300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        @keyframes subtle-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        .pulse-accent {
+            animation: subtle-pulse 3s infinite ease-in-out;
+        }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-secondary-fixed": "#002113",
+                    "tertiary-fixed": "#dae2fd",
+                    "on-tertiary": "#ffffff",
+                    "background": "#f8f9fa",
+                    "on-error-container": "#93000a",
+                    "on-error": "#ffffff",
+                    "inverse-on-surface": "#f0f1f2",
+                    "on-surface-variant": "#464555",
+                    "surface-dim": "#d9dadb",
+                    "on-secondary-container": "#00714d",
+                    "surface-container": "#edeeef",
+                    "on-secondary": "#ffffff",
+                    "surface-tint": "#4d44e3",
+                    "surface-variant": "#e1e3e4",
+                    "outline-variant": "#c7c4d8",
+                    "on-primary-fixed-variant": "#3323cc",
+                    "inverse-primary": "#c3c0ff",
+                    "surface-container-highest": "#e1e3e4",
+                    "on-tertiary-fixed": "#131b2e",
+                    "on-surface": "#191c1d",
+                    "secondary-fixed": "#6ffbbe",
+                    "outline": "#777587",
+                    "on-background": "#191c1d",
+                    "on-primary-container": "#dad7ff",
+                    "tertiary-fixed-dim": "#bec6e0",
+                    "on-tertiary-fixed-variant": "#3f465c",
+                    "tertiary": "#41485e",
+                    "primary-fixed-dim": "#c3c0ff",
+                    "primary-fixed": "#e2dfff",
+                    "on-secondary-fixed-variant": "#005236",
+                    "surface": "#f8f9fa",
+                    "on-primary": "#ffffff",
+                    "surface-container-lowest": "#ffffff",
+                    "inverse-surface": "#2e3132",
+                    "surface-container-low": "#f3f4f5",
+                    "tertiary-container": "#586076",
+                    "on-tertiary-container": "#d4dbf5",
+                    "surface-bright": "#f8f9fa",
+                    "error-container": "#ffdad6",
+                    "surface-container-high": "#e7e8e9",
+                    "secondary-container": "#6cf8bb",
+                    "error": "#ba1a1a",
+                    "secondary-fixed-dim": "#4edea3",
+                    "secondary": "#006c49",
+                    "primary-container": "#4f46e5",
+                    "primary": "#3525cd",
+                    "on-primary-fixed": "#0f0069"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "md": "16px",
+                    "3xl": "64px",
+                    "container-max": "1280px",
+                    "base": "8px",
+                    "xs": "4px",
+                    "lg": "24px",
+                    "xl": "32px",
+                    "sm": "8px",
+                    "gutter": "24px",
+                    "2xl": "48px"
+            },
+            "fontFamily": {
+                    "display-lg": ["Geist"],
+                    "label-md": ["Geist"],
+                    "label-sm": ["Geist"],
+                    "headline-md": ["Geist"],
+                    "body-md": ["Inter"],
+                    "headline-lg": ["Geist"],
+                    "body-lg": ["Inter"],
+                    "headline-lg-mobile": ["Geist"]
+            },
+            "fontSize": {
+                    "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.04em", "fontWeight": "800"}],
+                    "label-md": ["14px", {"lineHeight": "1", "letterSpacing": "0.02em", "fontWeight": "600"}],
+                    "label-sm": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                    "headline-md": ["24px", {"lineHeight": "1.3", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "body-md": ["16px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}],
+                    "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-lg": ["18px", {"lineHeight": "1.6", "letterSpacing": "0", "fontWeight": "400"}],
+                    "headline-lg-mobile": ["28px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+</head>
+<body class="bg-background text-on-surface font-body-md min-h-screen pb-24">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 backdrop-blur-md bg-surface/80 border-b border-outline-variant/30 shadow-sm">
+<div class="flex items-center justify-between px-md h-16 w-full max-w-container-max mx-auto">
+<div class="flex items-center gap-sm">
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-highest/50 transition-colors active:scale-95 duration-200">
+<span class="material-symbols-outlined text-primary">menu</span>
+</button>
+<h1 class="font-display-lg text-headline-md font-bold text-primary">Rama Elite Admin</h1>
+</div>
+<div class="flex items-center gap-xs">
+<div class="relative">
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-highest/50 transition-colors active:scale-95 duration-200">
+<span class="material-symbols-outlined text-primary">notifications</span>
+</button>
+<span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full border-2 border-surface"></span>
+</div>
+</div>
+</div>
+</header>
+<main class="pt-20 px-md space-y-lg max-w-lg mx-auto">
+<!-- Summary Dashboard Section -->
+<section class="space-y-md">
+<div class="flex items-center justify-between">
+<h2 class="font-headline-md text-headline-md text-on-surface">Today's Performance</h2>
+<span class="font-label-sm text-label-sm text-on-surface-variant px-sm py-xs bg-surface-container-high rounded-full">LIVE</span>
+</div>
+<!-- Bento Summary Cards -->
+<div class="grid grid-cols-2 gap-sm">
+<!-- Revenue Card -->
+<div class="col-span-2 glass-card border border-outline-variant/30 p-md rounded-2xl shadow-sm flex flex-col gap-xs relative overflow-hidden">
+<div class="absolute -right-4 -top-4 w-24 h-24 bg-primary/5 rounded-full blur-2xl"></div>
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Revenue</span>
+<div class="flex items-baseline gap-xs">
+<span class="font-display-lg text-headline-lg-mobile text-primary">$12,482.50</span>
+<span class="font-label-sm text-label-sm text-on-secondary-container bg-secondary-container/30 px-xs py-[2px] rounded-sm">+12%</span>
+</div>
+<div class="w-full h-1 bg-surface-container rounded-full mt-sm">
+<div class="h-full bg-primary rounded-full w-3/4 pulse-accent"></div>
+</div>
+</div>
+<!-- Orders Card -->
+<div class="glass-card border border-outline-variant/30 p-md rounded-2xl shadow-sm flex flex-col gap-xs">
+<span class="font-label-md text-label-md text-on-surface-variant">Orders</span>
+<span class="font-headline-lg text-headline-lg-mobile text-on-surface">148</span>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Target: 200</p>
+</div>
+<!-- Conversion Card -->
+<div class="glass-card border border-outline-variant/30 p-md rounded-2xl shadow-sm flex flex-col gap-xs">
+<span class="font-label-md text-label-md text-on-surface-variant">Conv. Rate</span>
+<span class="font-headline-lg text-headline-lg-mobile text-on-surface">3.8%</span>
+<p class="font-label-sm text-label-sm text-on-error-container">Low impact</p>
+</div>
+</div>
+</section>
+<!-- Real-time Activity Feed -->
+<section class="space-y-md">
+<div class="flex items-center justify-between">
+<h2 class="font-headline-md text-headline-md text-on-surface">Recent Activity</h2>
+<button class="font-label-md text-label-md text-primary font-bold">Clear All</button>
+</div>
+<div class="space-y-sm">
+<!-- Notification Item 1: High Priority Sale -->
+<div class="bg-surface-container-lowest border border-outline-variant/20 p-md rounded-xl flex gap-md items-start hover:bg-surface-container-low transition-colors duration-200">
+<div class="w-10 h-10 rounded-full bg-primary-fixed flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">shopping_cart</span>
+</div>
+<div class="flex-grow space-y-xs">
+<div class="flex justify-between items-start">
+<span class="font-label-md text-label-md text-on-surface font-bold">New High-Value Order</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">2m ago</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">Order #9421 from James Cooper for <span class="text-on-surface font-semibold">$1,299.00</span></p>
+<div class="pt-sm flex gap-sm">
+<button class="bg-primary-container text-on-primary-container font-label-md text-label-sm px-md py-xs rounded-lg active:scale-95 transition-transform">View Order</button>
+<button class="text-on-surface-variant border border-outline-variant/30 font-label-md text-label-sm px-md py-xs rounded-lg">Fulfill Now</button>
+</div>
+</div>
+</div>
+<!-- Notification Item 2: System Alert -->
+<div class="bg-surface-container-lowest border border-outline-variant/20 p-md rounded-xl flex gap-md items-start hover:bg-surface-container-low transition-colors duration-200">
+<div class="w-10 h-10 rounded-full bg-error-container flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-error" style="font-variation-settings: 'FILL' 1;">warning</span>
+</div>
+<div class="flex-grow space-y-xs">
+<div class="flex justify-between items-start">
+<span class="font-label-md text-label-md text-error font-bold">Inventory Alert</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">15m ago</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">"Elite Series Wireless Headphones" is low on stock (2 units left).</p>
+<div class="pt-sm">
+<button class="text-primary font-label-md text-label-md flex items-center gap-xs">
+                                Restock Inventory
+                                <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Notification Item 3: Customer Feedback -->
+<div class="bg-surface-container-lowest border border-outline-variant/20 p-md rounded-xl flex gap-md items-start hover:bg-surface-container-low transition-colors duration-200">
+<div class="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
+<img class="w-full h-full object-cover" data-alt="A professional headshot of a middle-aged female customer with a friendly expression. The lighting is bright and warm, in a high-end corporate lifestyle setting. The background is softly blurred with subtle hints of indigo and white architecture, matching the Elite High-Performance Admin theme." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC6DqKf4zinMWc-q1N4XdbV0xiXJnYvf2ljzR-dH4aughfpqofPmT5nDSzBNWMxHFVvuVyom94k3SP_pAjmWk647HyKztgs0dAy-DaDTIvSb-gevalvBFnB7BwH2Zv-LC-4NEfNcRCHeiVcVZvSav079nEpQ5YKpUOxLgsR0P22hoXRaZxfAI-dQrXNY6MqiEhQNLr3NRaV8sKbLVGClRagzoRxJ2QiYFPxR7NskT_dIEgQcstm8RwF"/>
+</div>
+<div class="flex-grow space-y-xs">
+<div class="flex justify-between items-start">
+<span class="font-label-md text-label-md text-on-surface font-bold">New Review: Sarah J.</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">1h ago</span>
+</div>
+<div class="flex gap-[2px]">
+<span class="material-symbols-outlined text-secondary text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-secondary text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-secondary text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-secondary text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-secondary text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant italic">"The delivery was incredibly fast and the packaging felt truly premium. Excellence redefined."</p>
+</div>
+</div>
+<!-- Notification Item 4: Milestone -->
+<div class="bg-surface-container-lowest border border-outline-variant/20 p-md rounded-xl flex gap-md items-start hover:bg-surface-container-low transition-colors duration-200">
+<div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-on-secondary-container" style="font-variation-settings: 'FILL' 1;">emoji_events</span>
+</div>
+<div class="flex-grow space-y-xs">
+<div class="flex justify-between items-start">
+<span class="font-label-md text-label-md text-on-secondary-container font-bold">Daily Goal Reached</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">3h ago</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">You've surpassed the daily revenue goal by 5%! Great performance today.</p>
+<div class="pt-sm">
+<button class="text-primary font-label-md text-label-md font-bold">View Report</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Dynamic Visualization (Mini Shader) -->
+<section class="relative h-40 w-full rounded-2xl overflow-hidden border border-outline-variant/30 group">
+
+<div class="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent"></div>
+<div class="absolute bottom-md left-md right-md flex justify-between items-end">
+<div>
+<h3 class="font-label-md text-label-md text-on-surface uppercase tracking-widest opacity-60">System Stability</h3>
+<p class="font-headline-md text-headline-md text-primary">99.98%</p>
+</div>
+<div class="flex gap-xs items-end h-12">
+<div class="w-1 bg-primary/20 h-4 rounded-full"></div>
+<div class="w-1 bg-primary/40 h-8 rounded-full"></div>
+<div class="w-1 bg-primary/60 h-6 rounded-full"></div>
+<div class="w-1 bg-primary h-10 rounded-full pulse-accent"></div>
+<div class="w-1 bg-primary/30 h-5 rounded-full"></div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar (Mobile) -->
+<nav class="md:hidden fixed bottom-0 w-full z-50 rounded-t-xl backdrop-blur-md bg-surface/80 border-t border-outline-variant/30 shadow-[0_-4px_12px_rgba(15,23,42,0.03)] pb-safe">
+<div class="flex justify-around items-center py-2 px-md">
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-label-sm text-label-sm mt-1">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-2xl px-4 py-1" href="#">
+<span class="material-symbols-outlined" data-icon="notifications" style="font-variation-settings: 'FILL' 1;">notifications</span>
+<span class="font-label-sm text-label-sm mt-1">Orders</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span class="font-label-sm text-label-sm mt-1">Stock</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-label-sm text-label-sm mt-1">Users</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="tune">tune</span>
+<span class="font-label-sm text-label-sm mt-1">Config</span>
+</a>
+</div>
+</nav>
+<script>
+        // Simple touch interaction for cards
+        document.querySelectorAll('.bg-surface-container-lowest').forEach(card => {
+            card.addEventListener('touchstart', () => {
+                card.style.transform = 'scale(0.98)';
+            });
+            card.addEventListener('touchend', () => {
+                card.style.transform = 'scale(1)';
+            });
+        });
+    </script>
+</body></html>

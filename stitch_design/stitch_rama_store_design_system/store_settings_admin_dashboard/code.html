@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Rama Store - Admin Settings</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Geist:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-fixed-dim": "#bec6e0",
+                        "outline-variant": "#c7c4d8",
+                        "on-secondary-fixed-variant": "#005236",
+                        "on-secondary-container": "#00714d",
+                        "tertiary": "#41485e",
+                        "surface-tint": "#4d44e3",
+                        "on-primary": "#ffffff",
+                        "surface-bright": "#f8f9fa",
+                        "secondary-container": "#6cf8bb",
+                        "on-background": "#191c1d",
+                        "surface-container-lowest": "#ffffff",
+                        "background": "#f8f9fa",
+                        "primary": "#3525cd",
+                        "tertiary-container": "#586076",
+                        "secondary": "#006c49",
+                        "on-tertiary-container": "#d4dbf5",
+                        "surface-container": "#edeeef",
+                        "on-tertiary-fixed": "#131b2e",
+                        "surface-container-low": "#f3f4f5",
+                        "primary-container": "#4f46e5",
+                        "surface-container-high": "#e7e8e9",
+                        "on-surface-variant": "#464555",
+                        "inverse-primary": "#c3c0ff",
+                        "tertiary-fixed": "#dae2fd",
+                        "on-secondary": "#ffffff",
+                        "on-primary-container": "#dad7ff",
+                        "surface-variant": "#e1e3e4",
+                        "secondary-fixed": "#6ffbbe",
+                        "on-tertiary": "#ffffff",
+                        "secondary-fixed-dim": "#4edea3",
+                        "primary-fixed": "#e2dfff",
+                        "surface": "#f8f9fa",
+                        "inverse-on-surface": "#f0f1f2",
+                        "error": "#ba1a1a",
+                        "primary-fixed-dim": "#c3c0ff",
+                        "on-error": "#ffffff",
+                        "inverse-surface": "#2e3132",
+                        "error-container": "#ffdad6",
+                        "on-surface": "#191c1d",
+                        "on-secondary-fixed": "#002113",
+                        "surface-dim": "#d9dadb",
+                        "on-primary-fixed-variant": "#3323cc",
+                        "on-primary-fixed": "#0f0069",
+                        "surface-container-highest": "#e1e3e4",
+                        "outline": "#777587",
+                        "on-tertiary-fixed-variant": "#3f465c",
+                        "on-error-container": "#93000a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "sm": "8px",
+                        "base": "8px",
+                        "md": "16px",
+                        "2xl": "48px",
+                        "xl": "32px",
+                        "xs": "4px",
+                        "lg": "24px",
+                        "3xl": "64px",
+                        "container-max": "1280px",
+                        "gutter": "24px"
+                    },
+                    "fontFamily": {
+                        "label-md": ["Geist"],
+                        "headline-lg-mobile": ["Geist"],
+                        "body-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-md": ["Geist"],
+                        "label-sm": ["Geist"],
+                        "headline-lg": ["Geist"],
+                        "display-lg": ["Geist"]
+                    },
+                    "fontSize": {
+                        "label-md": ["14px", {"lineHeight": "1", "letterSpacing": "0.02em", "fontWeight": "600"}],
+                        "headline-lg-mobile": ["28px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-md": ["16px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}],
+                        "body-lg": ["18px", {"lineHeight": "1.6", "letterSpacing": "0", "fontWeight": "400"}],
+                        "headline-md": ["24px", {"lineHeight": "1.3", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "label-sm": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                        "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.04em", "fontWeight": "800"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8f9fa; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .glass-header { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); background: rgba(255, 255, 255, 0.8); }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 10px; }
+        .sidebar-active-pill { transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); }
+        input:focus { outline: none; border-color: #3525cd !important; box-shadow: 0 0 0 2px rgba(53, 37, 205, 0.1); }
+    </style>
+</head>
+<body class="text-on-surface custom-scrollbar">
+<!-- SideNavBar -->
+<aside class="h-screen w-64 fixed left-0 top-0 bg-surface-container-lowest border-r border-outline-variant flex flex-col py-md px-sm z-50">
+<div class="mb-2xl px-md">
+<h1 class="font-headline-md text-headline-md font-bold text-primary">Rama Store</h1>
+<p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mt-xs">Elite Admin Control</p>
+</div>
+<nav class="flex-1 space-y-xs overflow-y-auto custom-scrollbar">
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant opacity-80 hover:bg-surface-container-high transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary">dashboard</span>
+<span class="font-label-md text-label-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant opacity-80 hover:bg-surface-container-high transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary">inventory_2</span>
+<span class="font-label-md text-label-md">Inventory</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant opacity-80 hover:bg-surface-container-high transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary">shopping_cart</span>
+<span class="font-label-md text-label-md">Orders</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant opacity-80 hover:bg-surface-container-high transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary">group</span>
+<span class="font-label-md text-label-md">Customers</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant opacity-80 hover:bg-surface-container-high transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary">gavel</span>
+<span class="font-label-md text-label-md">Legal Documents</span>
+</a>
+<div class="pt-md pb-xs px-md">
+<p class="text-[10px] font-bold text-outline uppercase tracking-tighter">System</p>
+</div>
+<a class="flex items-center gap-md px-md py-sm rounded-lg text-primary font-bold border-r-4 border-primary bg-primary/5 sidebar-active-pill" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">settings</span>
+<span class="font-label-md text-label-md">Settings</span>
+</a>
+</nav>
+<div class="mt-auto p-md border-t border-outline-variant">
+<button class="w-full py-sm px-md bg-primary text-on-primary font-label-md text-label-md rounded-lg shadow-sm hover:opacity-90 active:scale-95 transition-all">
+                Generate Report
+            </button>
+</div>
+</aside>
+<!-- Main Content Shell -->
+<main class="ml-64 min-h-screen">
+<!-- TopNavBar -->
+<header class="fixed top-0 right-0 w-[calc(100%-16rem)] h-16 glass-header border-b border-outline-variant z-40 flex justify-between items-center px-lg">
+<div class="flex items-center gap-xl">
+<div class="flex items-center bg-surface-container-low px-md py-xs rounded-full border border-outline-variant w-80 group">
+<span class="material-symbols-outlined text-on-surface-variant">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm w-full ml-sm" placeholder="Search settings..." type="text"/>
+</div>
+<nav class="hidden md:flex gap-lg">
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">Overview</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">Analytics</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">Reports</a>
+</nav>
+</div>
+<div class="flex items-center gap-md">
+<button class="p-sm hover:bg-surface-container-low rounded-full transition-colors relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full border-2 border-white"></span>
+</button>
+<button class="p-sm hover:bg-surface-container-low rounded-full transition-colors">
+<span class="material-symbols-outlined">help_outline</span>
+</button>
+<div class="h-8 w-px bg-outline-variant mx-sm"></div>
+<div class="flex items-center gap-sm cursor-pointer hover:bg-surface-container-low p-xs pr-md rounded-full transition-colors">
+<div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-xs">AU</div>
+<span class="font-label-md text-label-md text-on-surface">Admin User</span>
+</div>
+</div>
+</header>
+<!-- Page Content -->
+<div class="pt-24 pb-2xl px-lg max-w-container-max mx-auto">
+<div class="flex justify-between items-end mb-xl">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface">Store Settings</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mt-xs">Manage your brand's core configuration, payments, and team access.</p>
+</div>
+<div class="flex gap-md">
+<button class="px-lg py-sm border border-outline text-on-surface font-label-md text-label-md rounded-lg hover:bg-surface-container-high transition-colors">Discard Changes</button>
+<button class="px-lg py-sm bg-primary text-on-primary font-label-md text-label-md rounded-lg shadow-md hover:shadow-lg active:scale-[0.98] transition-all">Save All Changes</button>
+</div>
+</div>
+<!-- Bento Grid Layout for Settings Sections -->
+<div class="grid grid-cols-12 gap-lg items-start">
+<!-- Store Configuration (Bento Card Large) -->
+<section class="col-span-12 lg:col-span-7 bg-white p-2xl rounded-xl border border-outline-variant shadow-[0_4px_12px_rgba(15,23,42,0.03)] hover:shadow-[0_12px_24px_rgba(15,23,42,0.08)] transition-all">
+<div class="flex items-center gap-md mb-xl">
+<div class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'wght' 600;">storefront</span>
+</div>
+<div>
+<h3 class="font-headline-md text-headline-md">Store Configuration</h3>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Primary store identity and localization</p>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-xl">
+<div class="col-span-2">
+<label class="block font-label-md text-label-md text-on-surface mb-xs">Store Name</label>
+<input class="w-full rounded-lg border-outline-variant bg-surface-container-lowest px-md py-sm font-body-md" type="text" value="Rama Elite Luxury"/>
+</div>
+<div class="col-span-1">
+<label class="block font-label-md text-label-md text-on-surface mb-xs">Currency</label>
+<select class="w-full rounded-lg border-outline-variant bg-surface-container-lowest px-md py-sm font-body-md">
+<option>USD ($)</option>
+<option selected="">INR (₹)</option>
+<option>EUR (€)</option>
+<option>GBP (£)</option>
+</select>
+</div>
+<div class="col-span-1">
+<label class="block font-label-md text-label-md text-on-surface mb-xs">Timezone</label>
+<select class="w-full rounded-lg border-outline-variant bg-surface-container-lowest px-md py-sm font-body-md">
+<option>(GMT+05:30) Mumbai, New Delhi</option>
+<option>(GMT-08:00) Pacific Time</option>
+<option>(GMT+00:00) London</option>
+</select>
+</div>
+<div class="col-span-2">
+<label class="block font-label-md text-label-md text-on-surface mb-xs">Support Email</label>
+<input class="w-full rounded-lg border-outline-variant bg-surface-container-lowest px-md py-sm font-body-md" placeholder="support@ramastore.com" type="email"/>
+</div>
+</div>
+</section>
+<!-- Payment Providers (Bento Card Small) -->
+<section class="col-span-12 lg:col-span-5 space-y-lg">
+<div class="bg-white p-2xl rounded-xl border border-outline-variant shadow-[0_4px_12px_rgba(15,23,42,0.03)]">
+<div class="flex items-center gap-md mb-xl">
+<div class="w-12 h-12 bg-secondary/10 rounded-xl flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'wght' 600;">payments</span>
+</div>
+<div>
+<h3 class="font-headline-md text-headline-md">Payments</h3>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Gateways and payout rules</p>
+</div>
+</div>
+<div class="space-y-md">
+<div class="p-md rounded-lg border border-outline-variant bg-surface-container-low flex items-center justify-between">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-black italic">S</div>
+<div>
+<p class="font-label-md text-label-md">Stripe Connect</p>
+<p class="text-[10px] text-on-surface-variant uppercase">Connected · 2.9% Fee</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<div class="p-md rounded-lg border border-outline-variant bg-surface-container-lowest flex items-center justify-between hover:bg-surface-container-low transition-colors cursor-pointer group">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 bg-surface-variant rounded-lg flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined">account_balance_wallet</span>
+</div>
+<div>
+<p class="font-label-md text-label-md">UPI Global</p>
+<p class="text-[10px] text-on-surface-variant uppercase">Setup required</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors">chevron_right</span>
+</div>
+<button class="w-full py-sm border-2 border-dashed border-outline-variant rounded-lg text-on-surface-variant font-label-md text-label-md hover:border-primary hover:text-primary transition-all">
+                                + Add Payment Method
+                            </button>
+</div>
+</div>
+<!-- Shipping Rules (Mini Bento) -->
+<div class="bg-white p-2xl rounded-xl border border-outline-variant shadow-[0_4px_12px_rgba(15,23,42,0.03)]">
+<div class="flex items-center gap-md mb-xl">
+<div class="w-12 h-12 bg-tertiary/10 rounded-xl flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'wght' 600;">local_shipping</span>
+</div>
+<div>
+<h3 class="font-headline-md text-headline-md">Shipping Rules</h3>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Delivery zones and thresholds</p>
+</div>
+</div>
+<div class="space-y-md">
+<div class="flex items-center justify-between">
+<span class="font-body-md text-body-md">Flat Rate Delivery</span>
+<span class="font-label-md text-label-md text-primary">₹150.00</span>
+</div>
+<div class="h-px bg-outline-variant"></div>
+<div class="flex items-center justify-between">
+<span class="font-body-md text-body-md">Free Shipping Above</span>
+<span class="font-label-md text-label-md text-primary">₹5,000.00</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Team Management (Full Width Card) -->
+<section class="col-span-12 bg-white p-2xl rounded-xl border border-outline-variant shadow-[0_4px_12px_rgba(15,23,42,0.03)]">
+<div class="flex items-center justify-between mb-xl">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'wght' 600;">shield_person</span>
+</div>
+<div>
+<h3 class="font-headline-md text-headline-md">Team Management</h3>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Control access levels for administrators</p>
+</div>
+</div>
+<button class="flex items-center gap-sm px-lg py-sm bg-primary/5 text-primary border border-primary/20 font-label-md text-label-md rounded-lg hover:bg-primary/10 transition-all">
+<span class="material-symbols-outlined text-[20px]">person_add</span>
+                            Invite Member
+                        </button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full border-collapse">
+<thead>
+<tr class="border-b border-outline-variant text-left">
+<th class="pb-md font-label-md text-label-md text-outline uppercase tracking-wider">User</th>
+<th class="pb-md font-label-md text-label-md text-outline uppercase tracking-wider">Role</th>
+<th class="pb-md font-label-md text-label-md text-outline uppercase tracking-wider">Last Active</th>
+<th class="pb-md font-label-md text-label-md text-outline uppercase tracking-wider text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant">
+<tr class="group hover:bg-surface-container-low transition-colors">
+<td class="py-md">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 rounded-full border-2 border-primary/20 p-xs">
+<div class="w-full h-full rounded-full bg-cover bg-center" data-alt="A professional headshot of a female executive in a modern tech office, soft natural lighting, high-end photography, cinematic depth of field, Rama Store purple branding colors in background." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCtUIVfOxEBeckPFV9cujV8EWahJoqffsjybwA3LQu8hy8pYuLsgmtpiVjZ3O996hFl0Tn2AUr0skqtqOxbB5xdihPqNyaJQSUmjaU4YA1NFcclAZg8rCJsALNsyqPuIvROjOVBeNc6MjVTa8kUrJJqs74edCreTov9I70uG3uw2Jvp--tpnQDjraHuuBmeUaBTvv1deE1nwZ0hJtwyzdfhpw81XjlFwWutk7eU3GluX0ZtKNFXRVDG')"></div>
+</div>
+<div>
+<p class="font-label-md text-label-md text-on-surface">Sarah Mitchell</p>
+<p class="text-xs text-on-surface-variant">sarah@ramastore.com</p>
+</div>
+</div>
+</td>
+<td class="py-md">
+<span class="px-sm py-xs bg-primary/10 text-primary text-[10px] font-bold rounded uppercase">Owner</span>
+</td>
+<td class="py-md text-body-md text-on-surface-variant">2 mins ago</td>
+<td class="py-md text-right">
+<button class="p-sm text-outline hover:text-primary transition-colors"><span class="material-symbols-outlined">edit</span></button>
+</td>
+</tr>
+<tr class="group hover:bg-surface-container-low transition-colors">
+<td class="py-md">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 rounded-full border-2 border-outline-variant p-xs">
+<div class="w-full h-full rounded-full bg-cover bg-center" data-alt="A professional headshot of a male operations manager, clean office environment, bright professional lighting, minimalist aesthetic, navy blue accents, high-quality digital portrait." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCjv4blylEGpq-4WERPbrM7818sAIeOaWTIHdSVG8e4reLoazZC_BiL7PDHwM0PlA4qbN4ALilFe80wqFkU-jmcDe_jMCemYxN8dR2tRmuocBtRPafjJFp_B7R6dv4J6UQPE1qKyUGfK3DuEqifFgz_EOqZ9Xs7t394M2f2xZP2yOK95-YmmIsbMN0AWT7EcR45N6OL-u6-09xwPBjxNFXxbm8XpSGlEkNrE1H26pVVsH1H_-GA-F2R')"></div>
+</div>
+<div>
+<p class="font-label-md text-label-md text-on-surface">David Chen</p>
+<p class="text-xs text-on-surface-variant">d.chen@ramastore.com</p>
+</div>
+</div>
+</td>
+<td class="py-md">
+<span class="px-sm py-xs bg-secondary/10 text-secondary text-[10px] font-bold rounded uppercase">Operations</span>
+</td>
+<td class="py-md text-body-md text-on-surface-variant">Yesterday</td>
+<td class="py-md text-right">
+<button class="p-sm text-outline hover:text-primary transition-colors"><span class="material-symbols-outlined">edit</span></button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</div>
+</div>
+<!-- Footer -->
+<footer class="w-full relative bg-surface-container-low border-t border-outline-variant">
+<div class="max-w-container-max mx-auto py-xl px-lg flex flex-col md:flex-row justify-between items-center gap-md">
+<div class="flex flex-col items-center md:items-start gap-xs">
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold">Rama Store</span>
+<p class="font-label-sm text-label-sm text-on-surface-variant">© 2024 Rama Store. All rights reserved. Precision in Industrial Luxury.</p>
+</div>
+<div class="flex flex-wrap justify-center gap-lg">
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors" href="#">Privacy Policy</a>
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors" href="#">Terms of Service</a>
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors" href="#">Legal Notice</a>
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors" href="#">Compliance</a>
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors" href="#">Contact Support</a>
+</div>
+</div>
+</footer>
+</main>
+<script>
+        // Simple micro-interactions
+        document.querySelectorAll('button, a').forEach(elem => {
+            elem.addEventListener('mousedown', () => {
+                elem.classList.add('scale-95');
+            });
+            elem.addEventListener('mouseup', () => {
+                elem.classList.remove('scale-95');
+            });
+            elem.addEventListener('mouseleave', () => {
+                elem.classList.remove('scale-95');
+            });
+        });
+
+        // Sticky Header scroll effect
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('.glass-header');
+            if (window.scrollY > 10) {
+                header.classList.add('shadow-sm');
+            } else {
+                header.classList.remove('shadow-sm');
+            }
+        });
+    </script>
+</body></html>

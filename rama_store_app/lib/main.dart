@@ -34,6 +34,7 @@ import 'features/loyalty/presentation/loyalty_screen.dart';
 
 import 'features/profile/presentation/profile_screen.dart';
 import 'features/profile/presentation/admin_dashboard_screen.dart';
+import 'features/profile/presentation/admin_login_screen.dart';
 import 'features/splash/presentation/splash_screen.dart';
 import 'shared/layouts/main_scaffold.dart';
 
@@ -209,7 +210,15 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const WishlistScreen(),
       ),
       GoRoute(
+        path: '/admin/login',
+        builder: (context, state) => const AdminLoginScreen(),
+      ),
+      GoRoute(
         path: '/admin',
+        builder: (context, state) => const AdminDashboardScreen(),
+      ),
+      GoRoute(
+        path: '/admin/dashboard',
         builder: (context, state) => const AdminDashboardScreen(),
       ),
     ],

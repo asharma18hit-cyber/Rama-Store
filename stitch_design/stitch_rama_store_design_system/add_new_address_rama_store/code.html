@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Add New Address - RAMA STORE</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Geist:wght@500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-container": "#6cf8bb",
+                        "secondary-fixed-dim": "#4edea3",
+                        "surface-dim": "#d9dadb",
+                        "on-error-container": "#93000a",
+                        "surface-container": "#edeeef",
+                        "secondary": "#006c49",
+                        "primary-fixed-dim": "#c3c0ff",
+                        "inverse-on-surface": "#f0f1f2",
+                        "error": "#ba1a1a",
+                        "on-secondary-fixed-variant": "#005236",
+                        "on-primary-fixed": "#0f0069",
+                        "on-tertiary-fixed": "#131b2e",
+                        "on-secondary-container": "#00714d",
+                        "surface": "#f8f9fa",
+                        "error-container": "#ffdad6",
+                        "on-error": "#ffffff",
+                        "on-primary-fixed-variant": "#3323cc",
+                        "tertiary-container": "#586076",
+                        "on-surface-variant": "#464555",
+                        "on-primary": "#ffffff",
+                        "tertiary-fixed": "#dae2fd",
+                        "inverse-primary": "#c3c0ff",
+                        "surface-container-low": "#f3f4f5",
+                        "background": "#f8f9fa",
+                        "tertiary-fixed-dim": "#bec6e0",
+                        "on-tertiary-container": "#d4dbf5",
+                        "on-surface": "#191c1d",
+                        "on-background": "#191c1d",
+                        "on-tertiary": "#ffffff",
+                        "on-tertiary-fixed-variant": "#3f465c",
+                        "on-primary-container": "#dad7ff",
+                        "surface-container-high": "#e7e8e9",
+                        "on-secondary-fixed": "#002113",
+                        "surface-bright": "#f8f9fa",
+                        "secondary-fixed": "#6ffbbe",
+                        "primary-fixed": "#e2dfff",
+                        "outline-variant": "#c7c4d8",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-highest": "#e1e3e4",
+                        "surface-variant": "#e1e3e4",
+                        "surface-tint": "#4d44e3",
+                        "primary": "#3525cd",
+                        "outline": "#777587",
+                        "primary-container": "#4f46e5",
+                        "on-secondary": "#ffffff",
+                        "tertiary": "#41485e",
+                        "inverse-surface": "#2e3132"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "base": "8px",
+                        "2xl": "48px",
+                        "container-max": "1280px",
+                        "xs": "4px",
+                        "sm": "8px",
+                        "lg": "24px",
+                        "md": "16px",
+                        "xl": "32px",
+                        "gutter": "24px",
+                        "3xl": "64px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Geist"],
+                        "body-lg": ["Inter"],
+                        "label-sm": ["Geist"],
+                        "display-lg": ["Geist"],
+                        "label-md": ["Geist"],
+                        "headline-md": ["Geist"],
+                        "headline-lg-mobile": ["Geist"],
+                        "body-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-lg": ["18px", {"lineHeight": "1.6", "letterSpacing": "0", "fontWeight": "400"}],
+                        "label-sm": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                        "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.04em", "fontWeight": "800"}],
+                        "label-md": ["14px", {"lineHeight": "1", "letterSpacing": "0.02em", "fontWeight": "600"}],
+                        "headline-md": ["24px", {"lineHeight": "1.3", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "headline-lg-mobile": ["28px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-md": ["16px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .form-input-focus:focus {
+            border-color: #3525cd;
+            box-shadow: 0 0 0 4px rgba(53, 37, 205, 0.1);
+        }
+        .glass-header {
+            backdrop-filter: blur(12px);
+            background-color: rgba(255, 255, 255, 0.8);
+        }
+        body {
+            background-color: #F9FAFB;
+        }
+    </style>
+</head>
+<body class="font-body-md text-on-surface antialiased">
+<!-- Top Navigation Bar -->
+<header class="fixed top-0 w-full z-50 glass-header border-b border-outline-variant/30 shadow-sm">
+<div class="flex items-center justify-between px-md h-16 w-full max-w-container-max mx-auto">
+<div class="flex items-center gap-md">
+<button class="active:scale-95 transition-transform duration-200 text-on-surface-variant">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tight text-primary">RAMA STORE</h1>
+</div>
+<div class="flex items-center gap-md">
+<button class="active:scale-95 transition-transform duration-200 text-on-surface-variant">
+<span class="material-symbols-outlined">help_outline</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="pt-24 pb-32 px-md max-w-2xl mx-auto">
+<div class="mb-xl">
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface mb-xs">Add New Address</h2>
+<p class="text-on-surface-variant font-body-md">Ensuring your luxury items reach the right doorstep.</p>
+</div>
+<form class="space-y-lg" id="addressForm">
+<!-- Section: Contact Details -->
+<div class="bg-surface-container-lowest p-lg rounded-xl border border-outline-variant/30 shadow-[0_4px_12px_rgba(15,23,42,0.03)]">
+<h3 class="font-label-md text-label-md uppercase tracking-wider text-outline mb-md">Contact Information</h3>
+<div class="space-y-md">
+<div class="relative">
+<label class="block font-label-sm text-label-sm text-on-surface-variant mb-xs">Full Name</label>
+<input class="w-full bg-surface border border-outline-variant/50 rounded-lg py-3 px-md focus:outline-none form-input-focus transition-all duration-200 font-body-md text-on-surface" placeholder="e.g. Rahul Sharma" type="text"/>
+</div>
+<div class="relative">
+<label class="block font-label-sm text-label-sm text-on-surface-variant mb-xs">Mobile Number</label>
+<div class="flex">
+<span class="inline-flex items-center px-md border border-r-0 border-outline-variant/50 bg-surface-container rounded-l-lg text-on-surface-variant font-body-md">+91</span>
+<input class="w-full bg-surface border border-outline-variant/50 rounded-r-lg py-3 px-md focus:outline-none form-input-focus transition-all duration-200 font-body-md text-on-surface" placeholder="10-digit number" type="tel"/>
+</div>
+</div>
+</div>
+</div>
+<!-- Section: Address Details -->
+<div class="bg-surface-container-lowest p-lg rounded-xl border border-outline-variant/30 shadow-[0_4px_12px_rgba(15,23,42,0.03)]">
+<h3 class="font-label-md text-label-md uppercase tracking-wider text-outline mb-md">Address Details</h3>
+<div class="grid grid-cols-2 gap-md">
+<div class="col-span-1">
+<label class="block font-label-sm text-label-sm text-on-surface-variant mb-xs">Pincode</label>
+<input class="w-full bg-surface border border-outline-variant/50 rounded-lg py-3 px-md focus:outline-none form-input-focus transition-all duration-200 font-body-md text-on-surface" placeholder="6 digits" type="number"/>
+</div>
+<div class="col-span-1 flex items-end">
+<button class="w-full h-[48px] bg-primary/10 text-primary font-label-md text-label-md rounded-lg flex items-center justify-center gap-xs active:scale-95 transition-transform" type="button">
+<span class="material-symbols-outlined text-[18px]">my_location</span>
+                            Use My Location
+                        </button>
+</div>
+<div class="col-span-2">
+<label class="block font-label-sm text-label-sm text-on-surface-variant mb-xs">House No., Building, Apartment</label>
+<input class="w-full bg-surface border border-outline-variant/50 rounded-lg py-3 px-md focus:outline-none form-input-focus transition-all duration-200 font-body-md text-on-surface" placeholder="e.g. Flat 402, Rama Enclave" type="text"/>
+</div>
+<div class="col-span-2">
+<label class="block font-label-sm text-label-sm text-on-surface-variant mb-xs">Road Name, Area, Colony</label>
+<input class="w-full bg-surface border border-outline-variant/50 rounded-lg py-3 px-md focus:outline-none form-input-focus transition-all duration-200 font-body-md text-on-surface" placeholder="e.g. MG Road, Jubilee Hills" type="text"/>
+</div>
+<div class="col-span-1">
+<label class="block font-label-sm text-label-sm text-on-surface-variant mb-xs">City</label>
+<input class="w-full bg-surface border border-outline-variant/50 rounded-lg py-3 px-md focus:outline-none form-input-focus transition-all duration-200 font-body-md text-on-surface" placeholder="e.g. Hyderabad" type="text"/>
+</div>
+<div class="col-span-1">
+<label class="block font-label-sm text-label-sm text-on-surface-variant mb-xs">State</label>
+<select class="w-full bg-surface border border-outline-variant/50 rounded-lg py-3 px-md focus:outline-none form-input-focus transition-all duration-200 font-body-md text-on-surface appearance-none">
+<option value="">Select State</option>
+<option value="TS">Telangana</option>
+<option value="KA">Karnataka</option>
+<option value="MH">Maharashtra</option>
+<option value="DL">Delhi</option>
+</select>
+</div>
+</div>
+</div>
+<!-- Section: Preferences -->
+<div class="bg-surface-container-lowest p-lg rounded-xl border border-outline-variant/30 shadow-[0_4px_12px_rgba(15,23,42,0.03)]">
+<h3 class="font-label-md text-label-md uppercase tracking-wider text-outline mb-md">Address Preferences</h3>
+<div class="mb-lg">
+<label class="block font-label-sm text-label-sm text-on-surface-variant mb-sm">Address Type</label>
+<div class="flex gap-sm">
+<button class="flex-1 py-3 px-md rounded-lg border-2 border-secondary bg-secondary-container/10 text-secondary font-label-md text-label-md flex items-center justify-center gap-xs transition-all duration-200" id="btn-home" onclick="setType('home')" type="button">
+<span class="material-symbols-outlined text-[20px]">home</span>
+                            Home
+                        </button>
+<button class="flex-1 py-3 px-md rounded-lg border-2 border-outline-variant/30 bg-surface text-on-surface-variant font-label-md text-label-md flex items-center justify-center gap-xs transition-all duration-200 hover:border-outline" id="btn-work" onclick="setType('work')" type="button">
+<span class="material-symbols-outlined text-[20px]">work</span>
+                            Work
+                        </button>
+</div>
+</div>
+<div class="flex items-center justify-between py-xs">
+<div class="flex flex-col">
+<span class="font-body-md font-semibold text-on-surface">Set as Default Address</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Use this for all future deliveries</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox" value=""/>
+<div class="w-11 h-6 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-secondary"></div>
+</label>
+</div>
+</div>
+</form>
+</main>
+<!-- Bottom Action Area -->
+<div class="fixed bottom-0 w-full bg-surface border-t border-outline-variant/30 px-lg py-md z-50">
+<div class="max-w-2xl mx-auto flex items-center gap-md">
+<button class="flex-1 h-14 bg-secondary text-white font-headline-md text-[18px] rounded-xl flex items-center justify-center gap-sm shadow-lg active:scale-95 transition-all duration-200 hover:opacity-90">
+<span>Save Address</span>
+<span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Background Decoration -->
+<div class="fixed -z-10 top-0 left-0 w-full h-full opacity-30 pointer-events-none">
+
+</div>
+<script>
+        function setType(type) {
+            const homeBtn = document.getElementById('btn-home');
+            const workBtn = document.getElementById('btn-work');
+            
+            if (type === 'home') {
+                homeBtn.classList.remove('border-outline-variant/30', 'bg-surface', 'text-on-surface-variant');
+                homeBtn.classList.add('border-secondary', 'bg-secondary-container/10', 'text-secondary');
+                
+                workBtn.classList.add('border-outline-variant/30', 'bg-surface', 'text-on-surface-variant');
+                workBtn.classList.remove('border-secondary', 'bg-secondary-container/10', 'text-secondary');
+            } else {
+                workBtn.classList.remove('border-outline-variant/30', 'bg-surface', 'text-on-surface-variant');
+                workBtn.classList.add('border-secondary', 'bg-secondary-container/10', 'text-secondary');
+                
+                homeBtn.classList.add('border-outline-variant/30', 'bg-surface', 'text-on-surface-variant');
+                homeBtn.classList.remove('border-secondary', 'bg-secondary-container/10', 'text-secondary');
+            }
+        }
+
+        // Simple animation logic for inputs
+        const inputs = document.querySelectorAll('input, select');
+        inputs.forEach(input => {
+            input.addEventListener('focus', () => {
+                input.parentElement.closest('div').classList.add('scale-[1.01]');
+            });
+            input.addEventListener('blur', () => {
+                input.parentElement.closest('div').classList.remove('scale-[1.01]');
+            });
+        });
+    </script>
+</body></html>

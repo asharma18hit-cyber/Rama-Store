@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>RAMA STORE | Elite High-Performance Fashion India</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Geist:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                "on-primary-container": "#dad7ff",
+                "outline-variant": "#c7c4d8",
+                "primary": "#3525cd",
+                "surface-container-lowest": "#ffffff",
+                "surface-container-high": "#e7e8e9",
+                "error-container": "#ffdad6",
+                "tertiary": "#41485e",
+                "inverse-surface": "#2e3132",
+                "on-background": "#191c1d",
+                "on-error": "#ffffff",
+                "inverse-on-surface": "#f0f1f2",
+                "surface-bright": "#f8f9fa",
+                "surface-variant": "#e1e3e4",
+                "on-tertiary-fixed-variant": "#3f465c",
+                "on-tertiary-container": "#d4dbf5",
+                "on-primary-fixed-variant": "#3323cc",
+                "on-secondary-fixed-variant": "#005236",
+                "surface-container": "#edeeef",
+                "tertiary-fixed-dim": "#bec6e0",
+                "surface-container-low": "#f3f4f5",
+                "tertiary-container": "#586076",
+                "secondary-container": "#6cf8bb",
+                "surface": "#f8f9fa",
+                "secondary-fixed-dim": "#4edea3",
+                "surface-container-highest": "#e1e3e4",
+                "on-surface": "#191c1d",
+                "outline": "#777587",
+                "secondary-fixed": "#6ffbbe",
+                "on-error-container": "#93000a",
+                "on-primary": "#ffffff",
+                "surface-tint": "#4d44e3",
+                "primary-fixed-dim": "#c3c0ff",
+                "error": "#ba1a1a",
+                "primary-container": "#4f46e5",
+                "inverse-primary": "#c3c0ff",
+                "on-tertiary-fixed": "#131b2e",
+                "on-secondary-container": "#00714d",
+                "secondary": "#006c49",
+                "background": "#f8f9fa",
+                "on-surface-variant": "#464555",
+                "primary-fixed": "#e2dfff",
+                "surface-dim": "#d9dadb",
+                "on-tertiary": "#ffffff",
+                "tertiary-fixed": "#dae2fd",
+                "on-secondary-fixed": "#002113",
+                "on-secondary": "#ffffff",
+                "on-primary-fixed": "#0f0069"
+            },
+            "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+            },
+            "spacing": {
+                "xs": "4px",
+                "xl": "32px",
+                "container-max": "1280px",
+                "3xl": "64px",
+                "2xl": "48px",
+                "md": "16px",
+                "sm": "8px",
+                "gutter": "24px",
+                "lg": "24px",
+                "base": "8px"
+            },
+            "fontFamily": {
+                "label-md": ["Geist"],
+                "headline-lg-mobile": ["Geist"],
+                "body-md": ["Inter"],
+                "body-lg": ["Inter"],
+                "headline-lg": ["Geist"],
+                "label-sm": ["Geist"],
+                "display-lg": ["Geist"],
+                "headline-md": ["Geist"]
+            },
+            "fontSize": {
+                "label-md": ["14px", {"lineHeight": "1", "letterSpacing": "0.02em", "fontWeight": "600"}],
+                "headline-lg-mobile": ["28px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                "body-md": ["16px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}],
+                "body-lg": ["18px", {"lineHeight": "1.6", "letterSpacing": "0", "fontWeight": "400"}],
+                "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                "label-sm": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.04em", "fontWeight": "800"}],
+                "headline-md": ["24px", {"lineHeight": "1.3", "letterSpacing": "-0.01em", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .glass {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .skeleton {
+            background: linear-gradient(90deg, #f0f1f2 25%, #e1e3e4 50%, #f0f1f2 75%);
+            background-size: 200% 100%;
+            animation: skeleton-loading 1.5s infinite linear;
+        }
+        @keyframes skeleton-loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .product-card-transition {
+            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .product-image-transition {
+            transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .btn-press-transition {
+            transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        
+        .product-card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+        .product-card-hover:hover .product-image-hover {
+            transform: scale(1.02);
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+            will-change: opacity, transform;
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .reveal {
+                transition: none !important;
+                opacity: 1 !important;
+                transform: none !important;
+            }
+        }
+    </style>
+<style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface selection:bg-primary-fixed-dim selection:text-on-primary-fixed antialiased">
+<!-- TopAppBar (Glassmorphic Sticky) -->
+<header class="fixed top-0 w-full z-50 bg-white/80 dark:bg-inverse-surface/80 backdrop-blur-xl border-b border-outline-variant/30 shadow-sm transition-all duration-300">
+<div class="flex items-center justify-between px-gutter py-4 max-w-container-max mx-auto h-16">
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-primary scale-95 active:scale-90 transition-transform">menu</button>
+<h1 class="font-display-lg text-headline-md font-extrabold tracking-tighter text-primary">RAMA STORE</h1>
+</div>
+<div class="hidden md:flex flex-1 max-w-md mx-8">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-surface-container-low border border-outline-variant/30 rounded-full font-body-md text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all" placeholder="Search Cricket Tech, Monsoon Gear..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors">search</button>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors" onclick="toggleCart()">shopping_cart</button>
+</div>
+</div>
+</header>
+<main class="pt-16 pb-20">
+<!-- Hero Banner -->
+<section class="relative h-[707px] w-full overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent z-10"></div>
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-[10000ms] hover:scale-110" data-alt="A cinematic, high-fashion lifestyle shot featuring a model in elite performance apparel standing against a minimalist industrial backdrop." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBg1kMkRYULY5xxCSXGn5iZhTYVfw1137pd0Ie7IRej1DlZXR6QVoakfqryHRNOxAUyefx0HW5hPMCK0b5UWinEn1Ha28rfroOo7auS84mmt_6PjcTJOGCWj7cB7KFUjgFoAS-2NvfW5s5VQLaqzwduCPWIk_xwbPJHpvRptjqNFC3sKGmqh5wyuA78dQE86pHgTH8xKRJZPoVtpEnL-yYkDNxqXR6scZLFy2j8RYMQZ11DPpmFfsjZ')"></div>
+<div class="relative z-20 h-full flex flex-col justify-end px-gutter pb-xl max-w-container-max mx-auto">
+<span class="text-secondary-fixed font-label-md tracking-widest mb-4 uppercase">New Performance Series • India Exclusive</span>
+<h2 class="font-display-lg text-white mb-6 max-w-lg leading-tight">BUILT FOR THE <br/>INDIAN GRIND</h2>
+<button class="bg-primary hover:bg-primary-container text-white font-label-md py-4 px-8 rounded-lg w-fit shadow-lg shadow-primary/20 btn-press-transition active:scale-95">
+            SHOP COLLECTION
+        </button>
+</div>
+</section>
+<!-- New Arrivals (Horizontal Scroll) -->
+<section class="py-2xl overflow-hidden">
+<div class="px-gutter max-w-container-max mx-auto flex justify-between items-end mb-lg">
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface">Fresh Drops</h3>
+<p class="text-on-surface-variant font-body-md text-sm">Engineered for training in tropical humidity.</p>
+</div>
+<button class="text-primary font-label-md flex items-center gap-1 hover:gap-2 transition-all">
+            View All <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+<div class="flex gap-md overflow-x-auto no-scrollbar px-gutter pb-4">
+<!-- Product Card 1 -->
+<div class="reveal flex-none w-64 group product-card-hover product-card-transition" style="transition-delay: 100ms;">
+<div class="relative aspect-[3/4] bg-surface-container-low rounded-xl overflow-hidden border border-outline-variant/20 transition-all">
+<div class="absolute top-3 right-3 z-10">
+<button class="w-8 h-8 rounded-full glass bg-white/40 flex items-center justify-center text-on-surface hover:text-error transition-colors btn-press-transition active:scale-90">
+<span class="material-symbols-outlined text-[20px]">favorite</span>
+</button>
+</div>
+<img class="w-full h-full object-cover product-image-transition product-image-hover" data-alt="A sleek black high-performance running jacket." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC251HG0Jz2JKnQ0trohopvRsCgyHBhdj0kmeQNQw6P1bF-fUzbiDRrJHIlt43jXdab6kR8qo9FaDZZE6URxA_vtHMLDvC0i8Ij2qJDfFmvakoLF5Z-q-eJhfLsT8iKSoirpctjKLGFID8TIb00V5pO4ydI2CWz03bi4xwbH2uXsozvkkqcB0uBY9IJ5aK-XwdKIrQOC_x0WvHOpifYM0J_oaOXyqWfLbsOzvhGWKTEs1L7eTcHS6C2"/>
+<div class="absolute bottom-3 left-3">
+<span class="bg-white/90 glass px-2 py-1 rounded text-[10px] font-bold tracking-tighter">NEW</span>
+</div>
+</div>
+<div class="mt-4">
+<h4 class="font-label-md text-on-surface truncate">Aero-Core Monsoon Shell</h4>
+<div class="flex items-center gap-1 my-1">
+<span class="material-symbols-outlined text-[14px] text-secondary" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="text-[12px] font-medium">4.9</span>
+</div>
+<div class="flex justify-between items-center">
+<p class="font-headline-md text-lg text-primary">₹14,999</p>
+<button class="w-8 h-8 rounded-full bg-secondary hover:bg-on-secondary-container text-white flex items-center justify-center btn-press-transition active:scale-90">
+<span class="material-symbols-outlined text-sm">add_shopping_cart</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Product Card 2 (Skeleton State) -->
+<div class="reveal flex-none w-64" style="transition-delay: 200ms;">
+<div class="aspect-[3/4] skeleton rounded-xl border border-outline-variant/10"></div>
+<div class="mt-4 space-y-2">
+<div class="h-4 w-3/4 skeleton rounded"></div>
+<div class="h-3 w-1/4 skeleton rounded"></div>
+<div class="flex justify-between pt-2">
+<div class="h-6 w-20 skeleton rounded"></div>
+<div class="h-8 w-8 skeleton rounded-full"></div>
+</div>
+</div>
+</div>
+<!-- Product Card 3 -->
+<div class="reveal flex-none w-64 group product-card-hover product-card-transition" style="transition-delay: 300ms;">
+<div class="relative aspect-[3/4] bg-surface-container-low rounded-xl overflow-hidden border border-outline-variant/20 transition-all">
+<div class="absolute top-3 right-3 z-10">
+<button class="w-8 h-8 rounded-full glass bg-white/40 flex items-center justify-center text-on-surface hover:text-error transition-colors btn-press-transition active:scale-90">
+<span class="material-symbols-outlined text-[20px]">favorite</span>
+</button>
+</div>
+<img class="w-full h-full object-cover product-image-transition product-image-hover" data-alt="High-end technical sneakers." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDNGs_2u62QCPUY086PZaZRJ8mjVpkLal9_xg32XJ9swhBHLslo4emHOCRCEvf-Yw2RbSLiDbYvz6QwLrR70qQKPsbCgnj-zOnzJOnu3IomVbqL6IcHOg3PhHHptzkzlVt9v6KUm0DVR3ujw-0ZN0E11OwMTbsddh7L07UDLN0--XQf8LJM7WQAys-qsZhLnar3cWeyr7qijZTr--wMwF12dT32vYbviI5vL7Ts2_L09olSSYOLGhtN"/>
+</div>
+<div class="mt-4">
+<h4 class="font-label-md text-on-surface truncate">Flux-Elite Pitch Runners</h4>
+<div class="flex items-center gap-1 my-1">
+<span class="material-symbols-outlined text-[14px] text-secondary" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="text-[12px] font-medium">4.8</span>
+</div>
+<div class="flex justify-between items-center">
+<p class="font-headline-md text-lg text-primary">₹18,500</p>
+<button class="w-8 h-8 rounded-full bg-secondary hover:bg-on-secondary-container text-white flex items-center justify-center btn-press-transition active:scale-90">
+<span class="material-symbols-outlined text-sm">add_shopping_cart</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Product Card 4 -->
+<div class="reveal flex-none w-64 group product-card-hover product-card-transition" style="transition-delay: 400ms;">
+<div class="relative aspect-[3/4] bg-surface-container-low rounded-xl overflow-hidden border border-outline-variant/20 transition-all">
+<div class="absolute top-3 right-3 z-10">
+<button class="w-8 h-8 rounded-full glass bg-white/40 flex items-center justify-center text-on-surface hover:text-error transition-colors btn-press-transition active:scale-90">
+<span class="material-symbols-outlined text-[20px]">favorite</span>
+</button>
+</div>
+<img class="w-full h-full object-cover product-image-transition product-image-hover" data-alt="A premium carbon-fiber patterned smart watch." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAGcFRVmeRFx5zoGZqUw_OJM182WyRw87HTZysSgSWFoIDegwf2C9uAwOls-gVwi9CiBU4tV8NgK6VeWecOux_boj6pIRF22pvcb2dYWlmrOelNYoVis6v4xYHthLujRFXQ933_xWT9WnhpNBfev4nmYGn84xH7aSmi_JzOzSs-u6YH5gytWDJkbWAdZ5TSL_FDBFa_LNE5MaIum76CxdaMBeLkRO5CKkAGKevUw8PF6RM6dA-ckNVE"/>
+</div>
+<div class="mt-4">
+<h4 class="font-label-md text-on-surface truncate">Titan-G IPL Edition</h4>
+<div class="flex items-center gap-1 my-1">
+<span class="material-symbols-outlined text-[14px] text-secondary" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="text-[12px] font-medium">5.0</span>
+</div>
+<div class="flex justify-between items-center">
+<p class="font-headline-md text-lg text-primary">₹42,000</p>
+<button class="w-8 h-8 rounded-full bg-secondary hover:bg-on-secondary-container text-white flex items-center justify-center btn-press-transition active:scale-90">
+<span class="material-symbols-outlined text-sm">add_shopping_cart</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Featured 2-Column Grid (Elite Collection) -->
+<section class="px-gutter py-2xl max-w-container-max mx-auto">
+<h3 class="font-headline-md text-headline-md mb-lg">Featured Collections</h3>
+<div class="grid grid-cols-2 gap-4">
+<!-- Large Item 1 -->
+<div class="reveal col-span-2 relative h-80 rounded-2xl overflow-hidden group product-card-hover product-card-transition" style="transition-delay: 100ms;">
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent z-10"></div>
+<img class="w-full h-full object-cover product-image-transition product-image-hover" data-alt="Urban streetwear in an Indian city context." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD5uTAWK1QNhEPgf8JEoAsETx1zR87b3jCKbnYi4y_3x5S7ibj-va-OrQl5JSxyfW7QsOweikpPxdLesIfjt4LFwVxtF5q4FzOqKmF159JMwyImcQymtL6uWeCmLMAMGSimIT26DNMBvWnhCEleArAQQHtIeWuZ5z--KG4YDWpC8N4sjjlS3CTxed1ERmM6sx-Y99YxcAw2FHdbvkNswWns0POchStd0j9TnqxuNKegA3-BXAAL8Ygu"/>
+<div class="absolute inset-0 z-20 p-lg flex flex-col justify-end">
+<h4 class="text-white font-headline-md text-2xl mb-2">URBAN OVERDRIVE: METRO SERIES</h4>
+<p class="text-white/70 font-body-md text-sm mb-4">Navigate the chaos with heat-wicking tech.</p>
+<button class="text-white font-label-md underline underline-offset-4 decoration-secondary">Discover Now</button>
+</div>
+</div>
+<!-- Small Item 1 -->
+<div class="reveal relative h-64 rounded-2xl overflow-hidden group border border-outline-variant/20 product-card-hover product-card-transition" style="transition-delay: 200ms;">
+<div class="absolute inset-0 bg-black/40 z-10 group-hover:bg-black/20 transition-all"></div>
+<img class="w-full h-full object-cover product-image-transition product-image-hover" data-alt="Macro detail of technical fabric." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC7zAfXxQy7dKcNYtqh6W1vI24Jrjud-xZI_0WB3GAoyCaNhNuZU5diayLdghVyIeGYpz2OI-echFeFinlRBBLD5gmsOIjTN_5nFGPLQrbIBflCOgF78xabAp0OGBxPpZsE2Sm3v0j1Kpo-CMFnw9R7LvKM72ax8f4FtLAiD2I5HUBbTt8z4s65JsFDJsZbjOueql5hVQfNp399f6JTPwU4xV-ri5QXkHU4jQkGeN9ydEx201KcVgqy"/>
+<div class="absolute inset-0 z-20 flex items-center justify-center text-center p-4">
+<h4 class="text-white font-label-md text-lg font-extrabold uppercase tracking-widest">Cricket Tech</h4>
+</div>
+</div>
+<!-- Small Item 2 -->
+<div class="reveal relative h-64 rounded-2xl overflow-hidden group border border-outline-variant/20 product-card-hover product-card-transition" style="transition-delay: 300ms;">
+<div class="absolute inset-0 bg-black/40 z-10 group-hover:bg-black/20 transition-all"></div>
+<img class="w-full h-full object-cover product-image-transition product-image-hover" data-alt="Titanium accessories." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC8kTK4FrNuMO-QVASmKx5irFcuLMoQ6Xsl1TRTGSgDLnpxngHgl5wrzAs7Q15pmh8NaY8PjnqXmxbL9cS2ohPOUTg3BDk8fgeASA0vmffMFuXUSqcr6-bNnAc_0y73Z1P80GYjFAcJR-8-58FRgctkqA6cGyXnHMn8hAMLneUuTfLrZb-xxduCKNPy5L10v4XChMzJNv2rtvF2cYYalHH2CdgpPliCnnKFQRa5VhRNISLju43bJP39"/>
+<div class="absolute inset-0 z-20 flex items-center justify-center text-center p-4">
+<h4 class="text-white font-label-md text-lg font-extrabold uppercase tracking-widest">EDC India</h4>
+</div>
+</div>
+</div>
+</section>
+<!-- Product Highlight Card (Emerald Green CTA) -->
+<section class="px-gutter py-xl">
+<div class="reveal bg-surface-container-highest rounded-3xl overflow-hidden flex flex-col md:flex-row shadow-2xl product-card-transition product-card-hover" style="transition-delay: 100ms;">
+<div class="md:w-1/2 h-64 md:h-auto overflow-hidden">
+<img class="w-full h-full object-cover product-image-transition product-image-hover" data-alt="Studio portrait of a model in a high-neck dark forest green compression shirt." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD-RSaWwLf05vc8tzISu3TE4ClWXigGoOf9H1-ONN5plA9-KKsmMVcWNAE9dpQrhcyfbFvsEYM7Z_eBQuN5hUOS2toFNX-I39D2SRQYrR0JScYRdzI9pdkwcdru06BkByfd3rtuQF9FN6ciHNDD8w1dbC6k-mznpUh5vRjBkGMsMxwlXSprgNohJct1ntclwjhXJ9pG2acExQusEl6sDeYmwUthDWjpvJsYb7i75R2VfRhMkDD3YE3u"/>
+</div>
+<div class="md:w-1/2 p-lg md:p-2xl flex flex-col justify-center">
+<div class="flex items-center gap-2 mb-4">
+<div class="w-12 h-[1px] bg-secondary"></div>
+<span class="text-secondary font-label-sm uppercase tracking-[0.2em]">Limited Release • Mumbai Store Exclusive</span>
+</div>
+<h3 class="font-headline-lg text-headline-lg mb-4">The Emerald Vertex India</h3>
+<p class="text-on-surface-variant font-body-md mb-8">Optimized for high-intensity training in humid conditions. Featuring our signature Aero-Breeze ventilation and titanium-infused 4-way stretch.</p>
+<div class="flex items-center gap-6 mb-8">
+<div>
+<span class="text-on-surface-variant text-[10px] uppercase font-bold tracking-widest">Price</span>
+<p class="text-headline-md font-bold text-primary">₹9,999</p>
+</div>
+<div class="w-[1px] h-10 bg-outline-variant/30"></div>
+<div>
+<span class="text-on-surface-variant text-[10px] uppercase font-bold tracking-widest">Rating</span>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-secondary text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<p class="text-headline-md font-bold">5.0</p>
+</div>
+</div>
+</div>
+<button class="w-full bg-secondary hover:bg-on-secondary-container text-white font-headline-md py-4 rounded-xl shadow-lg shadow-secondary/20 flex items-center justify-center gap-2 group btn-press-transition active:scale-95">
+                SECURE NOW 
+                <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</button>
+</div>
+</div>
+</section>
+</main>
+<!-- NavigationDrawer (Slide-over Cart) -->
+<div class="fixed inset-y-0 right-0 w-96 z-[60] translate-x-full transition-transform duration-[400ms] cubic-bezier(0.16, 1, 0.3, 1) bg-surface border-l border-outline-variant/20 shadow-2xl flex flex-col" id="cart-drawer">
+<div class="p-lg border-b border-outline-variant/20 flex justify-between items-center bg-white/50 backdrop-blur-lg">
+<div>
+<h2 class="font-headline-md text-primary">Your Cart</h2>
+<p class="text-on-surface-variant text-xs font-label-sm">RAMA Elite Selection</p>
+</div>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors" onclick="toggleCart()">close</button>
+</div>
+<div class="flex-1 overflow-y-auto p-lg space-y-6">
+<!-- Cart Item 1 -->
+<div class="flex gap-4">
+<div class="w-20 h-24 bg-surface-container-low rounded-lg overflow-hidden border border-outline-variant/10">
+<img class="w-full h-full object-cover" data-alt="Close up of a premium tech-shell jacket." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBQTFuD_hN_kpAXw-wy4c5pdJvfzyu5ddYzu3hV9nUcHMwvW8G7y6-6YGoC2wNpTNbG6AYtbJcQmDDQ0TuU5tR6Yj4KEpiscDpKqskM9seawJ0dRh9a7VkRtqQALU2-Ksn3HgXLkEPwFoZ1kmTsgx1KlJCEahkyCfhCDxtFuPfJ_eGlFzJKfQml9tht5ekSkZMXpJvFLxC1QQMlIt5fQUaN8lzXoMKU4j0fl3dtm7ommHN_UBBxghbt"/>
+</div>
+<div class="flex-1">
+<h4 class="font-label-md text-on-surface">Aero-Core Monsoon Shell</h4>
+<p class="text-xs text-on-surface-variant">Size: L | Color: Midnight Black</p>
+<div class="flex justify-between items-center mt-2">
+<div class="flex items-center gap-3 border border-outline-variant/30 rounded-full px-2 py-1">
+<button class="material-symbols-outlined text-sm btn-press-transition active:scale-75">remove</button>
+<span class="text-sm font-bold">1</span>
+<button class="material-symbols-outlined text-sm btn-press-transition active:scale-75">add</button>
+</div>
+<p class="font-headline-md text-sm">₹14,999</p>
+</div>
+</div>
+</div>
+<div class="h-24 skeleton rounded-lg opacity-40"></div>
+</div>
+<div class="p-lg bg-white border-t border-outline-variant/20">
+<div class="flex justify-between mb-4">
+<span class="text-on-surface-variant font-body-md">Subtotal</span>
+<span class="font-headline-md text-primary">₹14,999</span>
+</div>
+<button class="w-full bg-primary text-white py-4 rounded-xl font-headline-md shadow-xl shadow-primary/20 hover:bg-primary-container btn-press-transition active:scale-[0.98]">
+            CHECKOUT
+        </button>
+<p class="text-center text-[10px] text-on-surface-variant mt-4 font-label-sm uppercase tracking-widest">Complimentary Pan-India Express Shipping</p>
+</div>
+</div>
+<div class="fixed inset-0 bg-black/20 backdrop-blur-sm z-[55] hidden opacity-0 transition-opacity duration-300" id="cart-overlay" onclick="toggleCart()"></div>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="fixed bottom-0 w-full z-50 rounded-t-xl bg-white/90 dark:bg-inverse-surface/90 backdrop-blur-md border-t border-outline-variant/30 shadow-lg md:hidden">
+<div class="flex justify-around items-center h-16 px-4 pb-safe">
+<a class="flex flex-col items-center justify-center bg-primary/10 text-primary font-bold rounded-xl px-4 py-2 transition-all" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-label-sm text-xs">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">category</span>
+<span class="font-label-sm text-xs">Categories</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">favorite</span>
+<span class="font-label-sm text-xs">Wishlist</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-label-sm text-xs">Account</span>
+</a>
+</div>
+</nav>
+<script>
+    function toggleCart() {
+        const drawer = document.getElementById('cart-drawer');
+        const overlay = document.getElementById('cart-overlay');
+        const isOpen = drawer.classList.contains('translate-x-0');
+
+        if (isOpen) {
+            drawer.classList.remove('translate-x-0');
+            drawer.classList.add('translate-x-full');
+            overlay.classList.add('hidden');
+            overlay.classList.remove('opacity-100');
+            document.body.style.overflow = 'auto';
+        } else {
+            drawer.classList.add('translate-x-0');
+            drawer.classList.remove('translate-x-full');
+            overlay.classList.remove('hidden');
+            setTimeout(() => overlay.classList.add('opacity-100'), 10);
+            document.body.style.overflow = 'hidden';
+        }
+    }
+
+    const revealObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('active');
+                revealObserver.unobserve(entry.target);
+            }
+        });
+    }, {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    });
+
+    document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+    window.addEventListener('scroll', () => {
+        const header = document.querySelector('header');
+        if (window.scrollY > 20) {
+            header.classList.add('py-2', 'shadow-md');
+            header.classList.remove('py-4', 'shadow-sm');
+        } else {
+            header.classList.add('py-4', 'shadow-sm');
+            header.classList.remove('py-2', 'shadow-md');
+        }
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey && e.key === 'k') {
+            e.preventDefault();
+            document.querySelector('input').focus();
+        }
+    });
+</script>
+</body></html>

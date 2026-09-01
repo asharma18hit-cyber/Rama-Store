@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Customer Profile | Rama Store Elite Admin</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Geist:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-fixed": "#e2dfff",
+                        "on-tertiary-fixed-variant": "#3f465c",
+                        "on-secondary-fixed": "#002113",
+                        "secondary-container": "#6cf8bb",
+                        "secondary": "#006c49",
+                        "surface-container-high": "#e7e8e9",
+                        "on-surface": "#191c1d",
+                        "on-background": "#191c1d",
+                        "on-error-container": "#93000a",
+                        "tertiary-fixed-dim": "#bec6e0",
+                        "tertiary-fixed": "#dae2fd",
+                        "surface-tint": "#4d44e3",
+                        "surface-container-highest": "#e1e3e4",
+                        "secondary-fixed": "#6ffbbe",
+                        "error-container": "#ffdad6",
+                        "surface-container-low": "#f3f4f5",
+                        "surface-container": "#edeeef",
+                        "error": "#ba1a1a",
+                        "surface-variant": "#e1e3e4",
+                        "on-surface-variant": "#464555",
+                        "on-secondary": "#ffffff",
+                        "primary": "#3525cd",
+                        "tertiary": "#41485e",
+                        "surface": "#f8f9fa",
+                        "on-primary-fixed-variant": "#3323cc",
+                        "on-primary-container": "#dad7ff",
+                        "background": "#f8f9fa",
+                        "tertiary-container": "#586076",
+                        "on-secondary-fixed-variant": "#005236",
+                        "on-tertiary-fixed": "#131b2e",
+                        "inverse-on-surface": "#f0f1f2",
+                        "outline-variant": "#c7c4d8",
+                        "on-primary-fixed": "#0f0069",
+                        "inverse-surface": "#2e3132",
+                        "on-error": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-container": "#4f46e5",
+                        "secondary-fixed-dim": "#4edea3",
+                        "on-primary": "#ffffff",
+                        "surface-dim": "#d9dadb",
+                        "surface-bright": "#f8f9fa",
+                        "on-tertiary": "#ffffff",
+                        "on-tertiary-container": "#d4dbf5",
+                        "inverse-primary": "#c3c0ff",
+                        "on-secondary-container": "#00714d",
+                        "outline": "#777587",
+                        "primary-fixed-dim": "#c3c0ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "2xl": "48px",
+                        "xl": "32px",
+                        "container-max": "1280px",
+                        "sm": "8px",
+                        "lg": "24px",
+                        "gutter": "24px",
+                        "md": "16px",
+                        "base": "8px",
+                        "xs": "4px",
+                        "3xl": "64px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Geist"],
+                        "body-lg": ["Inter"],
+                        "label-md": ["Geist"],
+                        "headline-lg-mobile": ["Geist"],
+                        "label-sm": ["Geist"],
+                        "headline-lg": ["Geist"],
+                        "display-lg": ["Geist"],
+                        "body-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", {"lineHeight": "1.3", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "body-lg": ["18px", {"lineHeight": "1.6", "letterSpacing": "0", "fontWeight": "400"}],
+                        "label-md": ["14px", {"lineHeight": "1", "letterSpacing": "0.02em", "fontWeight": "600"}],
+                        "headline-lg-mobile": ["28px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "label-sm": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                        "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.04em", "fontWeight": "800"}],
+                        "body-md": ["16px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .glass-effect {
+            backdrop-filter: blur(12px);
+            background: rgba(255, 255, 255, 0.8);
+        }
+        .micro-shadow {
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03);
+        }
+        .lift-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body-md overflow-x-hidden">
+<!-- SideNavBar Anchor -->
+<aside class="h-screen w-64 fixed left-0 top-0 border-r border-outline-variant bg-surface flex flex-col py-lg px-md z-50">
+<div class="mb-3xl">
+<h1 class="text-headline-md font-headline-md font-bold text-primary">Rama Store</h1>
+<p class="text-label-sm text-on-surface-variant tracking-widest uppercase">Elite Management</p>
+</div>
+<nav class="flex-1 space-y-sm">
+<a class="flex items-center gap-md text-on-surface-variant hover:bg-surface-container-high transition-colors duration-200 px-4 py-3 rounded-lg group" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-md text-label-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-md text-on-surface-variant hover:bg-surface-container-high transition-colors duration-200 px-4 py-3 rounded-lg group" href="#">
+<span class="material-symbols-outlined">shopping_cart</span>
+<span class="font-label-md text-label-md">Orders</span>
+</a>
+<a class="flex items-center gap-md text-on-surface-variant hover:bg-surface-container-high transition-colors duration-200 px-4 py-3 rounded-lg group" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="font-label-md text-label-md">Inventory</span>
+</a>
+<!-- Active State: Customers -->
+<a class="flex items-center gap-md bg-primary-container text-on-primary-container rounded-lg px-4 py-3 scale-[0.98] transition-transform duration-150 shadow-sm" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">group</span>
+<span class="font-label-md text-label-md">Customers</span>
+</a>
+<a class="flex items-center gap-md text-on-surface-variant hover:bg-surface-container-high transition-colors duration-200 px-4 py-3 rounded-lg group" href="#">
+<span class="material-symbols-outlined">monitoring</span>
+<span class="font-label-md text-label-md">Analytics</span>
+</a>
+<a class="flex items-center gap-md text-on-surface-variant hover:bg-surface-container-high transition-colors duration-200 px-4 py-3 rounded-lg group" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-md text-label-md">Settings</span>
+</a>
+</nav>
+<div class="mt-auto pt-lg border-t border-outline-variant flex flex-col gap-sm">
+<a class="flex items-center gap-md text-on-surface-variant hover:bg-surface-container-high px-4 py-3 rounded-lg" href="#">
+<span class="material-symbols-outlined">help</span>
+<span class="font-label-md text-label-md">Support</span>
+</a>
+<a class="flex items-center gap-md text-on-surface-variant hover:bg-surface-container-high px-4 py-3 rounded-lg" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span class="font-label-md text-label-md">Log Out</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Shell -->
+<main class="ml-64 min-h-screen">
+<!-- TopNavBar Anchor -->
+<header class="docked full-width top-0 sticky z-40 glass-effect border-b border-outline-variant flex justify-between items-center h-16 px-lg">
+<div class="flex items-center gap-lg flex-1">
+<div class="relative w-full max-w-md">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
+<input class="w-full bg-white border border-outline-variant rounded-full py-2 pl-10 pr-4 text-body-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" placeholder="Search customers, orders, or data..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-md ml-auto">
+<button class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
+<span class="material-symbols-outlined">chat_bubble</span>
+</button>
+<div class="h-8 w-[1px] bg-outline-variant mx-2"></div>
+<div class="flex items-center gap-sm">
+<div class="text-right hidden lg:block">
+<p class="text-label-md font-bold">Admin User</p>
+<p class="text-[10px] uppercase tracking-tighter text-on-surface-variant">Fleet Manager</p>
+</div>
+<div class="w-10 h-10 rounded-full bg-primary-fixed border-2 border-white overflow-hidden shadow-sm">
+<img class="w-full h-full object-cover" data-alt="A professional headshot of a middle-aged male administrator with silver-rimmed glasses and a confident smile. The background is a blurred high-end corporate office with soft indigo and white tones, matching the brand's industrial luxury aesthetic. The lighting is bright and even, highlighting premium details of a silk necktie and tailored charcoal suit jacket." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDz8DdMRPtSAxWELq2IM0zQn3kKbem_nK38ByNdhvnYRDJaP4ydWM0_lmVhurNN8WfJ6hg3M5yb18ZGqw_Hs8ZgMHCwYCMxu1rd6qYjLaFNpk-Pup_C_AHWZ646us0yQHjahFpny7HO2i-noejNro6Zv-W5ipl75BmSoOSkqMPHiVRorO9eUHHl8u4_ozGzvPKyyj0zgxvKb1ou153QFmKO8qYyybllawGCER4MONbSRRaMWBHKeNf7"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Content Canvas -->
+<div class="p-xl space-y-xl max-w-screen-2xl mx-auto">
+<!-- Profile Header Section -->
+<section class="flex flex-col md:flex-row gap-xl items-start justify-between">
+<div class="flex gap-lg items-center">
+<div class="relative group">
+<div class="w-32 h-32 rounded-3xl overflow-hidden shadow-lg border-4 border-white">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="A high-resolution portrait of Marcus Thorne, a stylish executive in his 40s with a sharp jawline and focused expression. He wears a premium dark navy turtleneck and a tailored wool blazer. The studio lighting is dramatic yet soft, using a high-contrast palette of cool blues and charcoal to convey wealth and authority. The background is a minimalist architectural space." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC0vkn5unACBMT7G0mkcnrBSH-mjllACBPtcDN6n9KqOQiatsU8UbBTTao2fDm_h4TeEDRTMiCIh_9nlPGgxqR8SrUlW-5VRelx7PgpKM_wcQv9QQ--ftvNytW3DWRDAMYLa_IAkP7Ohantr56cFIK-YnoGTcsUYSTNGVGcmXoOf098U-JCuEdM-2we8nQ0AL9UrXu2kuso5ejYH-RqJZBwpBz5QV311mblBZY1GfP9drDyMP3aEBxG"/>
+</div>
+<div class="absolute -bottom-2 -right-2 bg-secondary text-white p-2 rounded-xl shadow-md flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+</div>
+<div class="space-y-xs">
+<div class="flex items-center gap-md">
+<h2 class="text-headline-lg font-headline-lg text-inverse-surface">Marcus Thorne</h2>
+<div class="flex gap-xs">
+<span class="px-3 py-1 rounded-full bg-primary/10 text-primary text-label-sm font-bold uppercase tracking-wider">Elite</span>
+<span class="px-3 py-1 rounded-full bg-secondary/10 text-secondary text-label-sm font-bold uppercase tracking-wider">Repeat Buyer</span>
+</div>
+</div>
+<p class="text-body-lg text-on-surface-variant">marcus.t@thornedynamics.com • London, UK</p>
+<div class="flex items-center gap-md pt-sm">
+<div class="flex items-center gap-xs text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]">calendar_today</span>
+<span class="text-label-md">Member since Dec 2021</span>
+</div>
+<div class="w-1 h-1 rounded-full bg-outline-variant"></div>
+<div class="flex items-center gap-xs text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]">schedule</span>
+<span class="text-label-md">Last active: 2h ago</span>
+</div>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-md items-end">
+<div class="bg-primary-container text-on-primary-container p-xl rounded-2xl micro-shadow min-w-[240px] relative overflow-hidden group">
+<div class="relative z-10">
+<p class="text-label-md opacity-80 mb-xs">Lifetime Value (LTV)</p>
+<h3 class="text-display-lg font-display-lg">$142,500.00</h3>
+<div class="flex items-center gap-xs mt-sm text-secondary-container">
+<span class="material-symbols-outlined text-[16px]">trending_up</span>
+<span class="text-label-sm font-bold">+12% vs last year</span>
+</div>
+</div>
+<div class="absolute top-0 right-0 p-lg opacity-20 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-[80px]">account_balance_wallet</span>
+</div>
+</div>
+<div class="flex gap-sm">
+<button class="bg-white border border-outline-variant text-on-surface-variant hover:text-primary hover:border-primary px-lg py-sm rounded-lg font-label-md transition-all flex items-center gap-sm">
+<span class="material-symbols-outlined text-[20px]">mail</span>
+                            Contact
+                        </button>
+<button class="bg-primary text-on-primary hover:opacity-90 px-lg py-sm rounded-lg font-label-md transition-all flex items-center gap-sm active:scale-95 shadow-md">
+<span class="material-symbols-outlined text-[20px]">edit</span>
+                            Edit Profile
+                        </button>
+</div>
+</div>
+</section>
+<!-- Grid Layout for Details -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-xl">
+<!-- Left Column: Contact & Segmentation -->
+<div class="lg:col-span-1 space-y-xl">
+<!-- Contact Details Card -->
+<div class="bg-white rounded-2xl border border-outline-variant micro-shadow overflow-hidden">
+<div class="px-lg py-md border-b border-outline-variant flex items-center justify-between bg-surface-container-low">
+<h4 class="text-label-md font-bold uppercase tracking-wider text-on-surface-variant">Contact Information</h4>
+<button class="text-primary hover:underline text-label-sm">Manage</button>
+</div>
+<div class="p-lg space-y-lg">
+<div class="space-y-xs">
+<label class="text-label-sm text-on-surface-variant">Email Address</label>
+<p class="text-body-md font-medium text-inverse-surface">marcus.t@thornedynamics.com</p>
+</div>
+<div class="space-y-xs">
+<label class="text-label-sm text-on-surface-variant">Phone Number</label>
+<p class="text-body-md font-medium text-inverse-surface">+44 20 7946 0123</p>
+</div>
+<div class="space-y-xs">
+<label class="text-label-sm text-on-surface-variant">Shipping Address</label>
+<p class="text-body-md font-medium text-inverse-surface">42 Berkeley Square, Mayfair<br/>London W1J 5AW, United Kingdom</p>
+</div>
+<div class="pt-md">
+<div class="bg-surface-container p-md rounded-xl flex items-center gap-md">
+<div class="w-10 h-10 rounded-full bg-white flex items-center justify-center text-primary border border-outline-variant">
+<span class="material-symbols-outlined">map</span>
+</div>
+<div>
+<p class="text-label-sm font-bold">Primary Market</p>
+<p class="text-body-md">European Union (Luxury)</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Segments & Interests -->
+<div class="bg-white rounded-2xl border border-outline-variant micro-shadow p-lg space-y-lg">
+<h4 class="text-label-md font-bold uppercase tracking-wider text-on-surface-variant">Customer Segmentation</h4>
+<div class="space-y-md">
+<div class="flex items-center justify-between p-sm bg-surface rounded-lg">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary">diamond</span>
+<span class="text-body-md font-medium">VIP Tier 1</span>
+</div>
+<span class="text-label-sm font-bold text-secondary">Active</span>
+</div>
+<div class="flex items-center justify-between p-sm bg-surface rounded-lg">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-on-surface-variant">watch</span>
+<span class="text-body-md font-medium">Horology Interest</span>
+</div>
+<span class="text-label-sm font-bold text-on-surface-variant">High</span>
+</div>
+<div class="flex flex-wrap gap-xs pt-md">
+<span class="bg-surface-variant px-3 py-1 rounded text-label-sm">Art Collector</span>
+<span class="bg-surface-variant px-3 py-1 rounded text-label-sm">High-Tech</span>
+<span class="bg-surface-variant px-3 py-1 rounded text-label-sm">Early Adopter</span>
+<span class="bg-surface-variant px-3 py-1 rounded text-label-sm">Corporate Buyer</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Transactions & Communications -->
+<div class="lg:col-span-2 space-y-xl">
+<!-- Recent Orders Bento -->
+<div class="bg-white rounded-2xl border border-outline-variant micro-shadow overflow-hidden">
+<div class="px-lg py-md border-b border-outline-variant flex items-center justify-between">
+<div class="flex items-center gap-md">
+<h4 class="text-label-md font-bold uppercase tracking-wider text-on-surface-variant">Recent Orders</h4>
+<span class="bg-surface-container-high px-2 py-0.5 rounded text-label-sm">24 Total</span>
+</div>
+<button class="text-primary hover:underline text-label-md font-bold">View All History</button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead class="bg-surface text-on-surface-variant text-label-sm uppercase tracking-tighter">
+<tr>
+<th class="px-lg py-md">Order ID</th>
+<th class="px-lg py-md">Date</th>
+<th class="px-lg py-md">Items</th>
+<th class="px-lg py-md">Status</th>
+<th class="px-lg py-md text-right">Amount</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant">
+<tr class="hover:bg-surface-container-low transition-colors cursor-pointer group">
+<td class="px-lg py-lg font-bold text-primary">#ORD-89210</td>
+<td class="px-lg py-lg text-on-surface-variant">Oct 12, 2023</td>
+<td class="px-lg py-lg">
+<div class="flex -space-x-3 overflow-hidden">
+<img class="inline-block h-8 w-8 rounded-full ring-2 ring-white" data-alt="A luxury mechanical watch with an exposed tourbillon and titanium casing, presented on a dark velvet background in high-key industrial lighting. The aesthetic is extremely premium, emphasizing technical precision." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCIA5Yad4ynUOt1vpmHmfRw8omRJnXvAqnNS_ChWsZzpYm5wMpxEwUCpFH5YqzUyEMcA-20Rl0EF6widuHFjqXTRYaqXSwPUp2uhztRRE95YIdCnYgSbueZ7BV01-s-KkQRXpSwBeXLRNry5Q5L8qRICLk7u50JoPfuIegmDQ1wKsianf0jloTNJ2hvc8mwlmFo7yaEnvcons9nOpaz9nZ3-_tOlTbjwn-tec8JJAf-94owkxTlUqn2"/>
+<img class="inline-block h-8 w-8 rounded-full ring-2 ring-white" data-alt="A set of premium leather noise-canceling headphones with brushed aluminum accents. The lighting is soft and minimalist, focusing on the texture of the fine-grain leather and the metallic sheen of the hardware." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAEAEprOVdAUnvE66OYuI82iXuXrSqIQoSIFvrDluukeJ30q42YtMKkuLraHNOYEMTHRQ2YqQfqUfDRHi6k89u94s75kvB4FkP6IJVWLzmlFisRA07TOJDHO0eTMGQdWPJ4bmTZ7VQNSxlXCD58wrKm9nNNOy09MP8yzvVXUmsaj7-lvqhHm1DUWKNiFZswrVCkqJZXeeO8h_wzKhoyp1FuzYybH60ii9J6xtBpCCsFqfqC5F4qfTJs"/>
+<div class="flex h-8 w-8 items-center justify-center rounded-full bg-surface-variant text-[10px] font-bold ring-2 ring-white">+1</div>
+</div>
+</td>
+<td class="px-lg py-lg">
+<span class="flex items-center gap-xs text-secondary font-bold text-label-sm">
+<span class="w-2 h-2 rounded-full bg-secondary"></span> Delivered
+                                            </span>
+</td>
+<td class="px-lg py-lg text-right font-bold">$12,450.00</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors cursor-pointer group">
+<td class="px-lg py-lg font-bold text-primary">#ORD-88544</td>
+<td class="px-lg py-lg text-on-surface-variant">Sep 28, 2023</td>
+<td class="px-lg py-lg">
+<img class="inline-block h-8 w-8 rounded-full ring-2 ring-white" data-alt="A minimalist architectural scale model made of frosted glass and white acrylic. The style is contemporary and high-end, with soft ambient occlusion and clean geometric lines." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCPs-gtNwVzA_DcbrO-eH6GzgD4FuxgNNH-7hLSaHrR8LFsVPe4g6zvTh91pceco91ZaQOhclTBfX0QBPNgs7t7hGOBNfpYgctrda7zYPu7-ACWhU_cW7j3V-OZb7BqXcvBLnHUGUWgRcIBEivRI1F4asIIKYhoyKWUnShiChnmjjoI2J7yHA4SzE5pck9dk-OkL8mpe9fNgL2XiKDU7jLaCJuvUvvsHBEp-huHwfXFMc6353WgJKeu"/>
+</td>
+<td class="px-lg py-lg">
+<span class="flex items-center gap-xs text-secondary font-bold text-label-sm">
+<span class="w-2 h-2 rounded-full bg-secondary"></span> Delivered
+                                            </span>
+</td>
+<td class="px-lg py-lg text-right font-bold">$4,200.00</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors cursor-pointer group">
+<td class="px-lg py-lg font-bold text-primary">#ORD-87102</td>
+<td class="px-lg py-lg text-on-surface-variant">Aug 15, 2023</td>
+<td class="px-lg py-lg">
+<img class="inline-block h-8 w-8 rounded-full ring-2 ring-white" data-alt="A sleek black obsidian digital sculpture displayed on a pedestal in a minimalist gallery. The lighting creates sharp highlights on the polished surface, creating an atmosphere of dark, industrial luxury." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC0X58Mkbhfa9OBh-4HK8NmxBm45df6JE0X9RmVkELDcve33TP10NhKbakd_BgzElLt4ecLf7YGJf0ETaGNUGAU3Pch1PAalMp_ToFOrrimPCTy71zjY_XmGlKbWKjpWuc8-KPi5QkacHC9LAcJ7I2K_H1KJGZl1qRdswAsUxWwBjSAcvb57xI52DGAMfk3rnMF7EzmhtGe817Zk5aV45jxjbuYlHny-WcT5h956ICOmlGoVy2sVPY9"/>
+</td>
+<td class="px-lg py-lg">
+<span class="flex items-center gap-xs text-on-surface-variant font-bold text-label-sm">
+<span class="w-2 h-2 rounded-full bg-outline"></span> Returned
+                                            </span>
+</td>
+<td class="px-lg py-lg text-right font-bold">$1,850.00</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Communication & Notes -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-xl">
+<!-- Private Admin Notes -->
+<div class="bg-surface-container-highest rounded-2xl p-lg space-y-md border border-outline-variant">
+<div class="flex items-center justify-between">
+<h4 class="text-label-md font-bold uppercase tracking-wider text-on-surface-variant">Internal Admin Notes</h4>
+<span class="material-symbols-outlined text-on-surface-variant">lock</span>
+</div>
+<div class="space-y-md h-[240px] overflow-y-auto pr-md">
+<div class="bg-white p-md rounded-xl micro-shadow space-y-xs relative">
+<p class="text-body-md text-on-surface">Client expressed interest in the upcoming Vanguard series. Prioritize early access invitation.</p>
+<p class="text-label-sm text-on-surface-variant flex items-center justify-between">
+<span>Added by Sarah K.</span>
+<span>Oct 14, 2023</span>
+</p>
+</div>
+<div class="bg-white p-md rounded-xl micro-shadow space-y-xs relative">
+<p class="text-body-md text-on-surface">Prefers concierge delivery over standard courier. Always call 15 mins prior.</p>
+<p class="text-label-sm text-on-surface-variant flex items-center justify-between">
+<span>Added by James W.</span>
+<span>Sep 02, 2023</span>
+</p>
+</div>
+</div>
+<div class="pt-sm">
+<div class="relative">
+<input class="w-full bg-white border border-outline-variant rounded-lg py-2 px-4 text-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none" placeholder="Add a note..." type="text"/>
+<button class="absolute right-2 top-1/2 -translate-y-1/2 text-primary hover:bg-primary-fixed p-1 rounded">
+<span class="material-symbols-outlined">add_circle</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Comm History -->
+<div class="bg-white rounded-2xl border border-outline-variant micro-shadow overflow-hidden">
+<div class="px-lg py-md border-b border-outline-variant bg-surface-container-low">
+<h4 class="text-label-md font-bold uppercase tracking-wider text-on-surface-variant">Communication History</h4>
+</div>
+<div class="p-lg space-y-lg relative">
+<div class="absolute left-[39px] top-lg bottom-lg w-[1px] bg-outline-variant"></div>
+<div class="flex gap-md relative">
+<div class="z-10 w-8 h-8 rounded-full bg-primary-fixed flex items-center justify-center text-primary border-2 border-white">
+<span class="material-symbols-outlined text-[16px]">call</span>
+</div>
+<div class="flex-1 space-y-xs">
+<p class="text-label-md font-bold text-inverse-surface">Direct Call - Relationship Review</p>
+<p class="text-body-md text-on-surface-variant line-clamp-1">Discussed annual membership benefits and upcoming private auction.</p>
+<p class="text-label-sm text-outline">Yesterday at 14:30</p>
+</div>
+</div>
+<div class="flex gap-md relative">
+<div class="z-10 w-8 h-8 rounded-full bg-secondary-fixed flex items-center justify-center text-secondary border-2 border-white">
+<span class="material-symbols-outlined text-[16px]">mail</span>
+</div>
+<div class="flex-1 space-y-xs">
+<p class="text-label-md font-bold text-inverse-surface">Email - Order Confirmation #ORD-89210</p>
+<p class="text-body-md text-on-surface-variant line-clamp-1">Automated confirmation sent to marcus.t@thornedynamics.com.</p>
+<p class="text-label-sm text-outline">Oct 12, 2023</p>
+</div>
+</div>
+<div class="flex gap-md relative">
+<div class="z-10 w-8 h-8 rounded-full bg-tertiary-fixed flex items-center justify-center text-tertiary border-2 border-white">
+<span class="material-symbols-outlined text-[16px]">chat</span>
+</div>
+<div class="flex-1 space-y-xs">
+<p class="text-label-md font-bold text-inverse-surface">Chat - Support Query</p>
+<p class="text-body-md text-on-surface-variant line-clamp-1">Inquired about availability of limited edition white gold model.</p>
+<p class="text-label-sm text-outline">Oct 05, 2023</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Interactive micro-script -->
+<script>
+        // Simple hover interaction for cards
+        document.querySelectorAll('.lift-hover').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.transform = 'translateY(-4px)';
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'translateY(0)';
+            });
+        });
+
+        // Search bar focus effect
+        const searchInput = document.querySelector('input[type="text"]');
+        searchInput.addEventListener('focus', () => {
+            searchInput.parentElement.classList.add('scale-[1.02]');
+            searchInput.parentElement.classList.add('transition-transform');
+        });
+        searchInput.addEventListener('blur', () => {
+            searchInput.parentElement.classList.remove('scale-[1.02]');
+        });
+    </script>
+</body></html>

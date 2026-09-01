@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Order Details | RAMA STORE Admin</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&amp;family=Geist:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                "on-primary-container": "#dad7ff",
+                "on-background": "#191c1d",
+                "error-container": "#ffdad6",
+                "outline": "#777587",
+                "on-secondary": "#ffffff",
+                "inverse-surface": "#2e3132",
+                "background": "#f8f9fa",
+                "on-primary-fixed": "#0f0069",
+                "tertiary": "#41485e",
+                "surface-dim": "#d9dadb",
+                "on-surface-variant": "#464555",
+                "tertiary-container": "#586076",
+                "surface-variant": "#e1e3e4",
+                "surface": "#f8f9fa",
+                "on-tertiary-container": "#d4dbf5",
+                "on-primary": "#ffffff",
+                "primary-fixed-dim": "#c3c0ff",
+                "secondary-fixed": "#6ffbbe",
+                "inverse-on-surface": "#f0f1f2",
+                "surface-container-highest": "#e1e3e4",
+                "on-error-container": "#93000a",
+                "secondary-fixed-dim": "#4edea3",
+                "tertiary-fixed": "#dae2fd",
+                "tertiary-fixed-dim": "#bec6e0",
+                "secondary-container": "#6cf8bb",
+                "inverse-primary": "#c3c0ff",
+                "primary-fixed": "#e2dfff",
+                "primary": "#3525cd",
+                "on-surface": "#191c1d",
+                "on-tertiary": "#ffffff",
+                "surface-bright": "#f8f9fa",
+                "surface-tint": "#4d44e3",
+                "on-secondary-fixed-variant": "#005236",
+                "secondary": "#006c49",
+                "on-secondary-container": "#00714d",
+                "on-error": "#ffffff",
+                "on-secondary-fixed": "#002113",
+                "surface-container": "#edeeef",
+                "outline-variant": "#c7c4d8",
+                "primary-container": "#4f46e5",
+                "on-tertiary-fixed-variant": "#3f465c",
+                "error": "#ba1a1a",
+                "surface-container-high": "#e7e8e9",
+                "on-primary-fixed-variant": "#3323cc",
+                "surface-container-low": "#f3f4f5",
+                "surface-container-lowest": "#ffffff",
+                "on-tertiary-fixed": "#131b2e"
+            },
+            "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+            },
+            "spacing": {
+                "md": "16px",
+                "gutter": "24px",
+                "lg": "24px",
+                "3xl": "64px",
+                "sm": "8px",
+                "xs": "4px",
+                "xl": "32px",
+                "container-max": "1280px",
+                "2xl": "48px",
+                "base": "8px"
+            },
+            "fontFamily": {
+                "headline-md": ["Geist"],
+                "headline-lg": ["Geist"],
+                "headline-lg-mobile": ["Geist"],
+                "display-lg": ["Geist"],
+                "body-lg": ["Inter"],
+                "label-md": ["Geist"],
+                "body-md": ["Inter"],
+                "label-sm": ["Geist"]
+            },
+            "fontSize": {
+                "headline-md": ["24px", {"lineHeight": "1.3", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                "headline-lg-mobile": ["28px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.04em", "fontWeight": "800"}],
+                "body-lg": ["18px", {"lineHeight": "1.6", "letterSpacing": "0", "fontWeight": "400"}],
+                "label-md": ["14px", {"lineHeight": "1", "letterSpacing": "0.02em", "fontWeight": "600"}],
+                "body-md": ["16px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}],
+                "label-sm": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "500"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #f8f9fa;
+            color: #191c1d;
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        .glass-effect {
+            backdrop-filter: blur(12px);
+            background: rgba(255, 255, 255, 0.8);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .status-line::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: #E5E7EB;
+            z-index: 0;
+            transform: translateY(-50%);
+        }
+        .status-line-active::before {
+            background: #4F46E5;
+        }
+    </style>
+</head>
+<body class="bg-background min-h-screen pb-20 md:pb-0">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-white/80 dark:bg-inverse-surface/80 backdrop-blur-xl border-b border-outline-variant/30 dark:border-outline/20 shadow-sm dark:shadow-none">
+<div class="flex items-center justify-between px-gutter py-4 max-w-container-max mx-auto">
+<div class="flex items-center gap-4">
+<button class="p-2 hover:bg-surface-container-low rounded-full transition-all active:scale-90">
+<span class="material-symbols-outlined text-primary">arrow_back</span>
+</button>
+<h1 class="font-display-lg text-headline-md font-extrabold tracking-tighter text-primary dark:text-primary-fixed-dim">RAMA STORE</h1>
+</div>
+<div class="hidden md:flex items-center gap-6">
+<span class="font-label-md text-on-surface-variant">Order #RS-88421</span>
+<button class="bg-primary-container text-white px-4 py-2 rounded-lg font-label-md hover:opacity-90 transition-all active:scale-95">
+                    Print Invoice
+                </button>
+</div>
+<div class="md:hidden">
+<span class="material-symbols-outlined text-on-surface-variant">more_vert</span>
+</div>
+</div>
+</header>
+<main class="pt-24 pb-12 px-4 md:px-gutter max-w-container-max mx-auto">
+<!-- Breadcrumbs & Title -->
+<div class="mb-8">
+<nav class="flex items-center gap-2 mb-2 text-on-surface-variant font-label-sm uppercase tracking-widest">
+<span>Orders</span>
+<span class="material-symbols-outlined text-sm">chevron_right</span>
+<span class="text-primary font-bold">Details</span>
+</nav>
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+<div>
+<h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-background">Order #RS-88421</h2>
+<p class="font-body-md text-on-surface-variant">Placed on Oct 24, 2023 • 14:32 PM</p>
+</div>
+<div class="flex gap-2">
+<span class="bg-secondary-container/20 text-secondary px-3 py-1 rounded-full font-label-md flex items-center gap-1">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                        Verified Payment
+                    </span>
+</div>
+</div>
+</div>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+<!-- Main Content: Items & Status -->
+<div class="lg:col-span-8 space-y-gutter">
+<!-- Shipment Status Tracker Card -->
+<section class="bg-surface-container-lowest p-6 md:p-8 rounded-xl border border-outline-variant/30 shadow-sm">
+<h3 class="font-headline-md text-headline-md mb-8">Shipment Status</h3>
+<div class="relative flex justify-between items-start">
+<!-- Connecting Lines -->
+<div class="absolute top-5 left-0 w-full h-[2px] bg-outline-variant/20 -z-0"></div>
+<div class="absolute top-5 left-0 w-[66%] h-[2px] bg-primary -z-0"></div>
+<!-- Steps -->
+<div class="relative z-10 flex flex-col items-center text-center max-w-[80px]">
+<div class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center shadow-lg mb-3">
+<span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">list_alt</span>
+</div>
+<span class="font-label-md text-on-background">Pending</span>
+</div>
+<div class="relative z-10 flex flex-col items-center text-center max-w-[80px]">
+<div class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center shadow-lg mb-3">
+<span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+<span class="font-label-md text-on-background">Confirmed</span>
+</div>
+<div class="relative z-10 flex flex-col items-center text-center max-w-[80px]">
+<div class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center shadow-lg mb-3 border-4 border-white">
+<span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">local_shipping</span>
+</div>
+<span class="font-label-md text-primary font-bold">Shipped</span>
+<span class="text-[10px] text-on-surface-variant mt-1">Oct 26</span>
+</div>
+<div class="relative z-10 flex flex-col items-center text-center max-w-[80px]">
+<div class="w-10 h-10 rounded-full bg-surface-container-high text-on-surface-variant flex items-center justify-center mb-3">
+<span class="material-symbols-outlined text-lg">package_2</span>
+</div>
+<span class="font-label-md text-on-surface-variant">Delivered</span>
+</div>
+</div>
+</section>
+<!-- Order Items Card -->
+<section class="bg-surface-container-lowest rounded-xl border border-outline-variant/30 shadow-sm overflow-hidden">
+<div class="p-6 border-b border-outline-variant/20 flex justify-between items-center">
+<h3 class="font-headline-md text-headline-md">Order Items (3)</h3>
+<span class="font-label-md text-on-surface-variant">Weight: 2.4kg</span>
+</div>
+<div class="divide-y divide-outline-variant/10">
+<!-- Item 1 -->
+<div class="p-6 flex gap-6 hover:bg-surface-container-low transition-colors group">
+<div class="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0 border border-outline-variant/20">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="A high-performance gaming laptop with sleek, industrial lines and vibrant purple RGB lighting, shot in a minimalist studio with soft ambient shadows and high-contrast backlighting to emphasize its premium build quality. The aesthetic is modern and elite." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBWh2r80fuAaGOhEZFUV5FkVkUSjNf7Y1Q4Ib8JM9l-yYN9FMwgGuS1ADH4PbBE_tZzX_fvP_CzuagUGWjT7DNoVgWwfxSFuCZPl1EzcjmDwOZL9Kv2bvmz4Qfv88N7A3DJx95eez5NQSTSB9R50bTqJ_rsbftMkRpfuISOmaYFJ4dI_1BKqRCALZxEsHPTzEtNyTXSP54tWxredaGRs6U8fuC6QRelRL-K_2ST0Hspvspx0hC6Nu_5"/>
+</div>
+<div class="flex-grow flex flex-col justify-between">
+<div>
+<h4 class="font-headline-md text-body-lg text-on-background group-hover:text-primary transition-colors">Rama Pro X1 Gaming Laptop</h4>
+<p class="font-body-md text-on-surface-variant">SKU: RAMA-LT-001 • Space Gray</p>
+</div>
+<div class="flex justify-between items-end">
+<div class="font-label-md text-on-surface-variant bg-surface-container-high px-3 py-1 rounded">Qty: 01</div>
+<div class="text-right">
+<p class="font-label-sm text-on-surface-variant line-through">$2,499.00</p>
+<p class="font-headline-md text-primary">$2,199.00</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="p-6 flex gap-6 hover:bg-surface-container-low transition-colors group">
+<div class="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0 border border-outline-variant/20">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Premium wireless headphones featuring a brushed metallic finish in deep charcoal and indigo accents. The product is displayed on a clean white pedestal in an airy, minimalist setting with sharp focus and professional studio lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBpQcG4FhmBUKksmOOoBgzVDNc2e6CIX5Ev4kpcJlHjv8DKFVHxh8PfwcXhGrtm6dvqwrBTCtJlJ44JoxfOGoHm9aWAQSqxhk_Z7G7JKLMZww3WEHO1JCI6sujQw5xgKVULT79nyH7u83UX0gFgQ5t-YCi9U0zDRO1RK5PhSgU140hpkjWp4LMncoiG7dk1UbiwosDNOiXy7ImYqO4MTsGng0aD6XEp_yLZ9e4CFa5XrW6Nq_GP2Oeb"/>
+</div>
+<div class="flex-grow flex flex-col justify-between">
+<div>
+<h4 class="font-headline-md text-body-lg text-on-background group-hover:text-primary transition-colors">Sonic Elite ANC Headphones</h4>
+<p class="font-body-md text-on-surface-variant">SKU: RAMA-HP-042 • Matte Black</p>
+</div>
+<div class="flex justify-between items-end">
+<div class="font-label-md text-on-surface-variant bg-surface-container-high px-3 py-1 rounded">Qty: 01</div>
+<div class="text-right">
+<p class="font-headline-md text-primary">$349.00</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Item 3 -->
+<div class="p-6 flex gap-6 hover:bg-surface-container-low transition-colors group">
+<div class="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0 border border-outline-variant/20">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Minimalist ergonomic mechanical keyboard with transparent housing and violet keycaps. The image captures technical precision with macro-detail focus, high-octane indigo lighting, and a serene light-mode background atmosphere." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDgnKyZYxswcJQxuFWinLIifgxrdSWbYrEfqKNripWxXY0kt87IybLBGiqYVFqJg-tr0Oxtqe9b7NugFJbbbHo4arSiRC3l6YLBUGPeH2g088FlWJhcuCNeHERrDmHWQp6RIyz2qudbto7_u81bNC82bMM5nOcK-vxmWlBBKeWli5RfUw_MfteZN2imeGFcMRV1m_1jxEH5uAAocFzwoET7X_MfnOwQ0R3HKg9_YqCaFe1g7objgg5U"/>
+</div>
+<div class="flex-grow flex flex-col justify-between">
+<div>
+<h4 class="font-headline-md text-body-lg text-on-background group-hover:text-primary transition-colors">Rama Mechanical Mech-K1</h4>
+<p class="font-body-md text-on-surface-variant">SKU: RAMA-KB-009 • Violet Switch</p>
+</div>
+<div class="flex justify-between items-end">
+<div class="font-label-md text-on-surface-variant bg-surface-container-high px-3 py-1 rounded">Qty: 01</div>
+<div class="text-right">
+<p class="font-headline-md text-primary">$189.00</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Sidebar: Summary & Customer -->
+<div class="lg:col-span-4 space-y-gutter">
+<!-- Order Summary Card -->
+<section class="bg-white p-6 rounded-xl border border-outline-variant/30 shadow-sm">
+<h3 class="font-headline-md text-headline-md mb-6">Order Summary</h3>
+<div class="space-y-4 font-body-md">
+<div class="flex justify-between">
+<span class="text-on-surface-variant">Subtotal</span>
+<span class="font-semibold">$2,737.00</span>
+</div>
+<div class="flex justify-between">
+<span class="text-on-surface-variant">Shipping (Express)</span>
+<span class="font-semibold text-secondary">Free</span>
+</div>
+<div class="flex justify-between">
+<span class="text-on-surface-variant">Tax (VAT 10%)</span>
+<span class="font-semibold">$273.70</span>
+</div>
+<div class="pt-4 border-t border-outline-variant/30 flex justify-between items-center">
+<span class="font-headline-md text-headline-md">Total</span>
+<span class="font-headline-md text-headline-md text-primary">$3,010.70</span>
+</div>
+</div>
+<button class="w-full mt-8 bg-primary-container text-white py-4 rounded-xl font-headline-md hover:translate-y-[-2px] hover:shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">description</span>
+                        Generate Receipt
+                    </button>
+</section>
+<!-- Customer Info Card -->
+<section class="bg-white p-6 rounded-xl border border-outline-variant/30 shadow-sm">
+<div class="flex items-center gap-4 mb-6">
+<div class="w-12 h-12 rounded-full overflow-hidden border-2 border-primary/20">
+<img class="w-full h-full object-cover" data-alt="A professional portrait of a tech-savvy executive in a minimalist office setting. The lighting is soft and bright, using a high-key light mode aesthetic. The user has an elite, high-performance look with deep indigo accents in their attire." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA7XV-yN1uIdCYGjIRKZ952z6qJD3ya93FmYyg2f5P9I-4J14A-s2MlLm2gso14GmoC7feqK2IeaVqH7SpXrsrWy9WYVB5LKkTGgh_IhYm17bzcMTeUAOc55iWprVZPGJH-vwle4f-b441NWZn2lI425fvxXnws2SVSsXKqruN2XNEtBrwHC9UX6oay4LmkPfJrdgGOAJuqa6y4lBr2SxobDAqqMuhU2fJrfJ-GAMm1xVS7jwoAhH0w"/>
+</div>
+<div>
+<h3 class="font-headline-md text-body-lg">Alexander Sterling</h3>
+<p class="font-label-sm text-primary uppercase tracking-wider">Elite Member</p>
+</div>
+</div>
+<div class="space-y-6">
+<div class="flex items-start gap-4">
+<span class="material-symbols-outlined text-on-surface-variant">mail</span>
+<div class="font-body-md">
+<p class="text-on-surface-variant text-xs mb-1">Email Address</p>
+<p class="text-on-background font-medium">a.sterling@elite.com</p>
+</div>
+</div>
+<div class="flex items-start gap-4">
+<span class="material-symbols-outlined text-on-surface-variant">phone</span>
+<div class="font-body-md">
+<p class="text-on-surface-variant text-xs mb-1">Phone Number</p>
+<p class="text-on-background font-medium">+1 (555) 012-3456</p>
+</div>
+</div>
+<div class="flex items-start gap-4">
+<span class="material-symbols-outlined text-on-surface-variant">location_on</span>
+<div class="font-body-md">
+<p class="text-on-surface-variant text-xs mb-1">Shipping Address</p>
+<p class="text-on-background font-medium">742 High Performance Drive,<br/>Innovation District, SF 94103</p>
+</div>
+</div>
+</div>
+<button class="w-full mt-8 border border-outline-variant py-3 rounded-xl font-label-md hover:bg-surface-container-low transition-all active:scale-95 text-on-surface-variant flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">chat</span>
+                        Message Customer
+                    </button>
+</section>
+<!-- Quick Actions -->
+<div class="grid grid-cols-2 gap-4">
+<button class="bg-error-container/20 text-error p-4 rounded-xl border border-error/10 hover:bg-error/5 transition-all text-center">
+<span class="material-symbols-outlined block mb-1">cancel</span>
+<span class="font-label-sm">Cancel Order</span>
+</button>
+<button class="bg-surface-container text-on-surface-variant p-4 rounded-xl border border-outline-variant/20 hover:bg-surface-container-high transition-all text-center">
+<span class="material-symbols-outlined block mb-1">edit</span>
+<span class="font-label-sm">Edit Details</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="fixed bottom-0 w-full z-50 rounded-t-xl md:hidden bg-white/90 backdrop-blur-md border-t border-outline-variant/30 shadow-lg">
+<div class="flex justify-around items-center h-16 px-4 pb-safe">
+<a class="flex flex-col items-center justify-center text-on-surface-variant active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-label-sm text-label-sm">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary/10 text-primary font-bold rounded-xl px-4 py-2 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">list_alt</span>
+<span class="font-label-sm text-label-sm">Orders</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="font-label-sm text-label-sm">Products</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-label-sm text-label-sm">Profile</span>
+</a>
+</div>
+</nav>
+<!-- Notification Toast (Micro-interaction) -->
+<div class="fixed bottom-20 left-1/2 -translate-x-1/2 bg-inverse-surface text-inverse-on-surface px-6 py-3 rounded-full shadow-2xl opacity-0 translate-y-10 transition-all duration-500 z-[100] flex items-center gap-3" id="toast">
+<span class="material-symbols-outlined text-secondary">check_circle</span>
+<span class="font-label-md">Invoice generated successfully</span>
+</div>
+<script>
+        // Micro-interaction for Receipt Generation
+        const receiptBtn = document.querySelector('button:contains("Generate Receipt")') || document.querySelectorAll('button')[2]; 
+        const toast = document.getElementById('toast');
+
+        receiptBtn.addEventListener('click', () => {
+            toast.classList.remove('opacity-0', 'translate-y-10');
+            toast.classList.add('opacity-100', 'translate-y-0');
+            
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-10');
+                toast.classList.remove('opacity-100', 'translate-y-0');
+            }, 3000);
+        });
+
+        // Simple check for ":contains" like functionality in vanilla JS
+        document.querySelectorAll('button').forEach(btn => {
+            if(btn.textContent.includes('Generate Receipt')) {
+                btn.addEventListener('click', () => {
+                    toast.classList.remove('opacity-0', 'translate-y-10');
+                    toast.classList.add('opacity-100', 'translate-y-0');
+                    setTimeout(() => {
+                        toast.classList.add('opacity-0', 'translate-y-10');
+                        toast.classList.remove('opacity-100', 'translate-y-0');
+                    }, 3000);
+                });
+            }
+        });
+    </script>
+</body></html>

@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+
+<html class="scroll-smooth" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Order Confirmed | RAMA STORE</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Geist:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind Config Verification -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-secondary": "#ffffff",
+                    "surface-container-highest": "#e1e3e4",
+                    "surface-container-lowest": "#ffffff",
+                    "outline": "#777587",
+                    "surface-container": "#edeeef",
+                    "on-surface": "#191c1d",
+                    "primary-container": "#4f46e5",
+                    "tertiary-fixed-dim": "#bec6e0",
+                    "secondary-fixed": "#6ffbbe",
+                    "tertiary-fixed": "#dae2fd",
+                    "tertiary-container": "#586076",
+                    "tertiary": "#41485e",
+                    "primary": "#3525cd",
+                    "on-surface-variant": "#464555",
+                    "primary-fixed-dim": "#c3c0ff",
+                    "on-tertiary-fixed-variant": "#3f465c",
+                    "background": "#f8f9fa",
+                    "on-secondary-container": "#00714d",
+                    "secondary": "#006c49",
+                    "on-primary-fixed-variant": "#3323cc",
+                    "surface-dim": "#d9dadb",
+                    "surface-bright": "#f8f9fa",
+                    "on-error-container": "#93000a",
+                    "inverse-surface": "#2e3132",
+                    "error": "#ba1a1a",
+                    "surface-variant": "#e1e3e4",
+                    "on-tertiary-fixed": "#131b2e",
+                    "on-primary-fixed": "#0f0069",
+                    "on-background": "#191c1d",
+                    "inverse-on-surface": "#f0f1f2",
+                    "surface-container-low": "#f3f4f5",
+                    "on-tertiary": "#ffffff",
+                    "on-primary-container": "#dad7ff",
+                    "surface": "#f8f9fa",
+                    "on-tertiary-container": "#d4dbf5",
+                    "on-secondary-fixed-variant": "#005236",
+                    "surface-container-high": "#e7e8e9",
+                    "outline-variant": "#c7c4d8",
+                    "error-container": "#ffdad6",
+                    "secondary-container": "#6cf8bb",
+                    "primary-fixed": "#e2dfff",
+                    "on-error": "#ffffff",
+                    "secondary-fixed-dim": "#4edea3",
+                    "on-secondary-fixed": "#002113",
+                    "inverse-primary": "#c3c0ff",
+                    "surface-tint": "#4d44e3",
+                    "on-primary": "#ffffff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "gutter": "24px",
+                    "2xl": "48px",
+                    "sm": "8px",
+                    "xl": "32px",
+                    "md": "16px",
+                    "3xl": "64px",
+                    "lg": "24px",
+                    "xs": "4px",
+                    "container-max": "1280px",
+                    "base": "8px"
+            },
+            "fontFamily": {
+                    "headline-md": ["Geist"],
+                    "headline-lg": ["Geist"],
+                    "display-lg": ["Geist"],
+                    "label-md": ["Geist"],
+                    "body-lg": ["Inter"],
+                    "headline-lg-mobile": ["Geist"],
+                    "label-sm": ["Geist"],
+                    "body-md": ["Inter"]
+            },
+            "fontSize": {
+                    "headline-md": ["24px", {"lineHeight": "1.3", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.04em", "fontWeight": "800"}],
+                    "label-md": ["14px", {"lineHeight": "1", "letterSpacing": "0.02em", "fontWeight": "600"}],
+                    "body-lg": ["18px", {"lineHeight": "1.6", "letterSpacing": "0", "fontWeight": "400"}],
+                    "headline-lg-mobile": ["28px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "label-sm": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                    "body-md": ["16px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .confetti {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background-color: #4F46E5;
+            opacity: 0;
+            top: -10px;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        @keyframes fall {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+
+        .animate-check {
+            animation: scaleIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes scaleIn {
+            0% { transform: scale(0); opacity: 0; }
+            60% { transform: scale(1.2); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-md min-h-screen relative overflow-x-hidden">
+<!-- Top Navigation Bar (Shared Component Strategy) -->
+<header class="bg-white/80 dark:bg-on-surface/80 backdrop-blur-md text-primary dark:text-primary-fixed-dim fixed top-0 w-full z-50 shadow-sm border-b border-outline-variant/30">
+<div class="flex justify-between items-center px-gutter h-16 w-full max-w-container-max mx-auto">
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined hover:opacity-80 transition-opacity active:scale-95 transition-transform duration-200 cursor-pointer">menu</span>
+<span class="font-headline-md text-headline-md font-bold tracking-tighter text-on-surface dark:text-surface-bright">RAMA STORE</span>
+</div>
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined hover:opacity-80 transition-opacity active:scale-95 transition-transform duration-200 cursor-pointer">shopping_bag</span>
+</div>
+</div>
+</header>
+<!-- Confetti Container -->
+<div class="fixed inset-0 pointer-events-none overflow-hidden z-[5]" id="confetti-container"></div>
+<!-- Main Content Canvas -->
+<main class="pt-24 pb-2xl px-md md:px-gutter max-w-2xl mx-auto flex flex-col items-center">
+<!-- Celebration Header Section -->
+<section class="text-center mb-xl w-full">
+<div class="mb-lg inline-flex items-center justify-center w-24 h-24 rounded-full bg-secondary/10 text-secondary animate-check relative">
+<div class="absolute inset-0 rounded-full border-4 border-secondary/20 animate-ping"></div>
+<span class="material-symbols-outlined text-[48px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<h1 class="font-display-lg text-display-lg md:text-display-lg text-on-surface tracking-tight mb-xs">Order Confirmed!</h1>
+<p class="text-on-surface-variant font-body-lg">Thank you for choosing Rama Elite.</p>
+</section>
+<!-- Order Identity & Metadata -->
+<section class="w-full grid grid-cols-2 gap-md mb-xl">
+<div class="bg-white border border-outline-variant/30 p-md rounded-xl shadow-[0_4px_12px_rgba(15,23,42,0.03)] flex flex-col items-center text-center">
+<span class="text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider mb-xs">Order ID</span>
+<span class="text-headline-md font-headline-md text-primary">#RM-92841</span>
+</div>
+<div class="bg-white border border-outline-variant/30 p-md rounded-xl shadow-[0_4px_12px_rgba(15,23,42,0.03)] flex flex-col items-center text-center">
+<span class="text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider mb-xs">Delivery By</span>
+<span class="text-headline-md font-headline-md text-on-surface">Oct 30, 2023</span>
+</div>
+</section>
+<!-- Order Summary Card -->
+<section class="w-full mb-2xl">
+<div class="bg-white border border-outline-variant/30 rounded-xl shadow-[0_4px_12px_rgba(15,23,42,0.03)] overflow-hidden">
+<div class="p-lg border-b border-outline-variant/30 bg-surface-container-low">
+<h2 class="font-headline-md text-headline-md text-on-surface">Order Summary</h2>
+</div>
+<div class="p-lg space-y-md">
+<!-- Item List -->
+<div class="flex items-center gap-md">
+<div class="w-16 h-16 rounded-lg bg-surface-container overflow-hidden flex-shrink-0">
+<img class="w-full h-full object-cover" data-alt="Close-up of a high-performance carbon-fiber running shoe, set against a clean studio background with professional lighting highlighting the intricate weave and sleek Indigo accents. The shoe is angled slightly, conveying speed and technical precision, matching an elite sports brand aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuArVi5TSRw6qsi1ZXyWvP2XSkCcUiOzKWi88UbKnRnAvzLhzEEWqR1WKFCCIVkrVY6E02I4dtWpqNQExgcqrbu9bJO3YybXb-DDAN3OkRjHbppSyvyLN6dAGYimztMyTpv-IPDPNsXxAv95PMjNwa-2pIgNScO7SPNlaRnYbUPXDMaLv08kIBmZu0gb2o25XN6GxA4WztxJPkt8dPFNQThOUwr7pSnk51XqvoMVrxjm6xUACRqQX77b"/>
+</div>
+<div class="flex-grow">
+<h4 class="font-body-md font-semibold text-on-surface">Elite Performance X1</h4>
+<p class="text-label-sm text-on-surface-variant">Size: 10 | Midnight Indigo</p>
+</div>
+<div class="text-right">
+<span class="font-body-md font-bold text-on-surface">₹4,499.00</span>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<div class="w-16 h-16 rounded-lg bg-surface-container overflow-hidden flex-shrink-0">
+<img class="w-full h-full object-cover" data-alt="A minimalist tech accessory pack containing a sleek matte black charging cable and a high-speed adapter, arranged artistically on a white industrial surface. The lighting is soft and ambient, creating a glassmorphic depth effect consistent with a premium shopping experience." src="https://lh3.googleusercontent.com/aida-public/AB6AXuByFETTwudB5mTL1yKPmcn_xGRmSdM6FRcgy7wYXhuRvxKJWBNLbiN4I55M7xcG2-OKE06PoyX_U7pyZ9TDStMbHOvbfz8UMB-GMVIIQhwcvhnDFrjjEfZMTTh4Bhms16LHbVRcfidJFYk3AH3En98Z6PWemBx27cLfMOYy-4sYWbTaTwBa-UO9Q58thyE-lMdRJOq2cRUwzX7CvOysISqDlRYBlOZsNbvxMRtcr-bh4UB70rJUW7y5"/>
+</div>
+<div class="flex-grow">
+<h4 class="font-body-md font-semibold text-on-surface">PowerLink Pro Cable</h4>
+<p class="text-label-sm text-on-surface-variant">Length: 2m</p>
+</div>
+<div class="text-right">
+<span class="font-body-md font-bold text-on-surface">₹500.00</span>
+</div>
+</div>
+<hr class="border-outline-variant/30 my-md"/>
+<!-- Calculations -->
+<div class="space-y-xs">
+<div class="flex justify-between text-on-surface-variant">
+<span class="font-body-md">Subtotal</span>
+<span class="font-body-md">₹4,999.00</span>
+</div>
+<div class="flex justify-between text-secondary">
+<span class="font-body-md">Shipping</span>
+<span class="font-body-md font-semibold uppercase text-label-sm self-center">FREE</span>
+</div>
+<div class="flex justify-between text-on-surface pt-sm">
+<span class="font-headline-md text-headline-md">Total</span>
+<span class="font-headline-md text-headline-md text-primary">₹4,999.00</span>
+</div>
+</div>
+</div>
+<!-- Delivery Address -->
+<div class="p-lg bg-surface-container-lowest border-t border-outline-variant/30">
+<div class="flex gap-sm items-start">
+<span class="material-symbols-outlined text-on-surface-variant mt-xs">location_on</span>
+<div>
+<h4 class="text-label-md font-label-md text-on-surface uppercase tracking-wide">Delivery Address</h4>
+<p class="text-body-md text-on-surface-variant mt-xs">
+                                42nd Industrial Avenue, Elite Park,<br/>
+                                Sector 12, Whitefield, Bengaluru,<br/>
+                                KA 560066, India
+                            </p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Action Buttons -->
+<section class="w-full flex flex-col gap-md">
+<button class="w-full py-4 bg-secondary text-on-secondary rounded-xl font-headline-md text-headline-md flex items-center justify-center gap-sm hover:opacity-90 active:scale-[0.98] transition-all shadow-lg shadow-secondary/20">
+<span class="material-symbols-outlined">local_shipping</span>
+                Track My Order
+            </button>
+<button class="w-full py-4 border-2 border-primary text-primary bg-transparent rounded-xl font-headline-md text-headline-md flex items-center justify-center gap-sm hover:bg-primary/5 active:scale-[0.98] transition-all">
+<span class="material-symbols-outlined">shopping_cart</span>
+                Continue Shopping
+            </button>
+</section>
+<!-- Post-Purchase Engagement -->
+<section class="mt-3xl w-full bg-primary-container/10 p-lg rounded-2xl border border-primary-container/20 flex flex-col md:flex-row items-center gap-lg">
+<div class="text-center md:text-left flex-grow">
+<h3 class="font-headline-md text-headline-md text-primary mb-xs">Become an Elite Member</h3>
+<p class="text-body-md text-on-surface-variant">Unlock exclusive early access and free express shipping on every order.</p>
+</div>
+<button class="bg-primary text-on-primary px-lg py-sm rounded-full font-label-md text-label-md uppercase tracking-wider hover:opacity-90 active:scale-95 transition-all whitespace-nowrap">
+                Learn More
+            </button>
+</section>
+</main>
+<!-- Footer Space -->
+<div class="h-2xl"></div>
+<!-- Script for Confetti Animation -->
+<script>
+        function createConfetti() {
+            const container = document.getElementById('confetti-container');
+            const colors = ['#4F46E5', '#10B981', '#3525cd', '#6ffbbe', '#c3c0ff'];
+            const count = 50;
+
+            for (let i = 0; i < count; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                
+                // Random styles
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                const left = Math.random() * 100 + 'vw';
+                const size = Math.random() * 8 + 4 + 'px';
+                const duration = Math.random() * 3 + 2 + 's';
+                const delay = Math.random() * 2 + 's';
+                
+                confetti.style.backgroundColor = color;
+                confetti.style.left = left;
+                confetti.style.width = size;
+                confetti.style.height = size;
+                confetti.style.animation = `fall ${duration} ${delay} linear forwards`;
+                confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+
+                container.appendChild(confetti);
+
+                // Clean up
+                setTimeout(() => {
+                    confetti.remove();
+                }, (parseFloat(duration) + parseFloat(delay)) * 1000);
+            }
+        }
+
+        // Trigger on load
+        window.onload = () => {
+            createConfetti();
+            // Re-trigger a smaller burst after 1 second
+            setTimeout(createConfetti, 1000);
+        };
+    </script>
+</body></html>

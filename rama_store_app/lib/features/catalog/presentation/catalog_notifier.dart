@@ -130,6 +130,33 @@ class CatalogNotifier extends StateNotifier<CatalogState> {
     );
   }
 
+  void updateProductStatus(int productId, String newStatus) {
+    final updatedList = state.products.map((p) {
+      if (p.id == productId) {
+        return Product(
+          id: p.id,
+          sku: p.sku,
+          name: p.name,
+          categoryId: p.categoryId,
+          categoryName: p.categoryName,
+          sellingPrice: p.sellingPrice,
+          stock: p.stock,
+          status: newStatus,
+          imageUrl: p.imageUrl,
+        );
+      }
+      return p;
+    }).toList();
+
+    state = state.copyWith(products: updatedList);
+  }
+
+  void addCategory(Category category) {
+    state = state.copyWith(
+      categories: [...state.categories, category],
+    );
+  }
+
   Future<void> _fetchProducts() async {
     try {
       final res = await repository.getProducts(

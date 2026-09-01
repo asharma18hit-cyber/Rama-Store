@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+
+<html class="scroll-smooth" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>VELOCITY ELITE | Rama Store India Edition</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Geist:wght@500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container": "#edeeef",
+                    "on-tertiary-fixed": "#131b2e",
+                    "on-primary-fixed-variant": "#3323cc",
+                    "primary-fixed-dim": "#c3c0ff",
+                    "secondary": "#006c49",
+                    "surface-tint": "#4d44e3",
+                    "tertiary-fixed-dim": "#bec6e0",
+                    "surface-container-lowest": "#ffffff",
+                    "outline": "#777587",
+                    "primary-container": "#4f46e5",
+                    "outline-variant": "#c7c4d8",
+                    "on-primary": "#ffffff",
+                    "inverse-primary": "#c3c0ff",
+                    "tertiary": "#41485e",
+                    "on-tertiary-container": "#d4dbf5",
+                    "error-container": "#ffdad6",
+                    "on-secondary": "#ffffff",
+                    "secondary-container": "#6cf8bb",
+                    "on-surface": "#191c1d",
+                    "on-error": "#ffffff",
+                    "inverse-surface": "#2e3132",
+                    "secondary-fixed-dim": "#4edea3",
+                    "primary-fixed": "#e2dfff",
+                    "tertiary-fixed": "#dae2fd",
+                    "surface-container-highest": "#e1e3e4",
+                    "surface-bright": "#f8f9fa",
+                    "on-tertiary-fixed-variant": "#3f465c",
+                    "on-background": "#191c1d",
+                    "on-secondary-fixed-variant": "#005236",
+                    "on-secondary-fixed": "#002113",
+                    "on-primary-container": "#dad7ff",
+                    "error": "#ba1a1a",
+                    "on-primary-fixed": "#0f0069",
+                    "background": "#f8f9fa",
+                    "surface-variant": "#e1e3e4",
+                    "surface": "#f8f9fa",
+                    "tertiary-container": "#586076",
+                    "on-surface-variant": "#464555",
+                    "secondary-fixed": "#6ffbbe",
+                    "inverse-on-surface": "#f0f1f2",
+                    "surface-container-high": "#e7e8e9",
+                    "on-error-container": "#93000a",
+                    "surface-dim": "#d9dadb",
+                    "surface-container-low": "#f3f4f5",
+                    "primary": "#3525cd",
+                    "on-tertiary": "#ffffff",
+                    "on-secondary-container": "#00714d"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "xs": "4px",
+                    "xl": "32px",
+                    "lg": "24px",
+                    "base": "8px",
+                    "2xl": "48px",
+                    "md": "16px",
+                    "sm": "8px",
+                    "3xl": "64px",
+                    "gutter": "24px",
+                    "container-max": "1280px"
+            },
+            "fontFamily": {
+                    "body-lg": ["Inter"],
+                    "label-md": ["Geist"],
+                    "headline-lg": ["Geist"],
+                    "label-sm": ["Geist"],
+                    "headline-md": ["Geist"],
+                    "headline-lg-mobile": ["Geist"],
+                    "display-lg": ["Geist"],
+                    "body-md": ["Inter"]
+            },
+            "fontSize": {
+                    "body-lg": ["18px", {"lineHeight": "1.6", "letterSpacing": "0", "fontWeight": "400"}],
+                    "label-md": ["14px", {"lineHeight": "1", "letterSpacing": "0.02em", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "label-sm": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                    "headline-md": ["24px", {"lineHeight": "1.3", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "headline-lg-mobile": ["28px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.04em", "fontWeight": "800"}],
+                    "body-md": ["16px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .glass-effect {
+            backdrop-filter: blur(12px);
+            background: rgba(255, 255, 255, 0.8);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #4f46e5;
+            border-radius: 10px;
+        }
+        .product-card:hover .product-image {
+            transform: scale(1.05);
+        }
+        .masonry-item {
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .masonry-item:hover {
+            transform: translateY(-8px);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-md overflow-x-hidden">
+<!-- TopNavBar -->
+<header class="fixed top-0 w-full z-50 bg-white/80 dark:bg-surface-container/80 backdrop-blur-xl shadow-sm border-b border-outline-variant/30 h-20">
+<nav class="flex justify-between items-center h-full px-gutter max-w-container-max mx-auto">
+<div class="flex items-center gap-xl">
+<a class="font-headline-md text-headline-md tracking-tighter font-black text-on-surface dark:text-on-primary-container" href="#">VELOCITY ELITE</a>
+<div class="hidden md:flex gap-lg">
+<a class="text-primary font-bold border-b-2 border-primary pb-1 font-body-md text-body-md" href="#">Performance Gear</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="#">Innovations</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="#">Athletes</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="#">Community</a>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<div class="relative hidden lg:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="pl-10 pr-4 py-2 bg-surface-container-low border-none rounded-full focus:ring-2 focus:ring-primary w-64 text-sm" placeholder="Search elite gear..." type="text"/>
+</div>
+<div class="flex gap-sm">
+<button class="p-2 hover:opacity-80 transition-all duration-200 active:scale-95 text-primary">
+<span class="material-symbols-outlined" data-icon="favorite">favorite</span>
+</button>
+<button class="p-2 hover:opacity-80 transition-all duration-200 active:scale-95 text-primary relative">
+<span class="material-symbols-outlined" data-icon="shopping_cart">shopping_cart</span>
+<span class="absolute top-1 right-1 bg-primary text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full">2</span>
+</button>
+<button class="p-2 hover:opacity-80 transition-all duration-200 active:scale-95 text-primary">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+</button>
+</div>
+</div>
+</nav>
+</header>
+<main class="pt-20">
+<!-- Massive Hero Section -->
+<section class="relative w-full h-[90vh] overflow-hidden">
+<div class="absolute inset-0 z-0">
+<div class="w-full h-full bg-cover bg-center" data-alt="A cinematic, high-contrast photograph of a professional sprinter in mid-stride on a vibrant, bustling urban street in Mumbai, India. The athlete wears sleek, futuristic charcoal and indigo performance gear. Golden hour sunlight filters through the hazy atmosphere, creating long shadows and highlighting the texture of the asphalt. The surrounding cityscape features a blend of historic architecture and modern steel structures, bathed in a premium light-mode aesthetic with soft glares and sharp focus." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDPUBkLkO_UAhyKiNNlw7bWAgH1byUDA3XRJyeC4wUejYMYPcx2KFsPM3pSdyjpYKfc0t4rA2a1TYBS7CO-LhNL2fNjPVk2uFj3uuZe3bCvEbTfC8_Tae1LqdXaewXTAx8DavGtABTMBQsmIWW07kFYAeUfPCLFcK3UYg5mNl-tAX5FvKpbWI3eeG610rAinnEtFGgWXn5CsSV5OKcy2ald392DikgqLl9lGnE6-E-nGtly9Q5bqNO4')"></div>
+<div class="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent"></div>
+</div>
+<div class="relative z-10 h-full max-w-container-max mx-auto px-gutter flex flex-col justify-center items-start">
+<div class="max-w-2xl space-y-md animate-fade-in-up">
+<span class="inline-block px-4 py-1 bg-primary/10 border border-primary/20 text-primary-fixed-dim rounded-full font-label-md text-label-md backdrop-blur-md">RAMA STORE INDIA EXCLUSIVE</span>
+<h1 class="font-display-lg text-display-lg text-white uppercase leading-none">Built for the<br/><span class="text-primary-fixed-dim">Indian Grind</span></h1>
+<p class="font-body-lg text-body-lg text-white/80 max-w-lg">Engineered for extreme humidity, chaotic urban terrains, and the relentless spirit of Bharat's elite performers.</p>
+<div class="flex gap-md pt-lg">
+<button class="px-xl py-4 bg-primary text-on-primary rounded-lg font-label-md text-label-md hover:shadow-lg hover:shadow-primary/30 transition-all active:scale-95 flex items-center gap-sm">
+                            Shop Collection <span class="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span>
+</button>
+<button class="px-xl py-4 bg-white/10 text-white border border-white/20 rounded-lg font-label-md text-label-md hover:bg-white/20 transition-all backdrop-blur-md">
+                            Watch Film
+                        </button>
+</div>
+</div>
+</div>
+<!-- Atmospheric micro-interaction -->
+<div class="absolute bottom-10 right-gutter z-10 flex flex-col items-end text-white/50 space-y-xs">
+<span class="font-label-sm text-label-sm uppercase tracking-widest">Global Coordinates</span>
+<span class="font-label-md text-label-md text-white">18.9220° N, 72.8347° E</span>
+</div>
+</section>
+<!-- Fresh Drops Carousel -->
+<section class="py-3xl max-w-container-max mx-auto px-gutter">
+<div class="flex justify-between items-end mb-xl">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface">Fresh Drops</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Technically advanced equipment for the new season.</p>
+</div>
+<div class="flex gap-sm">
+<button class="p-2 border border-outline-variant rounded-full hover:bg-surface-container transition-colors" onclick="document.getElementById('product-scroll').scrollBy({left: -400, behavior: 'smooth'})">
+<span class="material-symbols-outlined" data-icon="chevron_left">chevron_left</span>
+</button>
+<button class="p-2 border border-outline-variant rounded-full hover:bg-surface-container transition-colors" onclick="document.getElementById('product-scroll').scrollBy({left: 400, behavior: 'smooth'})">
+<span class="material-symbols-outlined" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</div>
+<div class="flex gap-lg overflow-x-auto pb-lg custom-scrollbar snap-x" id="product-scroll">
+<!-- Product Card 1 -->
+<div class="min-w-[320px] product-card group snap-start">
+<div class="relative aspect-[4/5] overflow-hidden rounded-xl mb-md bg-surface-container-low border border-outline-variant/30">
+<img class="product-image w-full h-full object-cover transition-transform duration-500" data-alt="A studio product shot of a high-performance running shoe, the Velocity X-1, in a stunning cobalt blue and charcoal gray colorway. The shoe is suspended in mid-air against a clean, off-white background. Sharp, focused lighting emphasizes the breathable mesh fabric and the technical carbon-fiber sole. The aesthetic is industrial luxury, minimal and sophisticated." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAoGgOgkBT8euvMtLHA3b7FBNc_F1hWbiELtcBjLSpb62Dnj11QuYv7wg3yceoJVnU2yi5wkZYaDjoYGEi076N3jCCWacr2JyxK7l17qzebrH9kzxWtQEB6RX0tWsPSYuRQtLGqg6NUGPxBF7M7xkQkFUOWksydVtOqURJzL2rg-NDvHjI-DNhAuAOmg9UIqPihbd3A8x622EUEBJoROcw5Wkzz5Qxg6W_a3sLGevX2kSbidRS5DrXS"/>
+<div class="absolute top-4 left-4 bg-primary text-white font-label-sm text-label-sm px-3 py-1 rounded-full">New Arrival</div>
+<button class="absolute bottom-4 right-4 bg-white p-3 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity translate-y-4 group-hover:translate-y-0 duration-300 active:scale-90">
+<span class="material-symbols-outlined text-primary" data-icon="add_shopping_cart">add_shopping_cart</span>
+</button>
+</div>
+<div class="space-y-xs">
+<p class="font-label-sm text-label-sm text-on-surface-variant uppercase">Footwear</p>
+<h3 class="font-headline-md text-headline-md group-hover:text-primary transition-colors">V-Elite Runner X1</h3>
+<p class="font-label-md text-label-md text-primary">₹14,999</p>
+</div>
+</div>
+<!-- Product Card 2 -->
+<div class="min-w-[320px] product-card group snap-start">
+<div class="relative aspect-[4/5] overflow-hidden rounded-xl mb-md bg-surface-container-low border border-outline-variant/30">
+<img class="product-image w-full h-full object-cover transition-transform duration-500" data-alt="An elite performance compression jersey, designed with advanced moisture-wicking technology. The jersey is deep indigo with subtle geometric reflective patterns that glow slightly under studio lights. It's displayed on a sleek, minimalist carbon-fiber mannequin. The background is a soft, ambient gray, creating a high-end, professional retail aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuADkCMuE8Cayj4oW9IPS6h62Ip6EcLl9fydPxeY1Wl73ZASkOvsBlh8nbK_SbF4hOzrLHgZTAIoSTZsJFgnvaKf9Z0tR2NHqsLzosokXuSY3_JW3pMX8548Fg3mDH6PL33CD7SZCJqX4SHYo29GBUvevN7g7s5MsczLRXsRn8Px2bK1HDo9yaFJuTWUiNvxTJMV4VoMwF2JgpC0By6oB6pCS4O08c2vQpFADLIN9cr1m0kTcU_2rQxQ"/>
+<button class="absolute bottom-4 right-4 bg-white p-3 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity translate-y-4 group-hover:translate-y-0 duration-300 active:scale-90">
+<span class="material-symbols-outlined text-primary" data-icon="add_shopping_cart">add_shopping_cart</span>
+</button>
+</div>
+<div class="space-y-xs">
+<p class="font-label-sm text-label-sm text-on-surface-variant uppercase">Apparel</p>
+<h3 class="font-headline-md text-headline-md group-hover:text-primary transition-colors">Monsoon Tech Jersey</h3>
+<p class="font-label-md text-label-md text-primary">₹5,499</p>
+</div>
+</div>
+<!-- Product Card 3 -->
+<div class="min-w-[320px] product-card group snap-start">
+<div class="relative aspect-[4/5] overflow-hidden rounded-xl mb-md bg-surface-container-low border border-outline-variant/30">
+<img class="product-image w-full h-full object-cover transition-transform duration-500" data-alt="A professional-grade cricket bat made from premium English Willow, featuring a sleek, modern matte black handle and minimal velocity elite branding in silver. The bat is leaning against a textured concrete wall, lit by a single dramatic overhead light that creates deep shadows and sharp highlights. The mood is powerful and elite." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBmjeC9RmJmgaFFkAPiU6iKOFlV-qtgE-ryiYhDWc655GaJ_Zf937KrF_sFIjQLDHLCzEVNqDq93FPRPabKXkXobw7O18ajtgmW2MVBIrPEgne-tCqkBIQGSKd4Q9_xidoYF5tw65rCWvxJRgfMbAM51AM4cqwn3kqOmCmaZqQ1hSdQlDiD6yn10pWiYSxzXQLuPDR8gybkOgzPyyzLZq8WzphqMV2GGP2tgb0wBsJcz-XFxaRu_7y0"/>
+<div class="absolute top-4 left-4 bg-secondary text-white font-label-sm text-label-sm px-3 py-1 rounded-full">Elite Tech</div>
+<button class="absolute bottom-4 right-4 bg-white p-3 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity translate-y-4 group-hover:translate-y-0 duration-300 active:scale-90">
+<span class="material-symbols-outlined text-primary" data-icon="add_shopping_cart">add_shopping_cart</span>
+</button>
+</div>
+<div class="space-y-xs">
+<p class="font-label-sm text-label-sm text-on-surface-variant uppercase">Equipment</p>
+<h3 class="font-headline-md text-headline-md group-hover:text-primary transition-colors">Strike-Master Willow</h3>
+<p class="font-label-md text-label-md text-primary">₹22,999</p>
+</div>
+</div>
+<!-- Product Card 4 -->
+<div class="min-w-[320px] product-card group snap-start">
+<div class="relative aspect-[4/5] overflow-hidden rounded-xl mb-md bg-surface-container-low border border-outline-variant/30">
+<img class="product-image w-full h-full object-cover transition-transform duration-500" data-alt="A pair of high-end aerodynamic training shorts in light titanium gray, featuring laser-cut ventilation and a seamless design. The shorts are shown flat-lay on a reflective dark glass surface, with subtle water droplets emphasizing their water-resistant properties. The lighting is clean and clinical, suggesting precision engineering." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCRy1d_9PCgrn9j6YFUfbxC76JGg_zkpBme2V7GsEPkQZZC92iWLUorsPFEY4qi7rUI0TrshjTvwwzssJn2Ki0qxrAY9XSp8wz_FxccB1gh014YK1oeJCBHHrUma8jwL9BWKM41QIM7aRn1nTKGouVHJ2rQ2UbynqLQ07AMBxTvKY1ZJFtv8YRL7HH5sryusyaBXY8u5Xg6T_DCAAXSzBCQo46WGcIyohr48kpbVcEG20AEOsLs-KEr"/>
+<button class="absolute bottom-4 right-4 bg-white p-3 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity translate-y-4 group-hover:translate-y-0 duration-300 active:scale-90">
+<span class="material-symbols-outlined text-primary" data-icon="add_shopping_cart">add_shopping_cart</span>
+</button>
+</div>
+<div class="space-y-xs">
+<p class="font-label-sm text-label-sm text-on-surface-variant uppercase">Apparel</p>
+<h3 class="font-headline-md text-headline-md group-hover:text-primary transition-colors">Aero-Breeze Shorts</h3>
+<p class="font-label-md text-label-md text-primary">₹3,999</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Featured Collections Masonry -->
+<section class="py-3xl bg-surface-container-low">
+<div class="max-w-container-max mx-auto px-gutter">
+<div class="mb-2xl text-center">
+<h2 class="font-headline-lg text-headline-lg text-on-surface">Curated Collections</h2>
+<div class="w-16 h-1 bg-primary mx-auto mt-sm"></div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-lg h-[800px]">
+<!-- Cricket Tech - Large -->
+<div class="md:col-span-2 md:row-span-2 relative group overflow-hidden rounded-xl masonry-item shadow-sm">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" data-alt="A high-energy photograph of a cricket player in modern technical gear, mid-swing in a stadium under bright floodlights. The lighting is dramatic, with high-key whites and deep shadows. The scene is crisp and detailed, showcasing the texture of the cricket bat and the precision of the athlete's movement. The color palette is dominated by professional grays and vibrant indigo accents." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAJn4Fn48aMG4TXgWMkfAeHkxIO1xUHd2cjc2O4UUTd4tS7AeiesYrNw6NJayx4d9OWegotMi6_03UgBfCpQ1g32gvFMl-hNNoaLm3UM1k8RnmsW_zbPy6eJ2df-n2_u4fmGo17PbyB6z-lL1zOwPFQ_YzY6TP6xE02rChtUkFpAzo4THnFUVt2TncI6LR7qRZZM0I0PV9UoPQ5b_iE5JvktwBt9KP_RuvB2l86yQJrytGajmoYXVqi')"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+<div class="absolute bottom-lg left-lg">
+<h3 class="font-display-lg text-[40px] text-white leading-tight mb-sm">CRICKET<br/>TECH</h3>
+<p class="text-white/70 max-w-sm mb-md font-body-md">The next evolution of the gentleman's game. Carbon-fiber reinforced gear for ultimate impact.</p>
+<a class="inline-flex items-center gap-xs text-white font-label-md text-label-md group/link hover:text-primary-fixed-dim transition-colors" href="#">
+                                Explore Collection <span class="material-symbols-outlined transition-transform group-hover/link:translate-x-1" data-icon="east">east</span>
+</a>
+</div>
+</div>
+<!-- Monsoon Gear -->
+<div class="relative group overflow-hidden rounded-xl masonry-item shadow-sm h-full">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" data-alt="A dramatic close-up of high-performance water-resistant fabric being hit by heavy rain droplets. Each droplet is perfectly frozen in time, shimmering against the dark, technical texture of the material. The lighting is moody and cool-toned, creating a sense of extreme protection and durability against the elements. The aesthetic is clean, industrial, and high-performance." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCLUaDu5Fe1evPrBw6U6y_yCS0zHMx-WQoA7ywlL4yTvv7cJQNojtgktWnkMtsj15ZoST0exi298b-KVPx7ej46BxNKa5ezAHg6xR2y99fehYSaa4JArYFykwFr3BsQKGGCzcNyCd0zzs0Y5FqxU8DqyKvC9sXk_IStYuYhrMZfy3STHtD9fYgrkZw6NO5V82Uogs_ptAJvFvYGcSm-nNccqMjryCJJ8v0DPLPWI9tvmISnqlJUTt_O')"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+<div class="absolute bottom-lg left-lg">
+<h3 class="font-headline-md text-headline-md text-white mb-xs">MONSOON GEAR</h3>
+<p class="text-white/70 font-label-sm text-label-sm mb-md">Defy the downpour. 100% waterproof elite kits.</p>
+<a class="inline-flex items-center gap-xs text-white font-label-md text-label-md group/link hover:text-primary-fixed-dim transition-colors" href="#">
+                                Shop Now <span class="material-symbols-outlined transition-transform group-hover/link:translate-x-1" data-icon="east">east</span>
+</a>
+</div>
+</div>
+<!-- Urban Training -->
+<div class="relative group overflow-hidden rounded-xl masonry-item shadow-sm h-full">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" data-alt="A minimalist photograph of a high-tech concrete outdoor gym in a modern Indian city. The setting is clean, featuring sleek metal bars and geometric concrete blocks. A single athlete is seen in the distance, focused on a workout. The color palette is monochromatic with sharp indigo lighting accents, reflecting a sophisticated, industrial luxury vibe." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBk2SskbJvCKEXj4J9cwAl585GnXyjQCOYuAHoabnezMySrNl24WhuL4bynMFKlfzTt0f380nYoXFgaL3Teq9lLaDxKV6Zg7083Lvq4oue9j41v0-HfTKN9AUAGmUxPmZNSKBQ-lVRxJahVkhDTziwy1fLt5t3k0xnPu_JFmXN4Aq0LX8GWo0O9CT0Ufp4pM0NvrnOMWtOHiXORKrSrc8A-O_peNtM0jyuLQxC_UG9JsgaVA9jzPxj8')"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+<div class="absolute bottom-lg left-lg">
+<h3 class="font-headline-md text-headline-md text-white mb-xs">URBAN TRAINING</h3>
+<p class="text-white/70 font-label-sm text-label-sm mb-md">Master the city streets.</p>
+<a class="inline-flex items-center gap-xs text-white font-label-md text-label-md group/link hover:text-primary-fixed-dim transition-colors" href="#">
+                                View More <span class="material-symbols-outlined transition-transform group-hover/link:translate-x-1" data-icon="east">east</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Technical Excellence Section -->
+<section class="py-3xl overflow-hidden">
+<div class="max-w-container-max mx-auto px-gutter">
+<div class="flex flex-col lg:flex-row items-center gap-3xl">
+<div class="w-full lg:w-1/2 space-y-lg">
+<h2 class="font-display-lg text-display-lg text-on-surface">Technical<br/><span class="text-primary">Precision</span></h2>
+<div class="space-y-md">
+<div class="flex gap-md p-md bg-white border border-outline-variant/30 rounded-xl hover:shadow-md transition-shadow">
+<div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-primary" data-icon="ac_unit">ac_unit</span>
+</div>
+<div>
+<h4 class="font-label-md text-label-md text-on-surface">V-Breathe Core</h4>
+<p class="font-body-md text-body-md text-on-surface-variant">Intelligent thermal regulation that adapts to India's varied micro-climates instantly.</p>
+</div>
+</div>
+<div class="flex gap-md p-md bg-white border border-outline-variant/30 rounded-xl hover:shadow-md transition-shadow">
+<div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-primary" data-icon="shield">shield</span>
+</div>
+<div>
+<h4 class="font-label-md text-label-md text-on-surface">Durashield X</h4>
+<p class="font-body-md text-body-md text-on-surface-variant">Reinforced impact zones engineered to withstand the toughest surfaces in urban Bharat.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="w-full lg:w-1/2 relative">
+<div class="relative z-10 rounded-2xl overflow-hidden shadow-2xl border border-outline-variant/50">
+<img class="w-full h-auto" data-alt="A highly detailed close-up of a carbon-fiber structure integrated into a piece of sporting equipment. The focus is incredibly sharp, showing the intricate weave of the fibers. Cinematic lighting with a blueish tint highlights the technological sophistication. The overall image is clean, sharp, and conveys a sense of high-performance engineering and premium quality." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCst2XXRuv0O1Dh0khbBcZW6NqAzY99xO8S2BwcgS-JSY6b2N7yXEmDKEz7mS28z9a4PcEvy1vKz161Q9yAFwFd6aLgDYOg9KvQMTZcglB_lJqm3WtF7C9V-2MqVWKZsD0fKXbSL5U0LWNjZOcwD8U-59ZhAUMkOf7MeKi-kSQ93f-DrUkcjmdPmXsa5NAwwWh1ssws3OLWsyxMtImFcZtie4l5zhA2m_1VWBaTmPyx4NhWka6Pl9JU"/>
+</div>
+<!-- Glass Decorative Elements -->
+<div class="absolute -top-10 -right-10 w-48 h-48 bg-primary/10 rounded-full blur-3xl -z-10"></div>
+<div class="absolute -bottom-10 -left-10 w-64 h-64 bg-secondary/10 rounded-full blur-3xl -z-10"></div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-on-tertiary-fixed dark:bg-surface-container-lowest text-tertiary-fixed w-full py-xl mt-3xl border-t border-outline-variant">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-lg px-gutter max-w-container-max mx-auto">
+<div class="space-y-md">
+<h2 class="font-headline-md text-headline-md font-bold text-white">VELOCITY ELITE</h2>
+<p class="text-tertiary-fixed/70 font-body-md text-body-md max-w-xs">Elevating athletic performance through relentless innovation and elite craftsmanship. Join the elite.</p>
+<div class="flex gap-sm">
+<a class="w-10 h-10 rounded-full border border-tertiary-fixed/20 flex items-center justify-center hover:bg-white hover:text-on-tertiary-fixed transition-colors" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="public">public</span>
+</a>
+<a class="w-10 h-10 rounded-full border border-tertiary-fixed/20 flex items-center justify-center hover:bg-white hover:text-on-tertiary-fixed transition-colors" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="share">share</span>
+</a>
+</div>
+</div>
+<div class="space-y-md">
+<h4 class="text-white font-label-md text-label-md uppercase tracking-widest">Shop</h4>
+<nav class="flex flex-col gap-sm">
+<a class="text-tertiary-fixed/70 hover:text-white transition-colors font-label-sm text-label-sm" href="#">Cricket Tech</a>
+<a class="text-tertiary-fixed/70 hover:text-white transition-colors font-label-sm text-label-sm" href="#">Urban Training</a>
+<a class="text-tertiary-fixed/70 hover:text-white transition-colors font-label-sm text-label-sm" href="#">Monsoon Gear</a>
+<a class="text-tertiary-fixed/70 hover:text-white transition-colors font-label-sm text-label-sm" href="#">Footwear</a>
+</nav>
+</div>
+<div class="space-y-md">
+<h4 class="text-white font-label-md text-label-md uppercase tracking-widest">Company</h4>
+<nav class="flex flex-col gap-sm">
+<a class="text-tertiary-fixed/70 hover:text-white transition-colors font-label-sm text-label-sm" href="#">Our Story</a>
+<a class="text-tertiary-fixed/70 hover:text-white transition-colors font-label-sm text-label-sm" href="#">Innovation Lab</a>
+<a class="text-tertiary-fixed/70 hover:text-white transition-colors font-label-sm text-label-sm" href="#">Sustainability</a>
+<a class="text-tertiary-fixed/70 hover:text-white transition-colors font-label-sm text-label-sm" href="#">Careers</a>
+</nav>
+</div>
+<div class="space-y-md">
+<h4 class="text-white font-label-md text-label-md uppercase tracking-widest">Support</h4>
+<nav class="flex flex-col gap-sm">
+<a class="text-tertiary-fixed/70 hover:text-white transition-colors font-label-sm text-label-sm" href="#">Contact Us</a>
+<a class="text-tertiary-fixed/70 hover:text-white transition-colors font-label-sm text-label-sm" href="#">Privacy Policy</a>
+<a class="text-tertiary-fixed/70 hover:text-white transition-colors font-label-sm text-label-sm" href="#">Terms of Service</a>
+<a class="text-tertiary-fixed/70 hover:text-white transition-colors font-label-sm text-label-sm" href="#">Shipping &amp; Returns</a>
+</nav>
+</div>
+</div>
+<div class="mt-2xl pt-xl border-t border-white/10 text-center">
+<p class="font-label-sm text-label-sm text-tertiary-fixed/50 uppercase tracking-tighter">© 2024 VELOCITY ELITE PERFORMANCE. ALL RIGHTS RESERVED.</p>
+</div>
+</footer>
+<script>
+        // Micro-interactions and effects
+        document.addEventListener('DOMContentLoaded', () => {
+            const header = document.querySelector('header');
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 50) {
+                    header.classList.add('shadow-md');
+                    header.classList.remove('shadow-sm');
+                } else {
+                    header.classList.add('shadow-sm');
+                    header.classList.remove('shadow-md');
+                }
+            });
+
+            // Smooth reveal animation for masonry
+            const observerOptions = {
+                threshold: 0.1
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('animate-in', 'fade-in', 'duration-1000');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.masonry-item').forEach(item => {
+                observer.observe(item);
+            });
+        });
+    </script>
+</body></html>

@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Checkout | Rama Elite</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Geist:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-effect {
+            backdrop-filter: blur(12px);
+            background-color: rgba(255, 255, 255, 0.8);
+        }
+        .step-transition {
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        input:focus {
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary": "#ffffff",
+                        "on-background": "#191c1d",
+                        "on-error-container": "#93000a",
+                        "on-surface-variant": "#464555",
+                        "on-tertiary-container": "#d4dbf5",
+                        "error-container": "#ffdad6",
+                        "tertiary-fixed": "#dae2fd",
+                        "surface-bright": "#f8f9fa",
+                        "primary-fixed-dim": "#c3c0ff",
+                        "primary": "#3525cd",
+                        "outline": "#777587",
+                        "on-surface": "#191c1d",
+                        "surface-container": "#edeeef",
+                        "on-primary": "#ffffff",
+                        "tertiary-fixed-dim": "#bec6e0",
+                        "primary-container": "#4f46e5",
+                        "primary-fixed": "#e2dfff",
+                        "outline-variant": "#c7c4d8",
+                        "error": "#ba1a1a",
+                        "on-tertiary": "#ffffff",
+                        "surface-variant": "#e1e3e4",
+                        "inverse-on-surface": "#f0f1f2",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-fixed-variant": "#3323cc",
+                        "surface-tint": "#4d44e3",
+                        "tertiary-container": "#586076",
+                        "on-primary-fixed": "#0f0069",
+                        "surface-dim": "#d9dadb",
+                        "surface-container-low": "#f3f4f5",
+                        "surface-container-highest": "#e1e3e4",
+                        "on-secondary-fixed-variant": "#005236",
+                        "on-primary-container": "#dad7ff",
+                        "secondary": "#006c49",
+                        "surface": "#f8f9fa",
+                        "tertiary": "#41485e",
+                        "secondary-fixed-dim": "#4edea3",
+                        "secondary-fixed": "#6ffbbe",
+                        "on-secondary-fixed": "#002113",
+                        "surface-container-high": "#e7e8e9",
+                        "on-tertiary-fixed-variant": "#3f465c",
+                        "on-tertiary-fixed": "#131b2e",
+                        "on-error": "#ffffff",
+                        "inverse-surface": "#2e3132",
+                        "on-secondary-container": "#00714d",
+                        "inverse-primary": "#c3c0ff",
+                        "secondary-container": "#6cf8bb",
+                        "background": "#f8f9fa"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "base": "8px",
+                        "sm": "8px",
+                        "xl": "32px",
+                        "xs": "4px",
+                        "gutter": "24px",
+                        "md": "16px",
+                        "2xl": "48px",
+                        "container-max": "1280px",
+                        "3xl": "64px",
+                        "lg": "24px"
+                    },
+                    "fontFamily": {
+                        "label-sm": ["Geist"],
+                        "headline-md": ["Geist"],
+                        "headline-lg-mobile": ["Geist"],
+                        "label-md": ["Geist"],
+                        "display-lg": ["Geist"],
+                        "body-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-lg": ["Geist"]
+                    },
+                    "fontSize": {
+                        "label-sm": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                        "headline-md": ["24px", {"lineHeight": "1.3", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "headline-lg-mobile": ["28px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "label-md": ["14px", {"lineHeight": "1", "letterSpacing": "0.02em", "fontWeight": "600"}],
+                        "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.04em", "fontWeight": "800"}],
+                        "body-lg": ["18px", {"lineHeight": "1.6", "letterSpacing": "0", "fontWeight": "400"}],
+                        "body-md": ["16px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}],
+                        "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background font-body-md text-on-background selection:bg-primary/20">
+<!-- Minimal Header (Task Focused) -->
+<header class="fixed top-0 w-full z-50 glass-effect border-b border-outline-variant/30">
+<div class="flex justify-between items-center max-w-container-max mx-auto px-lg h-xl">
+<a class="font-headline-lg text-headline-lg tracking-tighter text-on-surface font-black" href="#">Rama Elite</a>
+<div class="flex items-center gap-sm text-on-surface-variant font-label-md">
+<span class="material-symbols-outlined text-[20px]">lock</span>
+<span class="text-label-md">SECURE CHECKOUT</span>
+</div>
+</div>
+</header>
+<main class="pt-[100px] pb-3xl px-lg max-w-container-max mx-auto">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-xl">
+<!-- Left Column: Checkout Journey -->
+<div class="lg:col-span-7 space-y-xl">
+<!-- Progress Indicator -->
+<nav aria-label="Progress" class="mb-xl">
+<ol class="flex items-center space-x-md">
+<li class="flex items-center text-primary">
+<span class="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-white font-label-md">1</span>
+<span class="ml-sm font-label-md uppercase tracking-widest">Shipping</span>
+</li>
+<li class="flex items-center text-outline">
+<div class="h-px w-12 bg-outline-variant mx-md"></div>
+<span class="flex h-8 w-8 items-center justify-center rounded-full border-2 border-outline-variant font-label-md">2</span>
+<span class="ml-sm font-label-md uppercase tracking-widest">Payment</span>
+</li>
+<li class="flex items-center text-outline">
+<div class="h-px w-12 bg-outline-variant mx-md"></div>
+<span class="flex h-8 w-8 items-center justify-center rounded-full border-2 border-outline-variant font-label-md">3</span>
+<span class="ml-sm font-label-md uppercase tracking-widest">Review</span>
+</li>
+</ol>
+</nav>
+<!-- Section: Shipping Information -->
+<section class="bg-surface-container-lowest p-xl rounded-xl shadow-sm border border-outline-variant/30 transition-all" id="shipping-section">
+<h2 class="font-headline-md text-headline-md mb-lg">Shipping Information</h2>
+<form class="space-y-lg">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-md">
+<div class="space-y-xs">
+<label class="font-label-md text-on-surface-variant">First Name</label>
+<input class="w-full px-md py-sm rounded-lg border border-outline-variant bg-surface focus:border-primary focus:ring-0 outline-none transition-all" placeholder="John" type="text"/>
+</div>
+<div class="space-y-xs">
+<label class="font-label-md text-on-surface-variant">Last Name</label>
+<input class="w-full px-md py-sm rounded-lg border border-outline-variant bg-surface focus:border-primary focus:ring-0 outline-none transition-all" placeholder="Doe" type="text"/>
+</div>
+</div>
+<div class="space-y-xs">
+<label class="font-label-md text-on-surface-variant">Email Address</label>
+<input class="w-full px-md py-sm rounded-lg border border-outline-variant bg-surface focus:border-primary focus:ring-0 outline-none transition-all" placeholder="john.doe@example.com" type="email"/>
+</div>
+<div class="space-y-xs">
+<label class="font-label-md text-on-surface-variant">Address Line 1</label>
+<input class="w-full px-md py-sm rounded-lg border border-outline-variant bg-surface focus:border-primary focus:ring-0 outline-none transition-all" placeholder="123 Elite Performance Way" type="text"/>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-md">
+<div class="space-y-xs">
+<label class="font-label-md text-on-surface-variant">City</label>
+<input class="w-full px-md py-sm rounded-lg border border-outline-variant bg-surface focus:border-primary focus:ring-0 outline-none transition-all" placeholder="New York" type="text"/>
+</div>
+<div class="space-y-xs">
+<label class="font-label-md text-on-surface-variant">State</label>
+<select class="w-full px-md py-sm rounded-lg border border-outline-variant bg-surface focus:border-primary focus:ring-0 outline-none transition-all appearance-none">
+<option>New York</option>
+<option>California</option>
+<option>Texas</option>
+</select>
+</div>
+<div class="space-y-xs">
+<label class="font-label-md text-on-surface-variant">ZIP Code</label>
+<input class="w-full px-md py-sm rounded-lg border border-outline-variant bg-surface focus:border-primary focus:ring-0 outline-none transition-all" placeholder="10001" type="text"/>
+</div>
+</div>
+<div class="pt-md border-t border-outline-variant/20">
+<h3 class="font-label-md text-on-surface-variant uppercase tracking-widest mb-md">Delivery Method</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-md">
+<label class="relative flex cursor-pointer rounded-lg border border-outline-variant p-md focus:outline-none bg-surface transition-all hover:bg-surface-container-low border-primary ring-1 ring-primary">
+<input checked="" class="sr-only" name="delivery" type="radio" value="standard"/>
+<div class="flex flex-1">
+<div class="flex flex-col">
+<span class="block font-label-md text-on-surface">Standard Delivery</span>
+<span class="mt-xs flex items-center text-label-sm text-on-surface-variant">3-5 business days</span>
+</div>
+</div>
+<span class="font-label-md text-primary">$0.00</span>
+</label>
+<label class="relative flex cursor-pointer rounded-lg border border-outline-variant p-md focus:outline-none bg-surface transition-all hover:bg-surface-container-low">
+<input class="sr-only" name="delivery" type="radio" value="express"/>
+<div class="flex flex-1">
+<div class="flex flex-col">
+<span class="block font-label-md text-on-surface">Priority Express</span>
+<span class="mt-xs flex items-center text-label-sm text-on-surface-variant">Overnight delivery</span>
+</div>
+</div>
+<span class="font-label-md text-primary">$25.00</span>
+</label>
+</div>
+</div>
+<button class="w-full md:w-auto px-2xl py-md bg-primary text-white font-label-md rounded-lg hover:brightness-110 active:scale-95 transition-all" type="button">
+                            CONTINUE TO PAYMENT
+                        </button>
+</form>
+</section>
+<!-- Section: Payment (Collapsed State) -->
+<section class="bg-surface-container-lowest/50 p-xl rounded-xl border border-outline-variant/30 opacity-60">
+<div class="flex justify-between items-center">
+<h2 class="font-headline-md text-headline-md text-outline">Payment Method</h2>
+<span class="material-symbols-outlined text-outline">lock</span>
+</div>
+</section>
+</div>
+<!-- Right Column: Order Summary (Persistent) -->
+<div class="lg:col-span-5">
+<aside class="sticky top-[100px] bg-surface-container-lowest p-xl rounded-xl shadow-md border border-outline-variant/30">
+<h3 class="font-headline-md text-headline-md mb-lg">Order Summary</h3>
+<!-- Product List -->
+<div class="space-y-lg mb-xl max-h-[400px] overflow-y-auto pr-sm scrollbar-hide">
+<div class="flex gap-md group">
+<div class="h-24 w-24 flex-shrink-0 overflow-hidden rounded-lg border border-outline-variant bg-surface-container">
+<img class="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A high-end, premium white leather minimalist sneaker with clean lines and a subtle grey technical sole, shot in a high-key studio setting with soft indigo lighting accents. The aesthetic is ultra-modern and clinical, reflecting industrial luxury. Pristine craftsmanship is visible in the stitching and material texture." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAH_huMRqaPCAQfW4tfvXGtmmlpaAGAVTX3LhfLK7cBigIZncVDids1UBdkkA1iZRem_JrmN9cv6DWOw3wyY-g9P8tp6IeGr3t810DVNKhMwYBH8PVEv0ldENhM7BAyuZPtGKxmUp8OQiR2nOsnHwtO-E4S7Y5MSBLQsnqe4tRrORJav7y-Pvuw0JeyJuYu_mHsJS2ImByiS9Zmho_XJLEUFSfm7XXfZkeVa5Rf5EJDA7H0SD3BL4Ik"/>
+</div>
+<div class="flex flex-1 flex-col justify-between py-xs">
+<div>
+<div class="flex justify-between text-on-surface font-label-md">
+<h4>Elite Tech-Runner v1</h4>
+<p>$245.00</p>
+</div>
+<p class="mt-xs text-label-sm text-on-surface-variant">Phantom White / Size 10</p>
+</div>
+<div class="flex items-center gap-xs text-label-sm text-on-surface-variant">
+<span>Qty: 1</span>
+</div>
+</div>
+</div>
+<div class="flex gap-md group">
+<div class="h-24 w-24 flex-shrink-0 overflow-hidden rounded-lg border border-outline-variant bg-surface-container">
+<img class="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A sophisticated matte charcoal performance windbreaker jacket displayed on a minimalist grey backdrop. The fabric has a subtle technical sheen, with precision-engineered taped seams and a sleek hood. Atmospheric lighting creates soft shadows, highlighting the garment's aerodynamic silhouette and high-performance material." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB_BgYXUMuoIpeOa7wdECTgRVBg6DheIet0Mx4ZFpZvztqWHcwvF_PkOb-ORAGl1BXD1YbrD2SreSOBZT5xEbPa9JraJ44nJr55t-mNB78EKcQFMhOaVXl-h4httyzW2dxpKGbh1Ika8FUvgbEbSTOOU6CWaHeewL6UfNyW5KPWPNX0u3mSRxDdQmlCcTYjq-ZG-JSfoj32kqYqaLBstOwduhKZVPMMEwjBTjAW9WnOIiO4g1SmWbeS"/>
+</div>
+<div class="flex flex-1 flex-col justify-between py-xs">
+<div>
+<div class="flex justify-between text-on-surface font-label-md">
+<h4>Aero-Shell Parka</h4>
+<p>$380.00</p>
+</div>
+<p class="mt-xs text-label-sm text-on-surface-variant">Matte Charcoal / Medium</p>
+</div>
+<div class="flex items-center gap-xs text-label-sm text-on-surface-variant">
+<span>Qty: 1</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Cost Breakdown -->
+<div class="space-y-md border-t border-outline-variant/30 pt-lg">
+<div class="flex justify-between text-on-surface-variant font-body-md">
+<span>Subtotal</span>
+<span>$625.00</span>
+</div>
+<div class="flex justify-between text-on-surface-variant font-body-md">
+<span>Shipping</span>
+<span class="text-secondary font-label-md">FREE</span>
+</div>
+<div class="flex justify-between text-on-surface-variant font-body-md">
+<span>Estimated Tax</span>
+<span>$51.56</span>
+</div>
+<!-- Promo Code -->
+<div class="pt-md pb-xs">
+<div class="flex gap-sm">
+<input class="flex-1 px-md py-sm rounded-lg border border-outline-variant bg-surface text-label-md focus:border-primary focus:ring-0 outline-none transition-all" placeholder="Promo code" type="text"/>
+<button class="px-md py-sm border border-outline-variant rounded-lg font-label-md hover:bg-surface-variant/20 transition-all">Apply</button>
+</div>
+</div>
+<div class="flex justify-between border-t border-outline-variant pt-lg">
+<span class="font-headline-md text-headline-md text-on-surface">Total</span>
+<div class="text-right">
+<span class="font-headline-md text-headline-md text-primary">$676.56</span>
+<p class="text-label-sm text-on-surface-variant">or 4 installments of $169.14</p>
+</div>
+</div>
+</div>
+<!-- Trust Badges -->
+<div class="mt-xl grid grid-cols-3 gap-md pt-lg border-t border-outline-variant/20">
+<div class="flex flex-col items-center text-center gap-xs">
+<span class="material-symbols-outlined text-outline text-[20px]">verified</span>
+<span class="text-[10px] font-label-sm uppercase tracking-tighter text-outline">Genuine Product</span>
+</div>
+<div class="flex flex-col items-center text-center gap-xs">
+<span class="material-symbols-outlined text-outline text-[20px]">package_2</span>
+<span class="text-[10px] font-label-sm uppercase tracking-tighter text-outline">Eco-Packaging</span>
+</div>
+<div class="flex flex-col items-center text-center gap-xs">
+<span class="material-symbols-outlined text-outline text-[20px]">support_agent</span>
+<span class="text-[10px] font-label-sm uppercase tracking-tighter text-outline">Elite Support</span>
+</div>
+</div>
+</aside>
+</div>
+</div>
+</main>
+<!-- Footer (Simplified) -->
+<footer class="bg-surface-container-highest border-t border-outline-variant/20 mt-3xl">
+<div class="flex flex-col md:flex-row justify-between items-center px-2xl py-lg max-w-container-max mx-auto">
+<span class="font-label-sm text-on-surface-variant">© 2024 Rama Elite. All rights reserved.</span>
+<div class="flex gap-lg mt-md md:mt-0">
+<a class="font-label-sm text-on-surface-variant hover:text-on-background underline transition-opacity" href="#">Privacy Policy</a>
+<a class="font-label-sm text-on-surface-variant hover:text-on-background underline transition-opacity" href="#">Terms of Service</a>
+<a class="font-label-sm text-on-surface-variant hover:text-on-background underline transition-opacity" href="#">Shipping Info</a>
+</div>
+</div>
+</footer>
+<script>
+        // Simple Interaction: Toggle delivery method styling
+        const deliveryOptions = document.querySelectorAll('input[name="delivery"]');
+        deliveryOptions.forEach(option => {
+            option.addEventListener('change', (e) => {
+                deliveryOptions.forEach(opt => {
+                    const parent = opt.closest('label');
+                    parent.classList.remove('border-primary', 'ring-1', 'ring-primary');
+                });
+                if (e.target.checked) {
+                    const parent = e.target.closest('label');
+                    parent.classList.add('border-primary', 'ring-1', 'ring-primary');
+                }
+            });
+        });
+
+        // Sticky observer for header shadow
+        const header = document.querySelector('header');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 10) {
+                header.classList.add('shadow-md');
+            } else {
+                header.classList.remove('shadow-md');
+            }
+        });
+    </script>
+</body></html>

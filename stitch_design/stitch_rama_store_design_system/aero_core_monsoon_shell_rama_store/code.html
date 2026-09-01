@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+
+<html class="scroll-smooth" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Aero-Core Monsoon Shell | VELOCITY ELITE</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Geist:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-container": "#edeeef",
+                      "on-tertiary-fixed": "#131b2e",
+                      "on-primary-fixed-variant": "#3323cc",
+                      "primary-fixed-dim": "#c3c0ff",
+                      "secondary": "#006c49",
+                      "surface-tint": "#4d44e3",
+                      "tertiary-fixed-dim": "#bec6e0",
+                      "surface-container-lowest": "#ffffff",
+                      "outline": "#777587",
+                      "primary-container": "#4f46e5",
+                      "outline-variant": "#c7c4d8",
+                      "on-primary": "#ffffff",
+                      "inverse-primary": "#c3c0ff",
+                      "tertiary": "#41485e",
+                      "on-tertiary-container": "#d4dbf5",
+                      "error-container": "#ffdad6",
+                      "on-secondary": "#ffffff",
+                      "secondary-container": "#6cf8bb",
+                      "on-surface": "#191c1d",
+                      "on-error": "#ffffff",
+                      "inverse-surface": "#2e3132",
+                      "secondary-fixed-dim": "#4edea3",
+                      "primary-fixed": "#e2dfff",
+                      "tertiary-fixed": "#dae2fd",
+                      "surface-container-highest": "#e1e3e4",
+                      "surface-bright": "#f8f9fa",
+                      "on-tertiary-fixed-variant": "#3f465c",
+                      "on-background": "#191c1d",
+                      "on-secondary-fixed-variant": "#005236",
+                      "on-secondary-fixed": "#002113",
+                      "on-primary-container": "#dad7ff",
+                      "error": "#ba1a1a",
+                      "on-primary-fixed": "#0f0069",
+                      "background": "#f8f9fa",
+                      "surface-variant": "#e1e3e4",
+                      "surface": "#f8f9fa",
+                      "tertiary-container": "#586076",
+                      "on-surface-variant": "#464555",
+                      "secondary-fixed": "#6ffbbe",
+                      "inverse-on-surface": "#f0f1f2",
+                      "surface-container-high": "#e7e8e9",
+                      "on-error-container": "#93000a",
+                      "surface-dim": "#d9dadb",
+                      "surface-container-low": "#f3f4f5",
+                      "primary": "#3525cd",
+                      "on-tertiary": "#ffffff",
+                      "on-secondary-container": "#00714d"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "xs": "4px",
+                      "xl": "32px",
+                      "lg": "24px",
+                      "base": "8px",
+                      "2xl": "48px",
+                      "md": "16px",
+                      "sm": "8px",
+                      "3xl": "64px",
+                      "gutter": "24px",
+                      "container-max": "1280px"
+              },
+              "fontFamily": {
+                      "body-lg": ["Inter"],
+                      "label-md": ["Geist"],
+                      "headline-lg": ["Geist"],
+                      "label-sm": ["Geist"],
+                      "headline-md": ["Geist"],
+                      "headline-lg-mobile": ["Geist"],
+                      "display-lg": ["Geist"],
+                      "body-md": ["Inter"]
+              },
+              "fontSize": {
+                      "body-lg": ["18px", {"lineHeight": "1.6", "letterSpacing": "0", "fontWeight": "400"}],
+                      "label-md": ["14px", {"lineHeight": "1", "letterSpacing": "0.02em", "fontWeight": "600"}],
+                      "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "label-sm": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                      "headline-md": ["24px", {"lineHeight": "1.3", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                      "headline-lg-mobile": ["28px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.04em", "fontWeight": "800"}],
+                      "body-md": ["16px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+        .glass-effect {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .micro-shadow {
+            shadow: 0 4px 12px rgba(15, 23, 42, 0.03);
+        }
+        .hover-lift {
+            transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
+        }
+        .hover-lift:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #E5E7EB;
+            border-radius: 10px;
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        .accordion-item.active .accordion-content {
+            max-height: 500px;
+        }
+        .accordion-item.active .rotate-icon {
+            transform: rotate(180deg);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-md selection:bg-primary-fixed selection:text-on-primary-fixed">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 bg-white/80 dark:bg-surface-container/80 backdrop-blur-xl border-b border-outline-variant/30 shadow-sm h-20">
+<div class="flex justify-between items-center h-full px-gutter max-w-container-max mx-auto">
+<div class="flex items-center gap-xl">
+<a class="font-headline-md text-headline-md tracking-tighter font-black text-on-surface dark:text-on-primary-container" href="#">VELOCITY ELITE</a>
+<div class="hidden md:flex gap-lg items-center">
+<a class="font-body-md text-body-md text-primary font-bold border-b-2 border-primary pb-1" href="#">Performance Gear</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">Innovations</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">Athletes</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">Community</a>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<button class="p-sm hover:opacity-80 transition-all duration-200 active:scale-95 transition-transform">
+<span class="material-symbols-outlined" data-icon="favorite">favorite</span>
+</button>
+<button class="p-sm hover:opacity-80 transition-all duration-200 active:scale-95 transition-transform relative">
+<span class="material-symbols-outlined" data-icon="shopping_cart">shopping_cart</span>
+<span class="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full"></span>
+</button>
+<button class="p-sm hover:opacity-80 transition-all duration-200 active:scale-95 transition-transform">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+</button>
+</div>
+</div>
+</nav>
+<main class="pt-20 max-w-container-max mx-auto px-gutter grid grid-cols-1 md:grid-cols-12 gap-2xl mt-xl">
+<!-- Left: Image Gallery -->
+<div class="md:col-span-7 flex flex-col gap-md">
+<div class="aspect-[4/5] bg-surface-container-low rounded-xl overflow-hidden border border-outline-variant/30 group">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" data-alt="A cinematic, high-detail photograph of a sleek charcoal grey technical rain jacket designed for high-performance outdoor activities. The jacket features waterproof zippers and an aerodynamic silhouette, captured in a minimalist studio environment with soft, cool directional lighting that emphasizes its matte texture. The aesthetic is industrial luxury, focusing on technical precision and premium fabric quality." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCSwO5OWMFZrsCjaaAqYOcks4wqquhTAW4IaBGJIwWJ-NsbT0GeN2Iy7maap5NIzxiOeRzB9LmTw7lJgsOuaVuyKFZ8WNlXixfzT6dVU7v-opNR-RP0Q1NOV8b7ksLqV89wMQozyIeGfmdp4RB_oaLajlyHbetPWw1aJ_BHOkMR03Iy5IN2vfXW5a0TK2d6NBTkZpgn0x56R54H_UD0QhblpT7lyO4O98h9Mh0snHgY3lx97-wQi6gu"/>
+</div>
+<div class="grid grid-cols-2 gap-md">
+<div class="aspect-square bg-surface-container-low rounded-xl overflow-hidden border border-outline-variant/30 group">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" data-alt="A close-up macro shot of the Aero-Core Monsoon Shell jacket's fabric, showing water droplets perfectly beading on the indigo-tinted surface. The lighting is crisp and technical, highlighting the intricate micro-weave of the high-performance material. The background is a blurred industrial setting, maintaining the brand's elite and precise visual narrative." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB9Yg-ls563bOVMMFV7DsoTRthhmoMF8-Dsbz6jO5SHfuHR3Zd3V5SFF_Jh8A0Von4zLSbBL8BRrnQslCyydtQci8XiVTQjzU9doKCB0_mkL2ROBytSmCvWPRA1gwTqu_TCIe4LCg01-oh4Ur-d38AVwbM2LgVRai4U8v9z22XKR3cJFQimiLLRyeJCsDhihZH83L2D1Ae3YLvl9xyFJ6R4gDgJj08Ir6pRUA65tisOfk1fiPim-pId"/>
+</div>
+<div class="aspect-square bg-surface-container-low rounded-xl overflow-hidden border border-outline-variant/30 group">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" data-alt="Rear view of the Aero-Core Monsoon Shell being worn by an athlete in motion through a misty, dark forest. The image captures the dynamic fit and the reflective charcoal accents that glow under low light. The atmosphere is high-octane yet serene, utilizing a cool color palette of deep blues and slate greys to convey trust and reliability." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC1EFjBbHI0S-0ZRz-IvPSfHq5XsKaeYMxeEHCTo6UIPeV4y9brJS-iloyQBGp87nuyzIpm9eDfJ1i1VS5Cksl019YAEAfPXMAd_Ee764HiFD6HmLZdh2BhvF3eM4dy1kP6HR3E7M2krVHuqfIp7bBDgw7QEi6TdKoqhaV5WVhOwfamSx24NUjhIZT8MT-NVJtx1yqUhRMkALtTrzvEEucgztO6664ww6YxhmwaDINEWOYgnb4H3NdX"/>
+</div>
+<div class="aspect-square bg-surface-container-low rounded-xl overflow-hidden border border-outline-variant/30 group">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" data-alt="Exploded view technical illustration of the Aero-Core fabric layers, rendered in a clean, glassmorphic style. Semi-transparent membranes overlap with indigo-colored mesh, floating in a bright white space with soft ambient shadows. The visual style is technical luxury, presenting scientific innovation as a piece of minimalist art." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCoSMqcL4j0X6iLs_aaU3vGFduuTl2BMJLnVzE4gtYiOtIcn3ZNrq29X1mYys0oR8X_aJhvSKZrORf1BfWfihbJI97-8MxcgSN4isp6a9DgLmWLy4OGFurYtitpdvqQB4Vc4UmMGrnAp926HnTInpGStpCOl_09vak6ExY9PzYx_MZb28EMrMitRJNzXVubB3FOJjunhc05RILksHr_GYz-xkh0rBFdThQPhcqTVJmi5g2_PwFHXIAd"/>
+</div>
+<div class="aspect-square bg-surface-container-low rounded-xl overflow-hidden border border-outline-variant/30 group">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" data-alt="A detail shot of the jacket's waterproof hood construction, showing the reinforced brim and adjustable toggle system. The focus is sharp on the metallic hardware and precise stitching. Lighting is high-key and modern, emphasizing the sophisticated charcoal and indigo tones of the garment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCMgZ-26FWzUJIubGfqg1tcWoFglxfJAT8zYz2ljDfCkCjhY5J4iRPwP8kVIleP5pzn7KUskCCdnkqG2lGnJvvAWpT10_kvt5f0-5QjAvREecBAUz_zUFsnTl2DixV1ABdqtPZQG8oDgU_dPLTdpwx7cjTC9p_kAX-sefLDvoTt8VQqtj3q6M54foCiUFS9voM3KEiSv6LeI88DS1e3hJ_Wec26LuprxhSwP9Ne9-x75WJUNXVfVqF-"/>
+</div>
+</div>
+</div>
+<!-- Right: Sticky Product Info -->
+<div class="md:col-span-5">
+<div class="sticky top-24 flex flex-col gap-lg">
+<!-- Title & Price -->
+<div class="flex flex-col gap-xs">
+<div class="flex justify-between items-start">
+<h1 class="font-display-lg text-display-lg text-on-surface uppercase tracking-tight">Aero-Core<br/>Monsoon Shell</h1>
+<span class="font-headline-md text-headline-md text-primary font-bold">₹14,999</span>
+</div>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-md">Our most advanced outer layer. Engineered with 3-layer Aero-Core™ membrane for absolute storm protection without the weight.</p>
+</div>
+<!-- Features Chips -->
+<div class="flex flex-wrap gap-sm">
+<div class="px-md py-xs bg-secondary-container/20 text-on-secondary-container rounded-full border border-secondary-container/30 flex items-center gap-xs">
+<span class="material-symbols-outlined text-[18px]" data-icon="water_drop">water_drop</span>
+<span class="font-label-md text-label-md">Waterproof (20k)</span>
+</div>
+<div class="px-md py-xs bg-primary-container/10 text-primary rounded-full border border-primary-container/20 flex items-center gap-xs">
+<span class="material-symbols-outlined text-[18px]" data-icon="air">air</span>
+<span class="font-label-md text-label-md">Breathable</span>
+</div>
+<div class="px-md py-xs bg-surface-container-highest text-on-surface-variant rounded-full border border-outline-variant flex items-center gap-xs">
+<span class="material-symbols-outlined text-[18px]" data-icon="weight">weight</span>
+<span class="font-label-md text-label-md">Ultralight 240g</span>
+</div>
+</div>
+<hr class="border-outline-variant/30"/>
+<!-- Size Selection -->
+<div class="flex flex-col gap-md">
+<div class="flex justify-between items-center">
+<span class="font-label-md text-label-md text-on-surface uppercase">Select Size</span>
+<button class="text-primary font-label-sm text-label-sm uppercase underline decoration-2 underline-offset-4">Size Guide</button>
+</div>
+<div class="grid grid-cols-4 gap-sm">
+<button class="h-12 flex items-center justify-center border border-outline-variant rounded-lg hover:border-primary transition-colors font-label-md text-label-md">S</button>
+<button class="h-12 flex items-center justify-center border-2 border-primary bg-primary/5 rounded-lg font-label-md text-label-md text-primary">M</button>
+<button class="h-12 flex items-center justify-center border border-outline-variant rounded-lg hover:border-primary transition-colors font-label-md text-label-md">L</button>
+<button class="h-12 flex items-center justify-center border border-outline-variant rounded-lg hover:border-primary transition-colors font-label-md text-label-md">XL</button>
+</div>
+</div>
+<!-- CTAs -->
+<div class="flex flex-col gap-sm pt-md">
+<button class="w-full bg-primary-container h-14 rounded-xl text-white font-headline-md flex items-center justify-center gap-md active:scale-[0.98] transition-transform shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined" data-icon="shopping_bag">shopping_bag</span>
+                        Add to Cart
+                    </button>
+<button class="w-full bg-on-tertiary-fixed h-14 rounded-xl text-white font-headline-md flex items-center justify-center active:scale-[0.98] transition-transform">
+                        Buy Now
+                    </button>
+</div>
+<!-- Tech Specs Accordion -->
+<div class="mt-xl flex flex-col border-t border-outline-variant/30">
+<div class="accordion-item border-b border-outline-variant/30 active">
+<button class="w-full py-md flex justify-between items-center text-left hover:text-primary transition-colors" onclick="toggleAccordion(this)">
+<span class="font-label-md text-label-md uppercase tracking-widest">Technical Specifications</span>
+<span class="material-symbols-outlined transition-transform rotate-icon" data-icon="expand_more">expand_more</span>
+</button>
+<div class="accordion-content pb-md">
+<ul class="flex flex-col gap-sm font-body-md text-on-surface-variant">
+<li class="flex justify-between border-b border-outline-variant/10 pb-xs">
+<span>Material</span>
+<span class="text-on-surface font-medium">Aero-Core™ 3L Nylon</span>
+</li>
+<li class="flex justify-between border-b border-outline-variant/10 pb-xs">
+<span>Breathability</span>
+<span class="text-on-surface font-medium">15,000 g/m²/24h</span>
+</li>
+<li class="flex justify-between border-b border-outline-variant/10 pb-xs">
+<span>Water Column</span>
+<span class="text-on-surface font-medium">20,000 mm</span>
+</li>
+<li class="flex justify-between">
+<span>Weight</span>
+<span class="text-on-surface font-medium">240g (Medium)</span>
+</li>
+</ul>
+</div>
+</div>
+<div class="accordion-item border-b border-outline-variant/30">
+<button class="w-full py-md flex justify-between items-center text-left hover:text-primary transition-colors" onclick="toggleAccordion(this)">
+<span class="font-label-md text-label-md uppercase tracking-widest">Sustainability &amp; Impact</span>
+<span class="material-symbols-outlined transition-transform rotate-icon" data-icon="expand_more">expand_more</span>
+</button>
+<div class="accordion-content">
+<p class="font-body-md text-on-surface-variant pb-md">Crafted with 100% recycled nylon shell and PFC-free DWR finish. Produced in a Fair Trade Certified™ facility focusing on carbon neutrality.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Style With Section -->
+<section class="max-w-container-max mx-auto px-gutter mt-3xl">
+<div class="flex items-end justify-between mb-xl">
+<div>
+<span class="font-label-sm text-label-sm text-primary uppercase tracking-[0.2em] mb-xs block">Complete the Kit</span>
+<h2 class="font-headline-lg text-headline-lg text-on-surface">Style With</h2>
+</div>
+<button class="group flex items-center gap-xs font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors">
+                View Collection
+                <span class="material-symbols-outlined text-[20px] group-hover:translate-x-1 transition-transform" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-4 gap-lg">
+<!-- Item 1 -->
+<div class="flex flex-col gap-md group cursor-pointer">
+<div class="aspect-[3/4] bg-surface-container rounded-xl overflow-hidden relative border border-outline-variant/30">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Elite performance compression leggings in dark charcoal, displayed on a minimalist grey background. The leggings feature ergonomic seams and a high-waisted fit, styled with a high-end commercial fashion aesthetic. Precision and athleticism are the key themes." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDQlIuglR4yVjwx3LPhfslhOaiqKdmZylD0ETrEXRWFcf-96oBv1KwoUxp6swwSS5IltlxqFc2ZneOMIm1KdN7z25_OMlmkv-W4wrpSsQjkr5Za54IrI7SZuto1aIqY-d-Q4w6bCLisOdgtn9QE7L56mhZ-iXGlndHjxBR6FKFdUWIf1U9r1W0XjfArfkQA8h-o0RBQ5SmzkW6inl6LwRnnFCjNhz0qaas3fIyJCGqJNCLSR2U7QiQN"/>
+<button class="absolute top-4 right-4 p-xs bg-white/80 backdrop-blur-md rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-[20px]" data-icon="add">add</span>
+</button>
+</div>
+<div>
+<h3 class="font-label-md text-label-md text-on-surface group-hover:text-primary transition-colors">Kinetic-Base Tights</h3>
+<p class="font-label-sm text-label-sm text-on-surface-variant">₹5,499</p>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="flex flex-col gap-md group cursor-pointer">
+<div class="aspect-[3/4] bg-surface-container rounded-xl overflow-hidden relative border border-outline-variant/30">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Modern technical trail running shoes with an indigo and black gradient. The shoes feature a chunky responsive sole and reinforced toe caps, photographed with high-contrast studio lighting to show off the varied material textures of the upper mesh and synthetic overlays." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBgDOOFahsce26m6f6lBbEdwY1jfgh8MDo8Q78T5vRVXnFjrw_BnNAoffbHf1jHtgmHkQcQ5WcZvjiHDYtZo2HObx2ZCIYdlTJk2MLRYZW1C80fw6SdurirHlAmEw60EWyk6TZZkIgO-60ECgsCp4o9q0pmzii5IPNgFM1dQBmf-E7AJhegPVGjZmiG2uvfMXDB9peDtzG9vyVz5KJ3v-fcWAw-ykTQ-md2PcuE980ocdO8KGAMzFvV"/>
+<button class="absolute top-4 right-4 p-xs bg-white/80 backdrop-blur-md rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-[20px]" data-icon="add">add</span>
+</button>
+</div>
+<div>
+<h3 class="font-label-md text-label-md text-on-surface group-hover:text-primary transition-colors">Apex Trail V2</h3>
+<p class="font-label-sm text-label-sm text-on-surface-variant">₹12,999</p>
+</div>
+</div>
+<!-- Item 3 -->
+<div class="flex flex-col gap-md group cursor-pointer">
+<div class="aspect-[3/4] bg-surface-container rounded-xl overflow-hidden relative border border-outline-variant/30">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A minimalist 15L technical backpack in slate grey. The design is sleek with hidden zippers and a waterproof finish. It is styled in a bright, modern studio with soft shadows, reflecting an urban explorer aesthetic that blends luxury with function." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAqOrY1OZwLXaEWlv3zgKIgb9ibI_3yFR1dJoTuZMcxMIBkyaXo0B9su_AZlCIAdyY3hjhQ9GKU3w1_bR5YhhwwUxeb1OS38mg3-FyWpH5UL3Y2o4S2vmalXjwnawFEXqh56Jhv_KD8Y2bybsppynP8SwQVPB-XJipc6njfHXIENasn3t0ZTRHFUn45Csh44yL2C4eHkKkhffdm-dvArKNX2KeCUIzfhunW5eXAT-k13co381HBzH52"/>
+<button class="absolute top-4 right-4 p-xs bg-white/80 backdrop-blur-md rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-[20px]" data-icon="add">add</span>
+</button>
+</div>
+<div>
+<h3 class="font-label-md text-label-md text-on-surface group-hover:text-primary transition-colors">Velocity Daypack</h3>
+<p class="font-label-sm text-label-sm text-on-surface-variant">₹8,499</p>
+</div>
+</div>
+<!-- Item 4 -->
+<div class="flex flex-col gap-md group cursor-pointer">
+<div class="aspect-[3/4] bg-surface-container rounded-xl overflow-hidden relative border border-outline-variant/30">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A pair of high-performance technical gloves in black and indigo. They feature touchscreen-compatible fingertips and a sleek, articulated design. Lighting is dramatic and technical, showcasing the grip texture and reflective brand detailing." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBqzKFzgA6fn1hWrtfXQliwZrclh1Jo53xZ9A92MrmDSNU8CFu0Ybh1aWIrVwqu91dZMumZPyhmRVt-tXqNAcOPvanH2fBRb5kOtzaWUIv6CeiJp4GusDLJ4GAx1IX9A4WAnZN8n5u0UDE0xfEUuTomeE7m_TbSdk5XZbrobFumogwfGJBb8WpwVSklV00h3f4gHd-zCUelIWBHwickB9Vwl4balLmwKBtN7X-uKZEBDFhdXyBVLI6c"/>
+<button class="absolute top-4 right-4 p-xs bg-white/80 backdrop-blur-md rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-[20px]" data-icon="add">add</span>
+</button>
+</div>
+<div>
+<h3 class="font-label-md text-label-md text-on-surface group-hover:text-primary transition-colors">Aero-Grip Gloves</h3>
+<p class="font-label-sm text-label-sm text-on-surface-variant">₹3,999</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Footer -->
+<footer class="bg-on-tertiary-fixed dark:bg-surface-container-lowest w-full py-xl mt-3xl border-t border-outline-variant">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-lg px-gutter max-w-container-max mx-auto">
+<div class="col-span-1 md:col-span-1 flex flex-col gap-md">
+<span class="font-headline-md text-headline-md font-bold text-white">VELOCITY ELITE</span>
+<p class="font-label-sm text-label-sm text-tertiary-fixed/70">Redefining performance through technical precision and elite craftsmanship. Join the vanguard of athletic innovation.</p>
+</div>
+<div class="flex flex-col gap-sm">
+<h4 class="font-label-md text-label-md text-white uppercase mb-xs">Explore</h4>
+<a class="font-label-sm text-label-sm text-tertiary-fixed/70 hover:text-white transition-colors" href="#">Performance Gear</a>
+<a class="font-label-sm text-label-sm text-tertiary-fixed/70 hover:text-white transition-colors" href="#">Innovations</a>
+<a class="font-label-sm text-label-sm text-tertiary-fixed/70 hover:text-white transition-colors" href="#">Athletes</a>
+</div>
+<div class="flex flex-col gap-sm">
+<h4 class="font-label-md text-label-md text-white uppercase mb-xs">Assistance</h4>
+<a class="font-label-sm text-label-sm text-tertiary-fixed/70 hover:text-white transition-colors" href="#">Support</a>
+<a class="font-label-sm text-label-sm text-tertiary-fixed/70 hover:text-white transition-colors" href="#">Shipping &amp; Returns</a>
+<a class="font-label-sm text-label-sm text-tertiary-fixed/70 hover:text-white transition-colors" href="#">Contact Us</a>
+</div>
+<div class="flex flex-col gap-sm">
+<h4 class="font-label-md text-label-md text-white uppercase mb-xs">Newsletter</h4>
+<div class="flex">
+<input class="bg-white/10 border-none text-white font-label-sm px-md h-10 rounded-l-lg w-full focus:ring-1 focus:ring-primary" placeholder="Email address" type="email"/>
+<button class="bg-primary text-white px-md h-10 rounded-r-lg font-label-md">Join</button>
+</div>
+</div>
+</div>
+<div class="max-w-container-max mx-auto px-gutter mt-2xl pt-xl border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-md">
+<span class="font-label-sm text-label-sm text-tertiary-fixed/50">© 2024 VELOCITY ELITE PERFORMANCE. ALL RIGHTS RESERVED.</span>
+<div class="flex gap-lg">
+<a class="font-label-sm text-label-sm text-tertiary-fixed/70 hover:text-white" href="#">Privacy Policy</a>
+<a class="font-label-sm text-label-sm text-tertiary-fixed/70 hover:text-white" href="#">Terms of Service</a>
+</div>
+</div>
+</footer>
+<script>
+        function toggleAccordion(btn) {
+            const item = btn.parentElement;
+            const isActive = item.classList.contains('active');
+            
+            // Close others if needed, but here we just toggle
+            item.classList.toggle('active');
+        }
+
+        // Micro-interaction for size selection
+        const sizeButtons = document.querySelectorAll('.grid-cols-4 button');
+        sizeButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                sizeButtons.forEach(b => {
+                    b.classList.remove('border-2', 'border-primary', 'bg-primary/5', 'text-primary');
+                    b.classList.add('border', 'border-outline-variant');
+                });
+                btn.classList.add('border-2', 'border-primary', 'bg-primary/5', 'text-primary');
+                btn.classList.remove('border', 'border-outline-variant');
+            });
+        });
+    </script>
+</body></html>
