@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/constants/app_colors.dart';
+import '../widgets/app_download_banner.dart';
+import '../widgets/frosted_glass_container.dart';
 import '../../main.dart';
 
 class MainScaffold extends ConsumerWidget {
@@ -49,16 +51,25 @@ class MainScaffold extends ConsumerWidget {
     final itemCount = cartState.totalItemCount;
 
     return Scaffold(
-      body: child,
-      bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          border: Border(top: BorderSide(color: AppColors.surfaceLight, width: 0.5)),
+      body: Column(
+        children: [
+          const AppDownloadBanner(),
+          Expanded(child: child),
+        ],
+      ),
+      bottomNavigationBar: FrostedGlassContainer(
+        borderRadius: BorderRadius.zero,
+        blur: 24.0,
+        opacity: 0.85,
+        border: const Border(
+          top: BorderSide(color: Color(0x22FFFFFF), width: 0.8),
         ),
         child: BottomNavigationBar(
           currentIndex: _calculateSelectedIndex(context),
           onTap: (index) => _onItemTapped(index, context),
-          backgroundColor: AppColors.background,
-          selectedItemColor: AppColors.primaryGoldLight,
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          selectedItemColor: AppColors.secondaryFixedDim,
           unselectedItemColor: AppColors.textMuted,
           type: BottomNavigationBarType.fixed,
           selectedFontSize: 12,
@@ -78,13 +89,15 @@ class MainScaffold extends ConsumerWidget {
               icon: Badge(
                 label: Text(itemCount.toString()),
                 isLabelVisible: itemCount > 0,
-                backgroundColor: AppColors.primaryGold,
+                backgroundColor: AppColors.secondaryFixedDim,
+                textColor: const Color(0xFF005236),
                 child: const Icon(Icons.shopping_bag_outlined),
               ),
               activeIcon: Badge(
                 label: Text(itemCount.toString()),
                 isLabelVisible: itemCount > 0,
-                backgroundColor: AppColors.primaryGold,
+                backgroundColor: AppColors.secondaryFixedDim,
+                textColor: const Color(0xFF005236),
                 child: const Icon(Icons.shopping_bag_rounded),
               ),
               label: 'Cart',

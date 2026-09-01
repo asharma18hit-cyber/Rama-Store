@@ -124,6 +124,12 @@ class CatalogNotifier extends StateNotifier<CatalogState> {
     }
   }
 
+  void addProduct(Product product) {
+    state = state.copyWith(
+      products: [product, ...state.products],
+    );
+  }
+
   Future<void> _fetchProducts() async {
     try {
       final res = await repository.getProducts(

@@ -5,6 +5,8 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/app_text_field.dart';
+import '../../../shared/widgets/frosted_glass_container.dart';
+import '../data/checkout_repository.dart';
 import '../../../main.dart';
 
 class CheckoutScreen extends ConsumerStatefulWidget {
@@ -162,13 +164,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             const SizedBox(height: 28),
             const Text('Order Summary & Promo Code', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textPrimary)),
             const SizedBox(height: 12),
-            Container(
+            FrostedGlassContainer(
               padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.surfaceLight),
-              ),
+              borderRadius: BorderRadius.circular(16),
               child: Column(
                 children: [
                   // Promo Code Input Box (Stitch Design)
@@ -190,8 +188,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                       const SizedBox(width: 8),
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.secondary,
-                          foregroundColor: Colors.white,
+                          backgroundColor: AppColors.secondaryFixedDim,
+                          foregroundColor: const Color(0xFF005236),
                           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                         ),
@@ -199,7 +197,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                               content: Text('🎉 Promo Code "RAMA10" Applied! 10% Cash-Back Discount Credited.'),
-                              backgroundColor: AppColors.secondary,
+                              backgroundColor: AppColors.secondaryFixedDim,
                             ),
                           );
                         },
@@ -249,7 +247,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text('Total Amount', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
-                      Text(Formatters.formatCurrency(cartState.grandTotal), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.primaryGoldLight)),
+                      Text(Formatters.formatCurrency(cartState.grandTotal), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.secondaryFixedDim)),
                     ],
                   ),
                 ],
@@ -314,12 +312,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
                   if (!mounted) return;
                   setState(() => _isProcessing = false);
-                  messenger.showSnackBar(
-                    SnackBar(content: Text('Order #$trackingNumber Placed Successfully!'), backgroundColor: AppColors.success),
-                  );
-                  if (context.mounted) {
-                    context.go('/orders');
-                  }
+                  
+                  _showOrderSuccessCelebration(context, trackingNumber);
                 } catch (e) {
                   if (!mounted) return;
                   setState(() => _isProcessing = false);
@@ -359,6 +353,90 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   color: isSelected ? Colors.white : AppColors.textSecondary,
                 ),
                 textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showOrderSuccessCelebration(BuildContext context, String trackingNumber) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: FrostedGlassContainer(
+          padding: const EdgeInsets.all(24),
+          width: 360,
+          borderRadius: BorderRadius.circular(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Glowing Celebration Badge
+              Container(
+                width: 72,
+                height: 72,
+                decoration: BoxDecoration(
+                  color: AppColors.secondaryFixedDim,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.secondaryFixedDim.withValues(alpha: 0.5),
+                      blurRadius: 24,
+                      spreadRadius: 2,
+                    ),
+                  ],
+                ),
+                child: const Icon(Icons.check_rounded, color: Color(0xFF005236), size: 42),
+              ),
+              const SizedBox(height: 18),
+              const Text(
+                '🎉 ORDER CONFIRMED!',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: AppColors.textPrimary, letterSpacing: 0.5),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'Tracking ID: $trackingNumber',
+                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.secondaryFixedDim),
+              ),
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryContainer.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppColors.primaryContainer.withValues(alpha: 0.4)),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: const [
+                    Icon(Icons.stars_rounded, color: AppColors.primaryGoldLight, size: 18),
+                    SizedBox(width: 6),
+                    Text(
+                      '+10% Cashback Credited to Loyalty Balance',
+                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.primaryGoldLight),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Your items have been locked from inventory and dispatched to our priority fulfillment team.',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 12, color: AppColors.textSecondary, height: 1.4),
+              ),
+              const SizedBox(height: 24),
+              AppButton(
+                text: 'Track Order & View Receipt',
+                icon: Icons.local_shipping_outlined,
+                onPressed: () {
+                  Navigator.pop(dialogContext);
+                  if (context.mounted) {
+                    context.go('/orders');
+                  }
+                },
               ),
             ],
           ),
