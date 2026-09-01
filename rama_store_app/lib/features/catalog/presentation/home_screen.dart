@@ -30,17 +30,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     return Scaffold(
       backgroundColor: const Color(0xFF0B0F19),
-      body: RefreshIndicator(
-        color: AppColors.secondaryFixedDim,
-        backgroundColor: const Color(0xFF0F172A),
-        onRefresh: () => ref.read(catalogNotifierProvider.notifier).initCatalog(),
-        child: CustomScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          slivers: [
-            // 1. Top Global Announcement Ribbon
-            SliverToBoxAdapter(
-              child: _buildTopAnnouncementRibbon(catalogState),
-            ),
+      body: Stack(
+        children: [
+          RefreshIndicator(
+            color: AppColors.secondaryFixedDim,
+            backgroundColor: const Color(0xFF0F172A),
+            onRefresh: () => ref.read(catalogNotifierProvider.notifier).initCatalog(),
+            child: CustomScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              slivers: [
+                // 1. Top Global Announcement Ribbon
+                SliverToBoxAdapter(
+                  child: _buildTopAnnouncementRibbon(catalogState),
+                ),
 
             // 2. Stitch 2.0 Glassmorphic Header Navigation
             SliverToBoxAdapter(
@@ -153,8 +155,36 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ],
         ),
       ),
-    );
-  }
+      Positioned(
+        top: 12,
+        right: 12,
+        child: IgnorePointer(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            decoration: BoxDecoration(
+              color: const Color(0xFFEF4444),
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: Colors.white, width: 2),
+              boxShadow: const [
+                BoxShadow(color: Colors.black87, blurRadius: 12, offset: Offset(0, 4)),
+              ],
+            ),
+            child: const Text(
+              'RAMASTORE-NEW-BUILD-2026',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w900,
+                fontSize: 13,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ),
+        ),
+      ),
+    ],
+  ),
+);
+}
 
   // --- 1. TOP ANNOUNCEMENT RIBBON ---
   Widget _buildTopAnnouncementRibbon(CatalogState state) {
