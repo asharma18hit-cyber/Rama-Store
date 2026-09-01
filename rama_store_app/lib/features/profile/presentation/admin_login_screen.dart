@@ -43,7 +43,7 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
 
     try {
       final authNotifier = ref.read(authNotifierProvider.notifier);
-      await authNotifier.login(email, password);
+      await authNotifier.loginPassword(email, password);
 
       final authState = ref.read(authNotifierProvider);
       if (authState.isAuthenticated) {

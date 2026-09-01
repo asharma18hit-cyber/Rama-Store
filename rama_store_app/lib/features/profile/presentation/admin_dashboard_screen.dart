@@ -8,6 +8,7 @@ import '../../../shared/widgets/app_text_field.dart';
 import '../../../shared/widgets/frosted_glass_container.dart';
 import '../../../shared/widgets/hover_card.dart';
 import '../../catalog/data/catalog_models.dart';
+import '../../catalog/presentation/catalog_notifier.dart';
 import '../../../main.dart';
 
 class AdminDashboardScreen extends ConsumerStatefulWidget {
