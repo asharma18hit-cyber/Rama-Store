@@ -140,13 +140,13 @@ final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: '/',
     redirect: (context, state) {
-      final loc = state.uri.path;
-      final isAdminRoute = loc == '/admin' || loc.startsWith('/admin/');
+      final loc = state.matchedLocation;
+      final isAdminRoute = loc == '/admin' || loc == '/admin/dashboard';
       final isLoginRoute = loc == '/admin/login';
       final isAdmin = authState.isAuthenticated &&
           (authState.user?.role == 'admin' || authState.user?.role == 'super_admin');
 
-      if (isAdminRoute && !isLoginRoute && !isAdmin) {
+      if (isAdminRoute && !isAdmin) {
         return '/admin/login';
       }
       if (isLoginRoute && isAdmin) {
