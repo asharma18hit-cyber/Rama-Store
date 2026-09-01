@@ -116,12 +116,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               subtitle: 'View trackings & reorder previous items',
               onTap: () => context.go('/orders'),
             ),
-            _buildProfileMenuItem(
-              icon: Icons.admin_panel_settings_outlined,
-              title: 'Stitch Admin Dashboard',
-              subtitle: 'Manage revenue metrics, inventory & new products',
-              onTap: () => context.push('/admin'),
-            ),
+            if (user?.isAdmin == true || user?.role == 'admin' || user?.role == 'super_admin') ...[
+              _buildProfileMenuItem(
+                icon: Icons.admin_panel_settings_outlined,
+                title: 'Stitch Admin Dashboard',
+                subtitle: 'Manage revenue metrics, inventory & new products',
+                onTap: () => context.push('/admin'),
+              ),
+            ],
             Container(
               margin: const EdgeInsets.only(bottom: 12),
               decoration: BoxDecoration(

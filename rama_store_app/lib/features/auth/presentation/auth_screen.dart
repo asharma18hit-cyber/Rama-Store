@@ -169,12 +169,6 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
                 ],
               ),
             ),
-            const SizedBox(height: 16),
-            TextButton.icon(
-              icon: const Icon(Icons.admin_panel_settings_rounded, size: 16, color: AppColors.secondaryFixedDim),
-              label: const Text('Go to Administrator Login Portal', style: TextStyle(color: AppColors.secondaryFixedDim, fontWeight: FontWeight.bold, fontSize: 13)),
-              onPressed: () => context.go('/admin/login'),
-            ),
           ],
         ),
       ),
