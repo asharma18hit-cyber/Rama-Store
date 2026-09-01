@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/utils/file_downloader.dart';
 import 'frosted_glass_container.dart';
 
 class AppDownloadBanner extends StatefulWidget {
@@ -73,28 +74,23 @@ class _AppDownloadBannerState extends State<AppDownloadBanner> {
                 ),
                 icon: const Icon(Icons.download_rounded, color: Colors.white),
                 label: const Text('Download APK Directly (53 MB)', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                onPressed: () async {
-                  final apkUri = Uri.parse('https://rama-store-1.onrender.com/downloads/rama-store-app.apk');
-                  try {
-                    await launchUrl(apkUri, mode: LaunchMode.externalApplication, webOnlyWindowName: '_self');
-                  } catch (_) {
-                    await launchUrl(Uri.parse('/downloads/rama-store-app.apk'), mode: LaunchMode.platformDefault);
-                  }
-                  if (context.mounted) {
-                    Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Row(
-                          children: [
-                            Icon(Icons.downloading_rounded, color: AppColors.secondaryFixedDim),
-                            SizedBox(width: 10),
-                            Text('🚀 Downloading Rama Store Android APK directly to your device!'),
-                          ],
-                        ),
-                        backgroundColor: AppColors.surface,
+                onPressed: () {
+                  downloadFileFromUrl('/downloads/rama-store-app.apk', filename: 'rama-store-app.apk');
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Row(
+                        children: [
+                          Icon(Icons.download_done_rounded, color: AppColors.secondaryFixedDim),
+                          SizedBox(width: 10),
+                          Expanded(
+                            child: Text('🚀 Download started! Check your browser downloads for rama-store-app.apk'),
+                          ),
+                        ],
                       ),
-                    );
-                  }
+                      backgroundColor: AppColors.surface,
+                    ),
+                  );
                 },
               ),
             ],
