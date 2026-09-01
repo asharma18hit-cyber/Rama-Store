@@ -22,16 +22,45 @@ class HomeScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('RAMA STORE'),
+        backgroundColor: const Color(0xFF0F172A),
+        elevation: 0,
+        title: GestureDetector(
+          onTap: () => context.go('/catalog'),
+          child: Container(
+            height: 38,
+            padding: const EdgeInsets.symmetric(horizontal: 14),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: AppColors.surfaceLight),
+            ),
+            child: Row(
+              children: const [
+                Icon(Icons.search_rounded, size: 18, color: AppColors.secondaryFixedDim),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Search fashion, groceries, books, medicine...',
+                    style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: () => context.go('/catalog'),
+            icon: const Icon(Icons.loyalty_rounded),
+            color: AppColors.accentAmber,
+            tooltip: '10% Loyalty Cash-Back',
+            onPressed: () => context.push('/loyalty'),
           ),
           IconButton(
-            icon: const Icon(Icons.loyalty),
-            color: AppColors.accentAmber,
-            onPressed: () => context.push('/loyalty'),
+            icon: const Icon(Icons.shopping_bag_outlined),
+            color: AppColors.textPrimary,
+            tooltip: 'Cart',
+            onPressed: () => context.go('/cart'),
           ),
         ],
       ),
@@ -215,8 +244,36 @@ class HomeScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 4),
                 const Text(
-                  'Bakery, Books, Groceries & Medicine • 100% Shared Database',
+                  'Bakery, Books, Groceries & Medicine • 100% Authoritative Database',
                   style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.secondaryFixedDim,
+                        foregroundColor: const Color(0xFF005236),
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                      icon: const Icon(Icons.shopping_bag_rounded, size: 14),
+                      label: const Text('Shop Catalog', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                      onPressed: () => context.go('/catalog'),
+                    ),
+                    const SizedBox(width: 8),
+                    OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        side: const BorderSide(color: Colors.white24),
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                      icon: const Icon(Icons.download_rounded, size: 14, color: AppColors.secondaryFixedDim),
+                      label: const Text('Get App', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                      onPressed: () => context.push('/downloads'),
+                    ),
+                  ],
                 ),
               ],
             ),
