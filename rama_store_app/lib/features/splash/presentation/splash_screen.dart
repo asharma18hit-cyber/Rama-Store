@@ -79,6 +79,15 @@ class SplashScreen extends StatelessWidget {
                     isOutlined: true,
                     onPressed: () => context.go('/auth'),
                   ),
+                  const SizedBox(height: 12),
+                  TextButton.icon(
+                    icon: const Icon(Icons.admin_panel_settings_rounded, size: 16, color: AppColors.secondaryFixedDim),
+                    label: const Text(
+                      'Administrator Portal Login',
+                      style: TextStyle(color: AppColors.secondaryFixedDim, fontWeight: FontWeight.bold, fontSize: 13),
+                    ),
+                    onPressed: () => context.go('/admin/login'),
+                  ),
                 ],
               ),
             ],
