@@ -9,6 +9,7 @@ import '../../../shared/widgets/offline_banner.dart';
 import '../../../shared/widgets/shimmer_loader.dart';
 import '../../../main.dart';
 import '../data/catalog_models.dart';
+import 'product_card.dart';
 
 class CatalogScreen extends ConsumerStatefulWidget {
   const CatalogScreen({super.key});
@@ -159,7 +160,7 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
                       mainAxisSpacing: 12,
                     ),
                     itemCount: 6,
-                    itemBuilder: (context, index) => const ProductCardShimmer(),
+                    itemBuilder: (context, index) => ProductCardShimmer(),
                   )
                 : visibleProducts.isEmpty
                     ? Center(
@@ -177,19 +178,21 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
                         child: GridView.builder(
                           controller: _scrollController,
                           padding: const EdgeInsets.all(16),
-                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            childAspectRatio: 0.68,
+                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: MediaQuery.of(context).size.width >= 1024
+                                ? 4
+                                : (MediaQuery.of(context).size.width >= 600 ? 3 : 2),
+                            childAspectRatio: 0.65,
                             crossAxisSpacing: 12,
                             mainAxisSpacing: 12,
                           ),
                           itemCount: visibleProducts.length + (catalogState.isMoreLoading ? 2 : 0),
                           itemBuilder: (context, index) {
                             if (index >= visibleProducts.length) {
-                              return const ProductCardShimmer();
+                              return ProductCardShimmer();
                             }
                             final product = visibleProducts[index];
-                            return _buildProductGridCard(context, product, ref);
+                            return StitchProductCard(product: product);
                           },
                         ),
                       ),
@@ -210,119 +213,13 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
         label: Text(label),
         selected: isSelected,
         onSelected: (_) => onTap(),
-        selectedColor: AppColors.primaryGold,
-        backgroundColor: AppColors.surface,
-        checkmarkColor: Colors.white,
+        selectedColor: AppColors.secondaryFixedDim,
+        backgroundColor: const Color(0xFF1E293B),
+        checkmarkColor: const Color(0xFF005236),
         labelStyle: TextStyle(
-          color: isSelected ? Colors.white : AppColors.textSecondary,
+          color: isSelected ? const Color(0xFF005236) : AppColors.textSecondary,
           fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildProductGridCard(BuildContext context, Product product, WidgetRef ref) {
-    return Card(
-      color: AppColors.surface,
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: () => context.push('/product/${product.id}', extra: product),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Stack(
-              children: [
-                SizedBox(
-                  height: 130,
-                  width: double.infinity,
-                  child: product.imageUrl != null && product.imageUrl!.isNotEmpty
-                      ? CachedNetworkImage(
-                          imageUrl: product.imageUrl!,
-                          fit: BoxFit.cover,
-                          placeholder: (context, url) => const ShimmerLoader(width: double.infinity, height: 130),
-                          errorWidget: (context, url, err) => Container(color: AppColors.surfaceLight),
-                        )
-                      : Container(color: AppColors.surfaceLight, child: const Icon(Icons.store, size: 40, color: AppColors.textMuted)),
-                ),
-                Positioned(
-                  top: 8,
-                  left: 8,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryGoldDark,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      product.displayBadge,
-                      style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white),
-                    ),
-                  ),
-                ),
-                Positioned(
-                  top: 8,
-                  right: 8,
-                  child: Consumer(
-                    builder: (context, ref, child) {
-                      final isFav = ref.watch(wishlistNotifierProvider).contains(product.id);
-                      return GestureDetector(
-                        onTap: () => ref.read(wishlistNotifierProvider.notifier).toggleFavorite(product.id),
-                        child: CircleAvatar(
-                          radius: 14,
-                          backgroundColor: AppColors.surface.withOpacity(0.8),
-                          child: Icon(
-                            isFav ? Icons.favorite : Icons.favorite_border,
-                            color: isFav ? Colors.red : AppColors.textMuted,
-                            size: 16,
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
-            Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    product.name,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    product.categoryName ?? 'Retail Item',
-                    style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        Formatters.formatCurrency(product.sellingPrice),
-                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.primaryGoldLight),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.add_shopping_cart, color: AppColors.primaryGold, size: 20),
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
-                        onPressed: () {
-                          ref.read(cartNotifierProvider.notifier).addItem(product);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Added ${product.name} to cart'), duration: const Duration(seconds: 1)),
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
+          fontSize: 12,
         ),
       ),
     );
