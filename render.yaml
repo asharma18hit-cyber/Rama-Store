@@ -6,6 +6,9 @@ services:
     staticPublishPath: ./rama_store_app/build/web
     routes:
       - type: rewrite
+        source: /downloads/rama-store-app.apksvg
+        destination: /downloads/rama-store-app.apk
+      - type: rewrite
         source: /downloads/*
         destination: /downloads/*
       - type: rewrite

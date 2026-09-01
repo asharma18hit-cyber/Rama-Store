@@ -198,6 +198,10 @@ final routerProvider = Provider<GoRouter>((ref) {
             builder: (context, state) => const HomeScreen(),
           ),
           GoRoute(
+            path: '/homesvg',
+            builder: (context, state) => const HomeScreen(),
+          ),
+          GoRoute(
             path: '/catalog',
             builder: (context, state) => const CatalogScreen(),
           ),
