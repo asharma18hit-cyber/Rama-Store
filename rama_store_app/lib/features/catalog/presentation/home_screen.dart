@@ -8,7 +8,6 @@ import '../../../shared/widgets/offline_banner.dart';
 import '../../../shared/widgets/shimmer_loader.dart';
 import '../../../shared/widgets/rating_stars.dart';
 import '../../../shared/widgets/hover_card.dart';
-import '../../../shared/widgets/frosted_glass_container.dart';
 import '../../../main.dart';
 import '../data/catalog_models.dart';
 import 'catalog_notifier.dart';
