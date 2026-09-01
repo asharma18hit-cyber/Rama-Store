@@ -6,7 +6,6 @@ import '../../../core/utils/formatters.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/app_text_field.dart';
 import '../../../shared/widgets/frosted_glass_container.dart';
-import '../data/checkout_repository.dart';
 import '../../../main.dart';
 
 class CheckoutScreen extends ConsumerStatefulWidget {

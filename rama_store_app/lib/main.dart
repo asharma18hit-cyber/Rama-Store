@@ -35,7 +35,6 @@ import 'features/loyalty/presentation/loyalty_screen.dart';
 import 'features/profile/presentation/profile_screen.dart';
 import 'features/profile/presentation/admin_dashboard_screen.dart';
 import 'features/profile/presentation/admin_login_screen.dart';
-import 'features/splash/presentation/splash_screen.dart';
 import 'features/splash/presentation/download_screen.dart';
 import 'shared/layouts/main_scaffold.dart';
 
