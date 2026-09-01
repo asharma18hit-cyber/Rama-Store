@@ -133,31 +133,48 @@ final themeModeNotifierProvider = StateNotifierProvider<ThemeModeNotifier, Theme
   return ThemeModeNotifier(storage);
 });
 
+// Router Notifier to prevent recreating GoRouter on state changes
+class RouterNotifier extends ChangeNotifier {
+  final Ref _ref;
+
+  RouterNotifier(this._ref) {
+    _ref.listen<AuthState>(authNotifierProvider, (_, __) {
+      notifyListeners();
+    });
+  }
+
+  String? redirect(BuildContext context, GoRouterState state) {
+    final authState = _ref.read(authNotifierProvider);
+    final loc = state.matchedLocation;
+    final isAdminRoute = loc == '/admin' || loc == '/admin/dashboard';
+    final isLoginRoute = loc == '/admin/login';
+    final isAdmin = authState.isAuthenticated &&
+        (authState.user?.role == 'admin' || authState.user?.role == 'super_admin');
+
+    if (isAdminRoute && !isAdmin) {
+      return '/admin/login';
+    }
+    if (isLoginRoute && isAdmin) {
+      return '/admin';
+    }
+    return null;
+  }
+}
+
+final routerNotifierProvider = Provider<RouterNotifier>((ref) => RouterNotifier(ref));
+
 // GoRouter Navigation Config with Deep-Linking
 final routerProvider = Provider<GoRouter>((ref) {
-  final authState = ref.watch(authNotifierProvider);
+  final notifier = ref.watch(routerNotifierProvider);
 
   return GoRouter(
-    initialLocation: '/',
-    redirect: (context, state) {
-      final loc = state.matchedLocation;
-      final isAdminRoute = loc == '/admin' || loc == '/admin/dashboard';
-      final isLoginRoute = loc == '/admin/login';
-      final isAdmin = authState.isAuthenticated &&
-          (authState.user?.role == 'admin' || authState.user?.role == 'super_admin');
-
-      if (isAdminRoute && !isAdmin) {
-        return '/admin/login';
-      }
-      if (isLoginRoute && isAdmin) {
-        return '/admin';
-      }
-      return null;
-    },
+    initialLocation: '/home',
+    refreshListenable: notifier,
+    redirect: notifier.redirect,
     routes: [
       GoRoute(
         path: '/',
-        builder: (context, state) => const SplashScreen(),
+        builder: (context, state) => const HomeScreen(),
       ),
       GoRoute(
         path: '/auth',
