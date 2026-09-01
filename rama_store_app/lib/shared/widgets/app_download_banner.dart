@@ -74,15 +74,11 @@ class _AppDownloadBannerState extends State<AppDownloadBanner> {
                 icon: const Icon(Icons.download_rounded, color: Colors.white),
                 label: const Text('Download APK Directly (53 MB)', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                 onPressed: () async {
-                  final uri = Uri.parse('/downloads/rama-store-app.apk');
+                  final apkUri = Uri.parse('https://rama-store-1.onrender.com/downloads/rama-store-app.apk');
                   try {
-                    await launchUrl(uri, mode: LaunchMode.platformDefault, webOnlyWindowName: '_blank');
+                    await launchUrl(apkUri, mode: LaunchMode.externalApplication, webOnlyWindowName: '_self');
                   } catch (_) {
-                    await launchUrl(
-                      Uri.parse('https://rama-store-1.onrender.com/downloads/rama-store-app.apk'),
-                      mode: LaunchMode.platformDefault,
-                      webOnlyWindowName: '_blank',
-                    );
+                    await launchUrl(Uri.parse('/downloads/rama-store-app.apk'), mode: LaunchMode.platformDefault);
                   }
                   if (context.mounted) {
                     Navigator.pop(context);
@@ -90,9 +86,9 @@ class _AppDownloadBannerState extends State<AppDownloadBanner> {
                       const SnackBar(
                         content: Row(
                           children: [
-                            Icon(Icons.download_done_rounded, color: AppColors.secondaryFixedDim),
+                            Icon(Icons.downloading_rounded, color: AppColors.secondaryFixedDim),
                             SizedBox(width: 10),
-                            Text('🚀 Downloading Rama Store Android APK... Check downloads!'),
+                            Text('🚀 Downloading Rama Store Android APK directly to your device!'),
                           ],
                         ),
                         backgroundColor: AppColors.surface,
