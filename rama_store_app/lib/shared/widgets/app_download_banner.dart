@@ -75,10 +75,20 @@ class _AppDownloadBannerState extends State<AppDownloadBanner> {
                 label: const Text('Download APK Directly (53 MB)', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                 onPressed: () async {
                   final uri = Uri.parse('https://github.com/asharma18hit-cyber/Rama-Store/releases');
-                  if (await canLaunchUrl(uri)) {
-                    await launchUrl(uri, mode: LaunchMode.externalApplication);
+                  try {
+                    await launchUrl(uri, mode: LaunchMode.platformDefault, webOnlyWindowName: '_blank');
+                  } catch (_) {
+                    // Fallback
                   }
-                  if (context.mounted) Navigator.pop(context);
+                  if (context.mounted) {
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('🚀 Opening Rama Store Mobile App APK repository...'),
+                        backgroundColor: AppColors.primaryContainer,
+                      ),
+                    );
+                  }
                 },
               ),
             ],
