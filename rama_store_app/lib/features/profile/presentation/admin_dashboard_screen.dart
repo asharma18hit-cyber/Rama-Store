@@ -114,6 +114,61 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> wit
 
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authNotifierProvider);
+    final isAdmin = authState.isAuthenticated &&
+        (authState.user?.role == 'admin' || authState.user?.role == 'super_admin');
+
+    if (!isAdmin) {
+      return Scaffold(
+        backgroundColor: const Color(0xFF0B0F19),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: FrostedGlassContainer(
+              padding: const EdgeInsets.all(32),
+              borderRadius: BorderRadius.circular(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: AppColors.error.withValues(alpha: 0.15),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.lock_rounded, size: 48, color: AppColors.error),
+                  ),
+                  const SizedBox(height: 20),
+                  const Text(
+                    '403 Forbidden Access',
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'You must be signed in with an Administrator account to view this portal.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                  ),
+                  const SizedBox(height: 24),
+                  AppButton(
+                    text: 'Authenticate as Admin',
+                    icon: Icons.login_rounded,
+                    onPressed: () => context.go('/admin/login'),
+                  ),
+                  const SizedBox(height: 12),
+                  TextButton.icon(
+                    icon: const Icon(Icons.storefront_rounded, size: 16, color: AppColors.textSecondary),
+                    label: const Text('Back to Storefront', style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+                    onPressed: () => context.go('/home'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
     final catalogState = ref.watch(catalogNotifierProvider);
     final isDesktop = MediaQuery.of(context).size.width >= 900;
 

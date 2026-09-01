@@ -135,8 +135,25 @@ final themeModeNotifierProvider = StateNotifierProvider<ThemeModeNotifier, Theme
 
 // GoRouter Navigation Config with Deep-Linking
 final routerProvider = Provider<GoRouter>((ref) {
+  final authState = ref.watch(authNotifierProvider);
+
   return GoRouter(
     initialLocation: '/',
+    redirect: (context, state) {
+      final loc = state.uri.path;
+      final isAdminRoute = loc == '/admin' || loc.startsWith('/admin/');
+      final isLoginRoute = loc == '/admin/login';
+      final isAdmin = authState.isAuthenticated &&
+          (authState.user?.role == 'admin' || authState.user?.role == 'super_admin');
+
+      if (isAdminRoute && !isLoginRoute && !isAdmin) {
+        return '/admin/login';
+      }
+      if (isLoginRoute && isAdmin) {
+        return '/admin';
+      }
+      return null;
+    },
     routes: [
       GoRoute(
         path: '/',
