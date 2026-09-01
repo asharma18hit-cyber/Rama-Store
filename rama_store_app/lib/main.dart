@@ -36,6 +36,7 @@ import 'features/profile/presentation/profile_screen.dart';
 import 'features/profile/presentation/admin_dashboard_screen.dart';
 import 'features/profile/presentation/admin_login_screen.dart';
 import 'features/splash/presentation/splash_screen.dart';
+import 'features/splash/presentation/download_screen.dart';
 import 'shared/layouts/main_scaffold.dart';
 
 import 'features/catalog/presentation/wishlist_notifier.dart';
@@ -254,6 +255,14 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/admin/dashboard',
         builder: (context, state) => const AdminDashboardScreen(),
+      ),
+      GoRoute(
+        path: '/downloads',
+        builder: (context, state) => const DownloadScreen(),
+      ),
+      GoRoute(
+        path: '/download',
+        builder: (context, state) => const DownloadScreen(),
       ),
     ],
   );
