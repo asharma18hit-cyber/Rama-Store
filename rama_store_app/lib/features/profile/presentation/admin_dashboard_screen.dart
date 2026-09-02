@@ -547,15 +547,21 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> wit
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Customer Orders Fulfillment', style: Theme.of(context).textTheme.titleLarge),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Customer Orders & Fulfillment', style: Theme.of(context).textTheme.titleLarge),
+              Text('Live OMS Feed', style: TextStyle(fontSize: 12, color: AppColors.secondaryFixedDim, fontWeight: FontWeight.bold)),
+            ],
+          ),
           const SizedBox(height: 16),
           Expanded(
             child: ListView(
               children: [
-                _buildAdminOrderRow('TRK-982410', 'Rahul Sharma', '₹2,499', 'Paid', '2x Sourdough Bread, 1x Clean Code Book'),
-                _buildAdminOrderRow('TRK-741203', 'Anita Verma', '₹899', 'Processing', '1x Himalayan Pure Honey'),
-                _buildAdminOrderRow('TRK-551029', 'Vikram Singh', '₹1,249', 'Shipped', '1x Titanium Fiber Gear Pack'),
-                _buildAdminOrderRow('TRK-440192', 'Priya Patel', '₹499', 'Delivered', '1x Bakery Croissant Box'),
+                _buildAdminOrderRow('TRK-982410', 'Rahul Sharma', '₹2,499.00', 'Delivered', 'Paid', 'Card', '2x Sourdough Bread, 1x Clean Code Book', null),
+                _buildAdminOrderRow('TRK-741203', 'Anita Verma', '₹899.00', 'Confirmed', 'Payment Pending', 'COD', '1x Himalayan Pure Honey', null),
+                _buildAdminOrderRow('TRK-551029', 'Vikram Singh', '₹1,249.00', 'Dispatched', 'Payment Pending', 'COD', '1x Titanium Fiber Gear Pack', null),
+                _buildAdminOrderRow('TRK-440192', 'Priya Patel', '₹499.00', 'Cancelled', 'Not Paid', 'COD', '1x Bakery Croissant Box', 'I ordered by mistake'),
               ],
             ),
           ),
@@ -564,10 +570,22 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> wit
     );
   }
 
-  Widget _buildAdminOrderRow(String trk, String customer, String amount, String status, String items) {
+  Widget _buildAdminOrderRow(
+    String trk,
+    String customer,
+    String amount,
+    String orderStatus,
+    String paymentStatus,
+    String paymentMethod,
+    String items,
+    String? cancellationReason,
+  ) {
     Color statusColor = AppColors.info;
-    if (status == 'Delivered') statusColor = AppColors.success;
-    if (status == 'Processing') statusColor = AppColors.warning;
+    if (orderStatus == 'Delivered') statusColor = AppColors.success;
+    if (orderStatus == 'Confirmed' || orderStatus == 'Packed') statusColor = AppColors.secondaryFixedDim;
+    if (orderStatus == 'Cancelled') statusColor = AppColors.error;
+
+    Color paymentColor = paymentStatus == 'Paid' ? AppColors.success : (paymentStatus == 'Not Paid' ? AppColors.textMuted : AppColors.accentAmber);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -577,34 +595,77 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> wit
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: AppColors.surfaceLight),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Order #$trk', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.textPrimary)),
-                    const SizedBox(width: 8),
-                    Text('• $customer', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                    Row(
+                      children: [
+                        Text('Order #$trk', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.textPrimary)),
+                        const SizedBox(width: 8),
+                        Text('• $customer', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: AppColors.surfaceLight,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(paymentMethod, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(items, style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
                   ],
                 ),
-                const SizedBox(height: 2),
-                Text(items, style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
-              ],
-            ),
+              ),
+              Text(amount, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.secondaryFixedDim)),
+              const SizedBox(width: 12),
+              Wrap(
+                spacing: 6,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: statusColor.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: statusColor.withValues(alpha: 0.4)),
+                    ),
+                    child: Text(orderStatus, style: TextStyle(color: statusColor, fontWeight: FontWeight.bold, fontSize: 10)),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: paymentColor.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: paymentColor.withValues(alpha: 0.4)),
+                    ),
+                    child: Text(paymentStatus, style: TextStyle(color: paymentColor, fontWeight: FontWeight.bold, fontSize: 10)),
+                  ),
+                ],
+              ),
+            ],
           ),
-          Text(amount, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.secondaryFixedDim)),
-          const SizedBox(width: 12),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: statusColor.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(20),
+          if (cancellationReason != null) ...[
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: AppColors.error.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Text(
+                'Cancellation Reason: $cancellationReason',
+                style: const TextStyle(fontSize: 11, color: AppColors.error, fontWeight: FontWeight.w500),
+              ),
             ),
-            child: Text(status, style: TextStyle(color: statusColor, fontWeight: FontWeight.bold, fontSize: 11)),
-          ),
+          ],
         ],
       ),
     );
