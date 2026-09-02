@@ -42,9 +42,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   child: _buildTopAnnouncementRibbon(catalogState),
                 ),
 
-            // 2. Stitch 2.0 Glassmorphic Header Navigation
+            // 2. Header Navigation
             SliverToBoxAdapter(
-              child: _buildStitchHeader(context, isDesktop),
+              child: _buildHeader(context, isDesktop),
             ),
 
             // 3. Category Quick Filter Strip
@@ -58,11 +58,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 child: OfflineBanner(isOffline: catalogState.isOffline),
               ),
 
-            // 5. Main Hero Section (Stitch 2.0 Canvas)
+            // 5. Main Hero Section
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.only(top: 16.0, bottom: 28.0),
-                child: _buildStitchHeroSection(context, isDesktop, isTablet),
+                child: _buildHeroSection(context, isDesktop, isTablet),
               ),
             ),
 
@@ -83,7 +83,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
             ),
 
-            // 7. Stitch Asymmetric Bento Showcase Grid
+            // 7. Curated Collections Bento Showcase Grid
             SliverToBoxAdapter(
               child: _buildSectionHeader(
                 context,
@@ -148,7 +148,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
             // 12. Premium E-Commerce Footer
             SliverToBoxAdapter(
-              child: _buildStitchFooter(context, isDesktop),
+              child: _buildFooter(context, isDesktop),
             ),
           ],
         ),
@@ -187,8 +187,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  // --- 2. STITCH 2.0 HEADER NAVIGATION ---
-  Widget _buildStitchHeader(BuildContext context, bool isDesktop) {
+  // --- 2. HEADER NAVIGATION ---
+  Widget _buildHeader(BuildContext context, bool isDesktop) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: const BoxDecoration(
@@ -376,8 +376,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  // --- 4. STITCH HERO SECTION ---
-  Widget _buildStitchHeroSection(BuildContext context, bool isDesktop, bool isTablet) {
+  // --- 4. HERO SECTION ---
+  Widget _buildHeroSection(BuildContext context, bool isDesktop, bool isTablet) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       child: HoverCard(
@@ -645,7 +645,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  // --- 6. STITCH BENTO SHOWCASE ---
+  // --- 6. CURATED BENTO SHOWCASE ---
   Widget _buildBentoShowcase(BuildContext context, bool isDesktop) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -829,13 +829,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         itemCount: state.products.length,
         itemBuilder: (context, index) {
           final product = state.products[index];
-          return _buildStitchProductCard(context, product, ref);
+          return _buildProductCard(context, product, ref);
         },
       ),
     );
   }
 
-  Widget _buildStitchProductCard(BuildContext context, Product product, WidgetRef ref) {
+  Widget _buildProductCard(BuildContext context, Product product, WidgetRef ref) {
     final isFav = ref.watch(wishlistNotifierProvider).contains(product.id);
     final originalMrp = product.sellingPrice * 1.25;
 
@@ -1134,8 +1134,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  // --- 11. STITCH FOOTER ---
-  Widget _buildStitchFooter(BuildContext context, bool isDesktop) {
+  // --- 11. FOOTER ---
+  Widget _buildFooter(BuildContext context, bool isDesktop) {
     return Container(
       padding: const EdgeInsets.all(28),
       decoration: const BoxDecoration(
@@ -1179,7 +1179,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: const [
               Text('© 2026 Rama Store Inc. All Rights Reserved.', style: TextStyle(fontSize: 10, color: AppColors.textMuted)),
-              Text('Google Stitch 2.0 System', style: TextStyle(fontSize: 10, color: AppColors.secondaryFixedDim, fontWeight: FontWeight.bold)),
+              Text('Authentic Quality Guaranteed', style: TextStyle(fontSize: 10, color: AppColors.textMuted)),
             ],
           ),
         ],

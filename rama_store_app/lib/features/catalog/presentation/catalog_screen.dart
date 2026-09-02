@@ -61,7 +61,7 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
             onPressed: () {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text('✨ Google Stitch Filter Drawer Active: Filter by Material, Technical Weave & Water Resistance'),
+                  content: Text('Filter Active: Filter by Category, Material & Price Range'),
                   backgroundColor: AppColors.primary,
                 ),
               );
@@ -77,7 +77,7 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
         children: [
           OfflineBanner(isOffline: catalogState.isOffline),
 
-          // Google Stitch Elite Banner Pill
+          // Store Inventory Status Banner Pill
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
@@ -90,10 +90,10 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
                     color: AppColors.secondaryFixedDim,
                     borderRadius: BorderRadius.circular(4),
                   ),
-                  child: const Text('STITCH SYNCED', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Color(0xFF005236))),
+                  child: const Text('VERIFIED INVENTORY', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Color(0xFF005236))),
                 ),
                 const SizedBox(width: 8),
-                const Text('Precision Engineered Fashion & Essentials', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                const Text('Precision Curated Fashion & Daily Essentials', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
               ],
             ),
           ),
@@ -192,7 +192,7 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
                               return ProductCardShimmer();
                             }
                             final product = visibleProducts[index];
-                            return StitchProductCard(product: product);
+                            return ProductCard(product: product);
                           },
                         ),
                       ),

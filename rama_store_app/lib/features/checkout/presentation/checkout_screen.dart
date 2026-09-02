@@ -168,7 +168,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               borderRadius: BorderRadius.circular(16),
               child: Column(
                 children: [
-                  // Promo Code Input Box (Stitch Design)
+                  // Promo Code Input Box
                   Row(
                     children: [
                       Expanded(
@@ -254,7 +254,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             ),
 
             const SizedBox(height: 16),
-            // Google Stitch 256-bit SSL Security Badge
+            // 256-bit SSL Security Badge
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: const [

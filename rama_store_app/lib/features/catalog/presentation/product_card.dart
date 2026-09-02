@@ -10,12 +10,12 @@ import '../../../main.dart';
 import '../data/catalog_models.dart';
 import 'wishlist_notifier.dart';
 
-class StitchProductCard extends ConsumerWidget {
+class ProductCard extends ConsumerWidget {
   final Product product;
   final double? width;
   final bool compact;
 
-  const StitchProductCard({
+  const ProductCard({
     super.key,
     required this.product,
     this.width,

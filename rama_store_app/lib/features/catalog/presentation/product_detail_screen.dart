@@ -108,12 +108,12 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
 
               const SizedBox(height: 40),
 
-              // Stitch Trust & Warranty Bento Grid
+              // Trust & Warranty Bento Grid
               _buildTrustBento(),
 
               const SizedBox(height: 40),
 
-              // Related Products Section with StitchProductCard
+              // Related Products Section
               const Text(
                 'RELATED STORE DROPS',
                 style: TextStyle(
@@ -134,7 +134,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                     if (rel.id == p.id) return const SizedBox.shrink();
                     return Padding(
                       padding: const EdgeInsets.only(right: 14.0),
-                      child: StitchProductCard(product: rel, width: 175),
+                      child: ProductCard(product: rel, width: 175),
                     );
                   },
                 ),
