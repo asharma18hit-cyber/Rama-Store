@@ -1,189 +1,274 @@
 import 'dart:async';
-import 'dart:math';
+import 'package:flutter/foundation.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-class OtpSession {
-  final String otp;
-  final DateTime expiresAt;
-  final DateTime lastSentAt;
-  int attempts;
+class OtpSendResult {
+  final bool isSuccess;
+  final String? message;
+  final String? errorMessage;
+  final int cooldownRemaining;
 
-  OtpSession({
-    required this.otp,
-    required this.expiresAt,
-    required this.lastSentAt,
-    this.attempts = 0,
+  const OtpSendResult({
+    required this.isSuccess,
+    this.message,
+    this.errorMessage,
+    this.cooldownRemaining = 0,
   });
-
-  bool get isExpired => DateTime.now().isAfter(expiresAt);
-  bool get isLocked => attempts >= 5;
 }
 
 class OtpVerificationResult {
   final bool isValid;
+  final UserCredential? credential;
   final String? error;
 
-  const OtpVerificationResult({required this.isValid, this.error});
+  const OtpVerificationResult({
+    required this.isValid,
+    this.credential,
+    this.error,
+  });
 }
 
 class OtpService {
-  static final Map<String, OtpSession> _sessions = {};
-  static String? _verificationId;
+  // Mobile Native Verification IDs
+  static final Map<String, String> _nativeVerificationIds = {};
+  // Web Confirmation Results
+  static final Map<String, ConfirmationResult> _webConfirmationResults = {};
+  // Rate limiting cooldowns
+  static final Map<String, DateTime> _lastSentTimestamps = {};
 
-  /// Generate a secure random 6-digit OTP
-  static String _generateSecureOtp() {
-    final random = Random.secure();
-    return (100000 + random.nextInt(900000)).toString();
+  /// Format standard Indian 10-digit number into international E.164 (+91XXXXXXXXXX)
+  static String formatPhoneNumber(String rawPhone) {
+    final digits = rawPhone.replaceAll(RegExp(r'\D'), '');
+    if (digits.length == 10) {
+      return '+91$digits';
+    }
+    if (digits.length == 12 && digits.startsWith('91')) {
+      return '+$digits';
+    }
+    if (rawPhone.startsWith('+')) {
+      return rawPhone;
+    }
+    return '+91$digits';
   }
 
-  /// Request Real-Time OTP for phone number or email
-  static Future<Map<String, dynamic>> sendOtp(String identifier) async {
-    final cleanId = identifier.trim().toLowerCase();
-    final now = DateTime.now();
+  /// Request Real-World Carrier SMS OTP via Firebase Phone Authentication
+  static Future<OtpSendResult> sendOtp(String identifier) async {
+    final cleanId = identifier.trim();
+    if (cleanId.isEmpty) {
+      return const OtpSendResult(
+        isSuccess: false,
+        errorMessage: 'Please enter a valid phone number or email.',
+      );
+    }
 
-    // Check rate limit / cooldown (60 seconds)
-    final existing = _sessions[cleanId];
-    if (existing != null && !existing.isExpired) {
-      final elapsed = now.difference(existing.lastSentAt).inSeconds;
+    // Rate Limiting (30-second cooldown)
+    final now = DateTime.now();
+    final lastSent = _lastSentTimestamps[cleanId];
+    if (lastSent != null) {
+      final elapsed = now.difference(lastSent).inSeconds;
       if (elapsed < 30) {
-        return {
-          'success': false,
-          'message': 'Please wait ${30 - elapsed}s before requesting a new OTP.',
-          'cooldownRemaining': 30 - elapsed,
-        };
+        return OtpSendResult(
+          isSuccess: false,
+          errorMessage: 'Please wait ${30 - elapsed}s before requesting a new OTP.',
+          cooldownRemaining: 30 - elapsed,
+        );
       }
     }
 
-    final otp = _generateSecureOtp();
-    _sessions[cleanId] = OtpSession(
-      otp: otp,
-      expiresAt: now.add(const Duration(minutes: 5)),
-      lastSentAt: now,
-    );
-
-    // If phone number and Firebase is initialized, attempt SMS delivery
+    // Phone Number Authentication
     if (!cleanId.contains('@')) {
-      final cleanPhone = cleanId.replaceAll(RegExp(r'\D'), '');
-      if (cleanPhone.length >= 10) {
-        final formattedPhone = cleanPhone.length == 10 ? '+91$cleanPhone' : '+91${cleanPhone.substring(cleanPhone.length - 10)}';
-        try {
-          if (Firebase.apps.isNotEmpty) {
-            final completer = Completer<Map<String, dynamic>>();
-            await FirebaseAuth.instance.verifyPhoneNumber(
-              phoneNumber: formattedPhone,
-              verificationCompleted: (PhoneAuthCredential credential) async {
-                await FirebaseAuth.instance.signInWithCredential(credential);
-              },
-              verificationFailed: (FirebaseAuthException e) {
-                if (!completer.isCompleted) {
-                  completer.complete({
-                    'success': true,
-                    'message': 'OTP sent successfully.',
-                    'expiresInSeconds': 300,
-                  });
-                }
-              },
-              codeSent: (String verificationId, int? resendToken) {
-                _verificationId = verificationId;
-                if (!completer.isCompleted) {
-                  completer.complete({
-                    'success': true,
-                    'message': 'OTP sent to $formattedPhone.',
-                    'expiresInSeconds': 300,
-                  });
-                }
-              },
-              codeAutoRetrievalTimeout: (String verificationId) {
-                _verificationId = verificationId;
-              },
-            );
-            return await completer.future.timeout(
-              const Duration(seconds: 4),
-              onTimeout: () => {
-                'success': true,
-                'message': 'OTP sent successfully.',
-                'expiresInSeconds': 300,
-              },
+      final formattedPhone = formatPhoneNumber(cleanId);
+      final phoneDigits = formattedPhone.replaceAll(RegExp(r'\D'), '');
+      if (phoneDigits.length < 12) {
+        return const OtpSendResult(
+          isSuccess: false,
+          errorMessage: 'Please enter a valid 10-digit mobile number.',
+        );
+      }
+
+      if (Firebase.apps.isEmpty) {
+        return const OtpSendResult(
+          isSuccess: false,
+          errorMessage: 'Firebase Authentication is initializing. Please try again in a moment.',
+        );
+      }
+
+      try {
+        final auth = FirebaseAuth.instance;
+
+        if (kIsWeb) {
+          // Firebase Web Phone Authentication with automatic reCAPTCHA verifier
+          final confirmationResult = await auth.signInWithPhoneNumber(
+            formattedPhone,
+          );
+          _webConfirmationResults[formattedPhone] = confirmationResult;
+          _lastSentTimestamps[cleanId] = now;
+          return OtpSendResult(
+            isSuccess: true,
+            message: 'OTP sent via SMS to $formattedPhone.',
+          );
+        } else {
+          // Native Mobile (Android / iOS) Phone Authentication
+          final completer = Completer<OtpSendResult>();
+
+          await auth.verifyPhoneNumber(
+            phoneNumber: formattedPhone,
+            timeout: const Duration(seconds: 60),
+            verificationCompleted: (PhoneAuthCredential credential) async {
+              try {
+                await auth.signInWithCredential(credential);
+              } catch (_) {}
+            },
+            verificationFailed: (FirebaseAuthException e) {
+              final errorMsg = _mapFirebaseError(e);
+              if (!completer.isCompleted) {
+                completer.complete(
+                  OtpSendResult(
+                    isSuccess: false,
+                    errorMessage: errorMsg,
+                  ),
+                );
+              }
+            },
+            codeSent: (String verificationId, int? resendToken) {
+              _nativeVerificationIds[formattedPhone] = verificationId;
+              _lastSentTimestamps[cleanId] = now;
+              if (!completer.isCompleted) {
+                completer.complete(
+                  OtpSendResult(
+                    isSuccess: true,
+                    message: 'SMS verification code dispatched to $formattedPhone.',
+                  ),
+                );
+              }
+            },
+            codeAutoRetrievalTimeout: (String verificationId) {
+              _nativeVerificationIds[formattedPhone] = verificationId;
+            },
+          );
+
+          return await completer.future.timeout(
+            const Duration(seconds: 15),
+            onTimeout: () => const OtpSendResult(
+              isSuccess: false,
+              errorMessage: 'Network timeout requesting SMS from carrier. Please check your connection and retry.',
+            ),
+          );
+        }
+      } on FirebaseAuthException catch (e) {
+        return OtpSendResult(
+          isSuccess: false,
+          errorMessage: _mapFirebaseError(e),
+        );
+      } catch (e) {
+        return OtpSendResult(
+          isSuccess: false,
+          errorMessage: 'Failed to send SMS: ${e.toString().replaceAll('Exception: ', '')}',
+        );
+      }
+    }
+
+    // Email-based OTP request (requires real backend dispatch)
+    return const OtpSendResult(
+      isSuccess: false,
+      errorMessage: 'Email OTP dispatch is not enabled on this environment. Please sign in with your mobile number or password.',
+    );
+  }
+
+  /// Verify 6-digit SMS OTP against Firebase Authentication
+  static Future<OtpVerificationResult> verifyOtp(String identifier, String enteredCode) async {
+    final cleanId = identifier.trim();
+    final code = enteredCode.trim();
+
+    if (code.isEmpty || code.length != 6) {
+      return const OtpVerificationResult(
+        isValid: false,
+        error: 'Please enter the complete 6-digit SMS code.',
+      );
+    }
+
+    if (!cleanId.contains('@')) {
+      final formattedPhone = formatPhoneNumber(cleanId);
+      final auth = FirebaseAuth.instance;
+
+      try {
+        if (kIsWeb) {
+          final confirmationResult = _webConfirmationResults[formattedPhone];
+          if (confirmationResult == null) {
+            return const OtpVerificationResult(
+              isValid: false,
+              error: 'No active verification session found. Please request an SMS code first.',
             );
           }
-        } catch (_) {}
-      }
-    }
 
-    return {
-      'success': true,
-      'message': 'OTP sent successfully.',
-      'expiresInSeconds': 300,
-      'otp': otp, // Returned to caller for secure dispatch / notification
-    };
-  }
+          final userCredential = await confirmationResult.confirm(code);
+          _webConfirmationResults.remove(formattedPhone);
+          _lastSentTimestamps.remove(cleanId);
+          return OtpVerificationResult(
+            isValid: true,
+            credential: userCredential,
+          );
+        } else {
+          final verificationId = _nativeVerificationIds[formattedPhone];
+          if (verificationId == null) {
+            return const OtpVerificationResult(
+              isValid: false,
+              error: 'No active verification session found. Please request an SMS code first.',
+            );
+          }
 
-  /// Verify 6-digit OTP code entered by user
-  static Future<OtpVerificationResult> verifyOtpAsync(String identifier, String enteredCode) async {
-    final cleanId = identifier.trim().toLowerCase();
-    final code = enteredCode.trim();
-
-    if (_verificationId != null && Firebase.apps.isNotEmpty) {
-      try {
-        final credential = PhoneAuthProvider.credential(
-          verificationId: _verificationId!,
-          smsCode: code,
-        );
-        await FirebaseAuth.instance.signInWithCredential(credential);
-        _sessions.remove(cleanId);
-        return const OtpVerificationResult(isValid: true);
-      } catch (_) {}
-    }
-
-    return verifyOtp(cleanId, code);
-  }
-
-  /// Verify OTP strictly against active cryptographic session
-  static OtpVerificationResult verifyOtp(String identifier, String enteredCode) {
-    final cleanId = identifier.trim().toLowerCase();
-    final code = enteredCode.trim();
-
-    final session = _sessions[cleanId];
-    if (session == null) {
-      return const OtpVerificationResult(
-        isValid: false,
-        error: 'No active OTP request found. Please request an OTP.',
-      );
-    }
-
-    if (session.isLocked) {
-      return const OtpVerificationResult(
-        isValid: false,
-        error: 'Too many failed attempts. Please request a new OTP.',
-      );
-    }
-
-    if (session.isExpired) {
-      _sessions.remove(cleanId);
-      return const OtpVerificationResult(
-        isValid: false,
-        error: 'This OTP has expired. Please request a new one.',
-      );
-    }
-
-    if (session.otp != code) {
-      session.attempts++;
-      final remaining = 5 - session.attempts;
-      if (remaining <= 0) {
-        return const OtpVerificationResult(
+          final credential = PhoneAuthProvider.credential(
+            verificationId: verificationId,
+            smsCode: code,
+          );
+          final userCredential = await auth.signInWithCredential(credential);
+          _nativeVerificationIds.remove(formattedPhone);
+          _lastSentTimestamps.remove(cleanId);
+          return OtpVerificationResult(
+            isValid: true,
+            credential: userCredential,
+          );
+        }
+      } on FirebaseAuthException catch (e) {
+        return OtpVerificationResult(
           isValid: false,
-          error: 'Too many failed attempts. Please request a new OTP.',
+          error: _mapFirebaseError(e),
+        );
+      } catch (e) {
+        return OtpVerificationResult(
+          isValid: false,
+          error: 'Verification failed: ${e.toString().replaceAll('Exception: ', '')}',
         );
       }
-      return OtpVerificationResult(
-        isValid: false,
-        error: 'Incorrect OTP. Please check and try again ($remaining attempts remaining).',
-      );
     }
 
-    // OTP matched! Enforce one-time usage by clearing session
-    _sessions.remove(cleanId);
-    return const OtpVerificationResult(isValid: true);
+    return const OtpVerificationResult(
+      isValid: false,
+      error: 'Invalid verification identifier.',
+    );
+  }
+
+  static String _mapFirebaseError(FirebaseAuthException e) {
+    switch (e.code) {
+      case 'invalid-phone-number':
+        return 'The mobile phone number entered is invalid. Please check the number and try again.';
+      case 'quota-exceeded':
+        return 'SMS daily quota for this project has been exceeded. Please contact support or try again later.';
+      case 'too-many-requests':
+        return 'Too many attempts from this device. Please wait a few minutes before trying again.';
+      case 'invalid-verification-code':
+        return 'The 6-digit code you entered is incorrect. Please check your SMS and try again.';
+      case 'session-expired':
+        return 'This SMS verification session has expired. Please tap "Resend Code" to request a new one.';
+      case 'captcha-check-failed':
+        return 'reCAPTCHA verification failed. Please refresh the page and try again.';
+      case 'app-not-authorized':
+        return 'This domain is not authorized in Firebase Console. Please ensure authorized domains are configured.';
+      case 'network-request-failed':
+        return 'Network connection error. Please check your internet connection.';
+      default:
+        return e.message ?? 'An error occurred during authentication. Please try again.';
+    }
   }
 }

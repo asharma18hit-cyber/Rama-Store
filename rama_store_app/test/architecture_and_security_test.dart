@@ -100,17 +100,10 @@ void main() {
       expect(outOfStockProduct.isInStock, false);
     });
 
-    test('OTP Service verification dynamically generates and validates code', () async {
-      final res = await OtpService.sendOtp('9876543210');
-      final generatedOtp = res['otp'] as String;
-      expect(generatedOtp.length, 6);
-
-      final invalidResult = OtpService.verifyOtp('9876543210', '000000');
-      expect(invalidResult.isValid, false);
-      expect(invalidResult.error != null, true);
-
-      final validResult = OtpService.verifyOtp('9876543210', generatedOtp);
-      expect(validResult.isValid, true);
+    test('Phone Number formatting and validation integrity', () {
+      expect(OtpService.formatPhoneNumber('9876543210'), '+919876543210');
+      expect(OtpService.formatPhoneNumber('919876543210'), '+919876543210');
+      expect(OtpService.formatPhoneNumber('+919876543210'), '+919876543210');
     });
 
     test('Server-authoritative price validation ignoring manipulated price input', () {

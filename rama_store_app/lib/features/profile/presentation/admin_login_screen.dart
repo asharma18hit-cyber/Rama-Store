@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
-import '../../../core/services/otp_service.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/app_text_field.dart';
 import '../../../shared/widgets/frosted_glass_container.dart';
@@ -66,29 +65,38 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
       _errorMessage = null;
     });
 
-    final res = await OtpService.sendOtp(email);
-    setState(() {
-      _isLoading = false;
-      _mfaStepActive = true;
-    });
-    _startResendTimer();
+    try {
+      final authRepo = ref.read(authRepositoryProvider);
+      await authRepo.adminLoginRequest(email, password);
 
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              const Icon(Icons.security_rounded, color: AppColors.secondaryFixedDim),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text('🔐 Administrator MFA challenge issued. Check your authenticator / notification for code: ${res['otp']}'),
-              ),
-            ],
+      setState(() {
+        _isLoading = false;
+        _mfaStepActive = true;
+      });
+      _startResendTimer();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.security_rounded, color: AppColors.secondaryFixedDim),
+                SizedBox(width: 10),
+                Expanded(
+                  child: Text('🔐 Administrator MFA challenge issued. Check your authenticator device.'),
+                ),
+              ],
+            ),
+            backgroundColor: AppColors.surface,
+            duration: Duration(seconds: 5),
           ),
-          backgroundColor: AppColors.surface,
-          duration: const Duration(seconds: 8),
-        ),
-      );
+        );
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+        _errorMessage = e.toString().replaceAll('Exception: ', '');
+      });
     }
   }
 
@@ -107,21 +115,15 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
       _errorMessage = null;
     });
 
-    final result = OtpService.verifyOtp(email, mfaCode);
-    if (!result.isValid) {
-      setState(() {
-        _isLoading = false;
-        _errorMessage = result.error ?? 'Invalid MFA security passcode. Please check and try again.';
-      });
-      return;
-    }
-
     try {
+      final authRepo = ref.read(authRepositoryProvider);
+      await authRepo.adminLoginVerify(email, mfaCode);
+
       final authNotifier = ref.read(authNotifierProvider.notifier);
-      await authNotifier.loginPassword(email, password);
+      final ok = await authNotifier.loginPassword(email, password);
 
       final authState = ref.read(authNotifierProvider);
-      if (authState.isAuthenticated && (authState.user?.role == 'admin' || authState.user?.role == 'super_admin')) {
+      if (ok && authState.isAuthenticated && (authState.user?.role == 'admin' || authState.user?.role == 'super_admin')) {
         if (mounted) {
           context.go('/admin');
         }
@@ -238,7 +240,7 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
                           const SizedBox(width: 10),
                           Expanded(
                             child: Text(
-                              'Security challenge issued for: ${_emailController.text.trim()}',
+                              'Security challenge active for: ${_emailController.text.trim()}',
                               style: const TextStyle(fontSize: 12, color: AppColors.textPrimary, fontWeight: FontWeight.w500),
                             ),
                           ),
@@ -261,13 +263,7 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
                           onPressed: _resendSeconds > 0
                               ? null
                               : () async {
-                                  final res = await OtpService.sendOtp(_emailController.text.trim());
-                                  _startResendTimer();
-                                  if (mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text('🔄 New MFA Code Sent: ${res['otp']}')),
-                                    );
-                                  }
+                                  await _handleInitiateAdminAuth();
                                 },
                           child: Text(
                             _resendSeconds > 0 ? 'Resend in ${_resendSeconds}s' : 'Resend Code',

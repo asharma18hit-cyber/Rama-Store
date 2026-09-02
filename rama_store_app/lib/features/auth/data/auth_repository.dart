@@ -31,26 +31,25 @@ class ApiAuthRepository implements AuthRepository {
 
   @override
   Future<AuthUser?> checkAuthStatus() async {
-    final storedEmail = storage.getString(AppConstants.keyUserEmail);
-    if (storedEmail != null && storedEmail.isNotEmpty) {
-      return AuthUser(
-        emailOrPhone: storedEmail,
-        fullname: storage.getString(AppConstants.keyUserFullname) ?? 'Customer Account',
-        role: storage.getString(AppConstants.keyUserRole) ?? 'customer',
-      );
-    }
-
     try {
       final res = await apiClient.get('/api/auth/status');
-      if (res['authenticated'] == true && res['user'] != null) {
+      if (res != null && res['authenticated'] == true && res['user'] != null) {
         final user = AuthUser.fromJson(res['user']);
         await _saveUserLocal(user);
         return user;
       }
-      return null;
-    } catch (_) {
-      return null;
+    } catch (_) {}
+
+    final storedEmail = storage.getString(AppConstants.keyUserEmail);
+    if (storedEmail != null && storedEmail.isNotEmpty) {
+      return AuthUser(
+        emailOrPhone: storedEmail,
+        fullname: storage.getString(AppConstants.keyUserFullname) ?? 'Customer',
+        role: storage.getString(AppConstants.keyUserRole) ?? 'customer',
+      );
     }
+
+    return null;
   }
 
   @override
@@ -59,156 +58,172 @@ class ApiAuthRepository implements AuthRepository {
     final cleanPass = password.trim();
 
     if (cleanInput.isEmpty || cleanPass.isEmpty) {
-      throw Exception('Email/Phone and Password are required');
+      throw Exception('Email/Phone and Password are required.');
     }
 
     try {
       final res = await apiClient.post('/api/auth/login', data: {
         'email_or_phone': cleanInput,
         'password': cleanPass,
-      }).timeout(const Duration(seconds: 4));
-      
-      final user = AuthUser.fromJson(res['user']);
-      await _saveUserLocal(user);
-      return user;
+      }).timeout(const Duration(seconds: 8));
+
+      if (res != null && res['user'] != null) {
+        final user = AuthUser.fromJson(res['user']);
+        await _saveUserLocal(user);
+        return user;
+      } else {
+        throw Exception(res?['error'] ?? res?['message'] ?? 'Invalid email/phone or password.');
+      }
     } catch (e) {
-      // Direct credential authentication with role determination
-      final role = (cleanInput.contains('admin') || cleanInput == 'admin@ramastore.com') ? 'admin' : 'customer';
-      final name = role == 'admin' ? 'Administrator' : cleanInput.split('@')[0];
-      final user = AuthUser(
-        emailOrPhone: cleanInput,
-        fullname: name,
-        role: role,
-      );
-      await _saveUserLocal(user);
-      return user;
+      // Production Strict: Re-throw real error, NEVER fabricate local user
+      final msg = e.toString().replaceAll('Exception: ', '');
+      if (msg.contains('401') || msg.contains('Invalid')) {
+        throw Exception('Invalid email/phone or password. Please check your credentials.');
+      }
+      throw Exception(msg);
     }
   }
 
   @override
   Future<Map<String, dynamic>> registerRequest(String username, String email, String password) async {
     final cleanEmail = email.trim().toLowerCase();
-    try {
-      await apiClient.post('/api/auth/register', data: {
-        'username': username.trim(),
-        'email': cleanEmail,
-        'password': password.trim(),
-      }).timeout(const Duration(seconds: 3));
-    } catch (_) {}
-    
-    // Dispatch cryptographic OTP
-    return await OtpService.sendOtp(cleanEmail);
+    final cleanUser = username.trim();
+    final cleanPass = password.trim();
+
+    if (cleanUser.isEmpty || cleanEmail.isEmpty || cleanPass.isEmpty) {
+      throw Exception('All registration fields are required.');
+    }
+
+    final res = await apiClient.post('/api/auth/register', data: {
+      'username': cleanUser,
+      'email': cleanEmail,
+      'password': cleanPass,
+    });
+
+    return res ?? {'success': true, 'message': 'Account created successfully.'};
   }
 
   @override
   Future<AuthUser> registerVerify(String email, String otp, {String? username}) async {
     final cleanEmail = email.trim().toLowerCase();
-    final result = OtpService.verifyOtp(cleanEmail, otp);
-    if (!result.isValid) {
-      throw Exception(result.error ?? 'Incorrect OTP. Please check and try again.');
-    }
+    final cleanOtp = otp.trim();
 
-    try {
-      final res = await apiClient.post('/api/auth/verify_otp', data: {
-        'email': cleanEmail,
-        'otp': otp.trim(),
-      }).timeout(const Duration(seconds: 3));
+    final res = await apiClient.post('/api/auth/verify_otp', data: {
+      'email': cleanEmail,
+      'otp': cleanOtp,
+    });
+
+    if (res != null && res['user'] != null) {
       final user = AuthUser.fromJson(res['user']);
       await _saveUserLocal(user);
       return user;
-    } catch (_) {
-      final user = AuthUser(
-        emailOrPhone: cleanEmail,
-        fullname: username ?? cleanEmail.split('@')[0],
-        role: 'customer',
-      );
-      await _saveUserLocal(user);
-      return user;
     }
+
+    throw Exception(res?['error'] ?? 'Registration verification failed.');
   }
 
   @override
   Future<Map<String, dynamic>> loginOtpRequest(String emailOrPhone) async {
-    final cleanInput = emailOrPhone.trim().toLowerCase();
-    try {
-      await apiClient.post('/api/auth/login-otp-request', data: {
-        'email_or_phone': cleanInput,
-      }).timeout(const Duration(seconds: 3));
-    } catch (_) {}
+    final cleanInput = emailOrPhone.trim();
 
-    return await OtpService.sendOtp(cleanInput);
+    if (!cleanInput.contains('@')) {
+      // Real Phone OTP via Firebase Authentication
+      final result = await OtpService.sendOtp(cleanInput);
+      if (!result.isSuccess) {
+        throw Exception(result.errorMessage ?? 'Failed to send SMS OTP.');
+      }
+      return {
+        'success': true,
+        'message': result.message ?? 'OTP code sent via SMS.',
+      };
+    } else {
+      // Backend email request
+      final res = await apiClient.post('/api/auth/login-otp-request', data: {
+        'email_or_phone': cleanInput.toLowerCase(),
+      });
+      return res ?? {'success': true, 'message': 'Email verification dispatched.'};
+    }
   }
 
   @override
   Future<AuthUser> loginOtpVerify(String emailOrPhone, String otp) async {
-    final cleanInput = emailOrPhone.trim().toLowerCase();
-    final result = OtpService.verifyOtp(cleanInput, otp);
-    if (!result.isValid) {
-      throw Exception(result.error ?? 'Incorrect OTP. Please check and try again.');
-    }
+    final cleanInput = emailOrPhone.trim();
+    final cleanOtp = otp.trim();
 
-    try {
-      final res = await apiClient.post('/api/auth/login-otp-verify', data: {
-        'email_or_phone': cleanInput,
-        'otp': otp.trim(),
-      }).timeout(const Duration(seconds: 3));
-      final user = AuthUser.fromJson(res['user']);
-      await _saveUserLocal(user);
-      return user;
-    } catch (_) {
-      final role = cleanInput.contains('admin') ? 'admin' : 'customer';
+    if (!cleanInput.contains('@')) {
+      // Verify Real Phone OTP with Firebase
+      final result = await OtpService.verifyOtp(cleanInput, cleanOtp);
+      if (!result.isValid) {
+        throw Exception(result.error ?? 'Invalid SMS code. Please try again.');
+      }
+
+      // Synchronize with backend or generate verified customer session
+      final phone = result.credential?.user?.phoneNumber ?? cleanInput;
       final user = AuthUser(
-        emailOrPhone: cleanInput,
-        fullname: cleanInput.contains('@') ? cleanInput.split('@')[0] : 'Rama Store Member',
-        role: role,
+        emailOrPhone: phone,
+        fullname: 'Customer',
+        role: 'customer',
       );
       await _saveUserLocal(user);
       return user;
+    } else {
+      final res = await apiClient.post('/api/auth/login-otp-verify', data: {
+        'email_or_phone': cleanInput.toLowerCase(),
+        'otp': cleanOtp,
+      });
+
+      if (res != null && res['user'] != null) {
+        final user = AuthUser.fromJson(res['user']);
+        await _saveUserLocal(user);
+        return user;
+      }
+      throw Exception(res?['error'] ?? 'OTP verification failed.');
     }
   }
 
   @override
   Future<Map<String, dynamic>> forgotPasswordRequest(String emailOrPhone) async {
     final cleanInput = emailOrPhone.trim().toLowerCase();
-    try {
-      await apiClient.post('/api/auth/forgot-password', data: {
-        'email_or_phone': cleanInput,
-      }).timeout(const Duration(seconds: 3));
-    } catch (_) {}
-
-    return await OtpService.sendOtp(cleanInput);
+    final res = await apiClient.post('/api/auth/forgot-password', data: {
+      'email_or_phone': cleanInput,
+    });
+    return res ?? {'success': true, 'message': 'Password reset request dispatched.'};
   }
 
   @override
   Future<void> resetPassword(String emailOrPhone, String otp, String newPassword) async {
     final cleanInput = emailOrPhone.trim().toLowerCase();
-    final result = OtpService.verifyOtp(cleanInput, otp);
-    if (!result.isValid) {
-      throw Exception(result.error ?? 'Incorrect OTP. Please check and try again.');
-    }
+    final cleanOtp = otp.trim();
+    final cleanPass = newPassword.trim();
 
-    try {
-      await apiClient.post('/api/auth/reset-password', data: {
-        'email_or_phone': cleanInput,
-        'otp': otp.trim(),
-        'new_password': newPassword.trim(),
-      }).timeout(const Duration(seconds: 3));
-    } catch (_) {}
+    await apiClient.post('/api/auth/reset-password', data: {
+      'email_or_phone': cleanInput,
+      'otp': cleanOtp,
+      'new_password': cleanPass,
+    });
   }
 
   @override
   Future<Map<String, dynamic>> adminLoginRequest(String emailOrPhone, String password) async {
     final cleanInput = emailOrPhone.trim().toLowerCase();
-    return await OtpService.sendOtp(cleanInput);
+    final cleanPass = password.trim();
+
+    final res = await apiClient.post('/api/auth/admin-login-request', data: {
+      'email_or_phone': cleanInput,
+      'password': cleanPass,
+    });
+    return res ?? {'success': true, 'message': 'Admin MFA challenge initiated.'};
   }
 
   @override
   Future<void> adminLoginVerify(String emailOrPhone, String otp) async {
     final cleanInput = emailOrPhone.trim().toLowerCase();
-    final result = OtpService.verifyOtp(cleanInput, otp);
-    if (!result.isValid) {
-      throw Exception(result.error ?? 'Incorrect OTP. Please check and try again.');
-    }
+    final cleanOtp = otp.trim();
+
+    await apiClient.post('/api/auth/admin-login-verify', data: {
+      'email_or_phone': cleanInput,
+      'otp': cleanOtp,
+    });
   }
 
   @override
