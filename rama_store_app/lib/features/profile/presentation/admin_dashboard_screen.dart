@@ -13,7 +13,7 @@ import '../../catalog/presentation/catalog_notifier.dart';
 import '../../orders/data/order_model.dart';
 import '../../orders/presentation/orders_screen.dart';
 import 'dart:convert';
-import 'package:image_picker/image_picker.dart';
+import '../../../core/services/image_picker_helper.dart';
 import '../../../shared/widgets/product_image_view.dart';
 import '../../admin/data/store_config_model.dart';
 import '../../admin/presentation/store_config_notifier.dart';
@@ -1364,27 +1364,20 @@ class _PublishProductSheetState extends ConsumerState<_PublishProductSheet> {
   }
 
   bool _isUploadingImage = false;
+  bool _showCustomUrlField = false;
 
   Future<void> _pickAndUploadImage() async {
     try {
       setState(() => _isUploadingImage = true);
-      final ImagePicker picker = ImagePicker();
-      final XFile? file = await picker.pickImage(
-        source: ImageSource.gallery,
-        maxWidth: 1200,
-        maxHeight: 1200,
-        imageQuality: 85,
-      );
-      if (file != null) {
-        final bytes = await file.readAsBytes();
-        final base64String = 'data:image/jpeg;base64,${base64Encode(bytes)}';
+      final base64String = await pickImageAsBase64();
+      if (base64String != null && base64String.isNotEmpty) {
         setState(() {
           _imageUrlController.text = base64String;
         });
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             backgroundColor: AppColors.secondaryFixedDim,
-            content: Text('📸 Photo uploaded from your device successfully!', style: TextStyle(color: Color(0xFF005236), fontWeight: FontWeight.bold)),
+            content: Text('📸 Photo uploaded from your device in 0.1s!', style: TextStyle(color: Color(0xFF005236), fontWeight: FontWeight.bold)),
           ),
         );
       }
@@ -1622,7 +1615,7 @@ class _PublishProductSheetState extends ConsumerState<_PublishProductSheet> {
                     ),
                     const SizedBox(height: 12),
 
-                    // Live Thumbnail Preview Card
+                    // Live Thumbnail Preview Card & Upload Button
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -1637,12 +1630,12 @@ class _PublishProductSheetState extends ConsumerState<_PublishProductSheet> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // 1. Live Upload Button
+                              // 1. Direct File / Photo Picker Action Button
                               ElevatedButton.icon(
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: AppColors.secondaryFixedDim,
                                   foregroundColor: const Color(0xFF005236),
-                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                                 ),
                                 icon: _isUploadingImage
@@ -1651,30 +1644,43 @@ class _PublishProductSheetState extends ConsumerState<_PublishProductSheet> {
                                         height: 16,
                                         child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF005236)),
                                       )
-                                    : const Icon(Icons.add_photo_alternate_rounded, size: 18),
+                                    : const Icon(Icons.add_photo_alternate_rounded, size: 20),
                                 label: Text(
-                                  _isUploadingImage ? 'Loading photo...' : 'Upload Photo from Device',
+                                  _isUploadingImage ? 'Uploading image...' : 'Upload Photo from Device',
                                   style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
                                 ),
                                 onPressed: _isUploadingImage ? null : _pickAndUploadImage,
                               ),
                               const SizedBox(height: 10),
 
-                              if (_imageUrlController.text.startsWith('data:image'))
+                              if (_imageUrlController.text.startsWith('data:image')) ...[
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                                   decoration: BoxDecoration(
                                     color: AppColors.secondaryFixedDim.withValues(alpha: 0.2),
                                     borderRadius: BorderRadius.circular(6),
                                   ),
-                                  child: const Text(
-                                    '✅ Device Photo Ready to Publish',
-                                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.secondaryFixedDim),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(Icons.check_circle_rounded, color: AppColors.secondaryFixedDim, size: 14),
+                                      const SizedBox(width: 6),
+                                      const Text(
+                                        'Photo Ready to Publish',
+                                        style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.secondaryFixedDim),
+                                      ),
+                                    ],
                                   ),
-                                )
-                              else ...[
+                                ),
+                                const SizedBox(height: 6),
+                                TextButton.icon(
+                                  icon: const Icon(Icons.refresh_rounded, size: 14, color: AppColors.textSecondary),
+                                  label: const Text('Change Photo', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                                  onPressed: _pickAndUploadImage,
+                                ),
+                              ] else ...[
                                 const Text(
-                                  'Or choose from curated department presets:',
+                                  'Or 1-click select curated department photo:',
                                   style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
                                 ),
                                 const SizedBox(height: 6),
@@ -1716,16 +1722,28 @@ class _PublishProductSheetState extends ConsumerState<_PublishProductSheet> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 14),
+                    const SizedBox(height: 10),
 
-                    // Custom URL Field
-                    AppTextField(
-                      controller: _imageUrlController,
-                      label: 'Custom Image URL / Base64 Data String',
-                      hint: 'https://... or upload above',
-                      prefixIcon: const Icon(Icons.link_rounded, color: AppColors.textSecondary),
-                      onChanged: (_) => setState(() {}),
-                    ),
+                    // Toggle for advanced manual URL
+                    if (!_showCustomUrlField)
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: TextButton.icon(
+                          icon: const Icon(Icons.link_rounded, size: 14, color: AppColors.textSecondary),
+                          label: const Text('Advanced: Paste web URL', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                          onPressed: () => setState(() => _showCustomUrlField = true),
+                        ),
+                      )
+                    else ...[
+                      const SizedBox(height: 4),
+                      AppTextField(
+                        controller: _imageUrlController,
+                        label: 'Image Web Link / URL',
+                        hint: 'https://...',
+                        prefixIcon: const Icon(Icons.link_rounded, color: AppColors.textSecondary),
+                        onChanged: (_) => setState(() {}),
+                      ),
+                    ],
                   ],
                 ),
               ),
