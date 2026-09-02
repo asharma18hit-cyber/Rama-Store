@@ -76,7 +76,8 @@ final checkoutRepositoryProvider = Provider<CheckoutRepository>((ref) {
 
 final ordersRepositoryProvider = Provider<OrdersRepository>((ref) {
   final apiClient = ref.watch(apiClientProvider);
-  return ApiOrdersRepository(apiClient: apiClient);
+  final storage = ref.watch(localStorageProvider);
+  return ApiOrdersRepository(apiClient: apiClient, storage: storage);
 });
 
 final loyaltyRepositoryProvider = Provider<LoyaltyRepository>((ref) {

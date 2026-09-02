@@ -19,6 +19,15 @@ class OrderItem {
       priceAtPurchase: (json['price_at_purchase'] as num?)?.toDouble() ?? 0.0,
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'product_id': productId,
+      'name': name,
+      'quantity': quantity,
+      'price_at_purchase': priceAtPurchase,
+    };
+  }
 }
 
 class OrderModel {
@@ -43,7 +52,7 @@ class OrderModel {
   });
 
   factory OrderModel.fromJson(Map<String, dynamic> json) {
-    final list = (json['items'] as List? ?? []).map((i) => OrderItem.fromJson(i)).toList();
+    final list = (json['items'] as List? ?? []).map((i) => OrderItem.fromJson(i is Map<String, dynamic> ? i : Map<String, dynamic>.from(i))).toList();
     return OrderModel(
       id: json['id'] ?? 0,
       trackingNumber: json['tracking_number'] ?? '',
@@ -54,5 +63,18 @@ class OrderModel {
       createdAt: json['created_at'] ?? '',
       items: list,
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'tracking_number': trackingNumber,
+      'total_amount': totalAmount,
+      'tax_amount': taxAmount,
+      'shipping_address': shippingAddress,
+      'status': status,
+      'created_at': createdAt,
+      'items': items.map((i) => i.toJson()).toList(),
+    };
   }
 }

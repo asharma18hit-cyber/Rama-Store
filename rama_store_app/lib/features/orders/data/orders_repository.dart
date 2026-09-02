@@ -1,18 +1,45 @@
+import 'dart:convert';
 import '../../../core/network/api_client.dart';
+import '../../../core/storage/local_storage_service.dart';
+import '../../../core/constants/app_constants.dart';
 import 'order_model.dart';
 
 abstract class OrdersRepository {
   Future<List<OrderModel>> getOrderHistory();
+  Future<void> saveLocalOrder(OrderModel order);
 }
 
 class ApiOrdersRepository implements OrdersRepository {
   final ApiClient apiClient;
+  final LocalStorageService storage;
   final bool useMocks;
 
   ApiOrdersRepository({
     required this.apiClient,
+    required this.storage,
     this.useMocks = const bool.fromEnvironment('USE_MOCKS', defaultValue: false),
   });
+
+  @override
+  Future<void> saveLocalOrder(OrderModel order) async {
+    final existingOrders = await _getLocalOrders();
+    // Prepend new order at the top
+    existingOrders.removeWhere((o) => o.trackingNumber == order.trackingNumber);
+    existingOrders.insert(0, order);
+    final jsonList = existingOrders.map((o) => o.toJson()).toList();
+    await storage.setString(AppConstants.keyCachedOrders, jsonEncode(jsonList));
+  }
+
+  Future<List<OrderModel>> _getLocalOrders() async {
+    try {
+      final raw = storage.getString(AppConstants.keyCachedOrders);
+      if (raw != null && raw.isNotEmpty) {
+        final decoded = jsonDecode(raw) as List;
+        return decoded.map((i) => OrderModel.fromJson(i is Map<String, dynamic> ? i : Map<String, dynamic>.from(i))).toList();
+      }
+    } catch (_) {}
+    return [];
+  }
 
   @override
   Future<List<OrderModel>> getOrderHistory() async {
@@ -33,11 +60,23 @@ class ApiOrdersRepository implements OrdersRepository {
       ];
     }
 
+    final localOrders = await _getLocalOrders();
+
     try {
       final res = await apiClient.get('/api/orders/history');
-      return (res as List).map((i) => OrderModel.fromJson(i)).toList();
-    } catch (_) {
-      return [];
-    }
+      if (res is List) {
+        final remoteOrders = res.map((i) => OrderModel.fromJson(i is Map<String, dynamic> ? i : Map<String, dynamic>.from(i))).toList();
+        final Map<String, OrderModel> merged = {};
+        for (var o in localOrders) {
+          merged[o.trackingNumber] = o;
+        }
+        for (var o in remoteOrders) {
+          merged[o.trackingNumber] = o;
+        }
+        return merged.values.toList();
+      }
+    } catch (_) {}
+
+    return localOrders;
   }
 }

@@ -7,6 +7,7 @@ import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/app_text_field.dart';
 import '../../../shared/widgets/frosted_glass_container.dart';
 import '../../../main.dart';
+import '../../orders/data/order_model.dart';
 
 class CheckoutScreen extends ConsumerStatefulWidget {
   const CheckoutScreen({super.key});
@@ -309,7 +310,25 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   final payCard = _selectedPaymentMethod == 'card' ? card : '4532111122223333';
                   await checkoutRepo.processPayment(trackingNumber, payCard, '123', '12/28');
 
-                  // 3. Clear cart on success
+                  // 3. Persist placed order into Orders store
+                  final placedOrder = OrderModel(
+                    id: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+                    trackingNumber: trackingNumber,
+                    totalAmount: cartState.grandTotal,
+                    taxAmount: cartState.taxAmount,
+                    shippingAddress: addr,
+                    status: 'Paid',
+                    createdAt: DateTime.now().toIso8601String().substring(0, 19).replaceAll('T', ' '),
+                    items: cartState.items.map((i) => OrderItem(
+                      productId: i.product.id,
+                      name: i.product.name,
+                      quantity: i.quantity,
+                      priceAtPurchase: i.product.sellingPrice,
+                    )).toList(),
+                  );
+                  await ref.read(ordersRepositoryProvider).saveLocalOrder(placedOrder);
+
+                  // 4. Clear cart on success
                   await ref.read(cartNotifierProvider.notifier).clearCart();
 
                   if (!mounted) return;

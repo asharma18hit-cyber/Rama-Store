@@ -23,4 +23,5 @@ class AppConstants {
   static const String keyCartData = 'local_cart_json';
   static const String keyLoyaltyBalance = 'local_loyalty_balance';
   static const String keyCachedProducts = 'cached_products_json';
+  static const String keyCachedOrders = 'cached_orders_json';
 }
