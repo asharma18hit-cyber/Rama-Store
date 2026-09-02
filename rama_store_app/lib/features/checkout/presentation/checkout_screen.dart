@@ -300,7 +300,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   final checkoutRepo = ref.read(checkoutRepositoryProvider);
                   // 1. Create checkout session
                   final sessionRes = await checkoutRepo.createCheckoutSession(cartState.items, addr);
-                  final trackingNumber = sessionRes['session']['tracking_number'];
+                  final dynamic sessionData = sessionRes['session'];
+                  final String trackingNumber = (sessionData is Map ? sessionData['tracking_number'] : null) ??
+                      sessionRes['tracking_number']?.toString() ??
+                      'TRK-${DateTime.now().millisecondsSinceEpoch.toString().substring(5)}';
 
                   // 2. Process payment (mock / sandbox API)
                   final payCard = _selectedPaymentMethod == 'card' ? card : '4532111122223333';
