@@ -62,19 +62,13 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
     }
 
     setState(() {
-      _isLoading = true;
+      _isLoading = false;
+      _mfaStepActive = true;
       _errorMessage = null;
     });
 
-    // Simulate credential verification before 2FA challenge
-    await Future.delayed(const Duration(milliseconds: 500));
-    await OtpService.sendOtp(email);
+    OtpService.sendOtp(email);
     _startResendTimer();
-
-    setState(() {
-      _isLoading = false;
-      _mfaStepActive = true;
-    });
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -84,7 +78,7 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
               Icon(Icons.security_rounded, color: AppColors.primaryGold),
               SizedBox(width: 10),
               Expanded(
-                child: Text('🔐 Administrator MFA challenge dispatched. Enter code 123456.'),
+                child: Text('🔐 Administrator MFA challenge active. Enter code 123456.'),
               ),
             ],
           ),

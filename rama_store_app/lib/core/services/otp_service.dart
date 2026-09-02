@@ -15,9 +15,15 @@ class OtpService {
     return (100000 + random.nextInt(900000)).toString();
   }
 
-  /// Request Real-Time OTP for phone number (via Firebase Phone Auth or Fallback)
-  static Future<Map<String, dynamic>> sendOtp(String phoneNumber) async {
-    final cleanPhone = phoneNumber.replaceAll(RegExp(r'\D'), '');
+  /// Request Real-Time OTP for phone number or email (via Firebase Phone Auth or Fast Fallback)
+  static Future<Map<String, dynamic>> sendOtp(String identifier) async {
+    if (identifier.contains('@') || identifier.length < 10) {
+      return _fallbackOtp(identifier);
+    }
+    final cleanPhone = identifier.replaceAll(RegExp(r'\D'), '');
+    if (cleanPhone.length < 10) {
+      return _fallbackOtp(identifier);
+    }
     final formattedPhone = cleanPhone.length == 10 ? '+91$cleanPhone' : '+91${cleanPhone.substring(cleanPhone.length - 10)}';
 
     try {
@@ -30,13 +36,13 @@ class OtpService {
           },
           verificationFailed: (FirebaseAuthException e) {
             if (!completer.isCompleted) {
-              completer.complete(_fallbackOtp(phoneNumber));
+              completer.complete(_fallbackOtp(identifier));
             }
           },
           codeSent: (String verificationId, int? resendToken) {
             _verificationId = verificationId;
             if (!completer.isCompleted) {
-              completer.complete(_fallbackOtp(phoneNumber, note: 'Firebase SMS sent to $formattedPhone'));
+              completer.complete(_fallbackOtp(identifier, note: 'Firebase SMS sent to $formattedPhone'));
             }
           },
           codeAutoRetrievalTimeout: (String verificationId) {
@@ -45,14 +51,14 @@ class OtpService {
         );
         return await completer.future.timeout(
           const Duration(seconds: 4),
-          onTimeout: () => _fallbackOtp(phoneNumber),
+          onTimeout: () => _fallbackOtp(identifier),
         );
       }
     } catch (_) {
       // Fall through to resilient generated OTP
     }
 
-    return _fallbackOtp(phoneNumber);
+    return _fallbackOtp(identifier);
   }
 
   static Map<String, dynamic> _fallbackOtp(String phoneNumber, {String? note}) {
