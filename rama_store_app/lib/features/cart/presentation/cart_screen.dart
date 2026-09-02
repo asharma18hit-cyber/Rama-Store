@@ -3,17 +3,67 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/constants/app_colors.dart';
-import '../../../core/constants/app_constants.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../shared/widgets/app_button.dart';
+import '../../../shared/widgets/app_text_field.dart';
+import '../../admin/data/store_config_model.dart';
+import '../../admin/presentation/store_config_notifier.dart';
 import '../../../main.dart';
 
-class CartScreen extends ConsumerWidget {
+class CartScreen extends ConsumerStatefulWidget {
   const CartScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<CartScreen> createState() => _CartScreenState();
+}
+
+class _CartScreenState extends ConsumerState<CartScreen> {
+  final _couponController = TextEditingController();
+  String? _couponError;
+
+  @override
+  void dispose() {
+    _couponController.dispose();
+    super.dispose();
+  }
+
+  void _applyCoupon() {
+    final code = _couponController.text.trim().toUpperCase();
+    if (code.isEmpty) return;
+
+    final storeConfig = ref.read(storeConfigProvider);
+    final coupon = storeConfig.coupons.firstWhere(
+      (c) => c.code.toUpperCase() == code,
+      orElse: () => StoreCoupon(code: '', description: '', discountType: 'flat', discountValue: 0.0, minOrderAmount: 0.0, isActive: false),
+    );
+
+    if (coupon.code.isEmpty || !coupon.isActive) {
+      setState(() => _couponError = 'Invalid or expired promo code "$code"');
+      return;
+    }
+
+    final cartState = ref.read(cartNotifierProvider);
+    if (cartState.subtotal < coupon.minOrderAmount) {
+      setState(() => _couponError = 'Minimum order of ₹${coupon.minOrderAmount.toStringAsFixed(0)} required for this code');
+      return;
+    }
+
+    final success = ref.read(cartNotifierProvider.notifier).applyCoupon(coupon);
+    if (success) {
+      setState(() {
+        _couponError = null;
+        _couponController.clear();
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('✨ Promo code "${coupon.code}" applied successfully!')),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final cartState = ref.watch(cartNotifierProvider);
+    final storeConfig = ref.watch(storeConfigProvider);
     final loyaltyPoints = ref.watch(loyaltyRepositoryProvider).getStoredPoints();
     final isDesktop = MediaQuery.of(context).size.width >= 1024;
 
@@ -60,7 +110,7 @@ class CartScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: 8),
                     const Text(
-                      'Explore our hyper-local catalog and autumn drops.',
+                      'Explore our hyper-local catalog and daily essentials.',
                       style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
                       textAlign: TextAlign.center,
                     ),
@@ -80,8 +130,8 @@ class CartScreen extends ConsumerWidget {
                 padding: EdgeInsets.symmetric(horizontal: isDesktop ? 48.0 : 16.0, vertical: 16.0),
                 child: Column(
                   children: [
-                    // Delivery Threshold Banner
-                    _buildDeliveryMeter(cartState),
+                    // Dynamic Delivery Threshold Banner
+                    _buildDeliveryMeter(cartState, storeConfig),
                     const SizedBox(height: 24),
 
                     if (isDesktop)
@@ -90,21 +140,21 @@ class CartScreen extends ConsumerWidget {
                         children: [
                           Expanded(
                             flex: 7,
-                            child: _buildItemsList(cartState, ref),
+                            child: _buildItemsList(cartState),
                           ),
                           const SizedBox(width: 32),
                           Expanded(
                             flex: 5,
-                            child: _buildOrderSummary(cartState, loyaltyPoints, ref, context),
+                            child: _buildOrderSummary(cartState, loyaltyPoints, storeConfig),
                           ),
                         ],
                       )
                     else
                       Column(
                         children: [
-                          _buildItemsList(cartState, ref),
+                          _buildItemsList(cartState),
                           const SizedBox(height: 24),
-                          _buildOrderSummary(cartState, loyaltyPoints, ref, context),
+                          _buildOrderSummary(cartState, loyaltyPoints, storeConfig),
                         ],
                       ),
                   ],
@@ -114,7 +164,11 @@ class CartScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildDeliveryMeter(cartState) {
+  Widget _buildDeliveryMeter(cartState, storeConfig) {
+    final threshold = cartState.freeDeliveryThreshold;
+    final subtotal = cartState.subtotal;
+    final remaining = (threshold - subtotal).clamp(0.0, threshold);
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -128,12 +182,12 @@ class CartScreen extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Row(
-                children: const [
-                  Icon(Icons.local_shipping_outlined, color: AppColors.secondaryFixedDim, size: 20),
-                  SizedBox(width: 8),
+                children: [
+                  const Icon(Icons.local_shipping_outlined, color: AppColors.secondaryFixedDim, size: 20),
+                  const SizedBox(width: 8),
                   Text(
-                    'Free Express Delivery (Orders > ₹500)',
-                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                    'Free Delivery (Orders > ₹${threshold.toStringAsFixed(0)})',
+                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
                   ),
                 ],
               ),
@@ -147,8 +201,8 @@ class CartScreen extends ConsumerWidget {
                 ),
                 child: Text(
                   cartState.qualifiesForFreeDelivery
-                      ? 'UNLOCKED'
-                      : 'Add ${Formatters.formatCurrency(AppConstants.freeDeliveryThreshold - cartState.subtotal)}',
+                      ? 'FREE SHIPPING UNLOCKED'
+                      : 'Add ${Formatters.formatCurrency(remaining)}',
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w900,
@@ -158,16 +212,16 @@ class CartScreen extends ConsumerWidget {
               ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
           ClipRRect(
             borderRadius: BorderRadius.circular(4),
             child: LinearProgressIndicator(
               value: cartState.deliveryProgress,
-              minHeight: 6,
               backgroundColor: const Color(0xFF0F172A),
               valueColor: AlwaysStoppedAnimation<Color>(
-                cartState.qualifiesForFreeDelivery ? AppColors.secondaryFixedDim : const Color(0xFF3525CD),
+                cartState.qualifiesForFreeDelivery ? AppColors.secondaryFixedDim : AppColors.primaryFixedDim,
               ),
+              minHeight: 6,
             ),
           ),
         ],
@@ -175,7 +229,7 @@ class CartScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildItemsList(cartState, WidgetRef ref) {
+  Widget _buildItemsList(cartState) {
     return ListView.separated(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -183,8 +237,9 @@ class CartScreen extends ConsumerWidget {
       separatorBuilder: (context, index) => const SizedBox(height: 12),
       itemBuilder: (context, index) {
         final item = cartState.items[index];
+
         return Container(
-          padding: const EdgeInsets.all(14),
+          padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: const Color(0xFF1E293B),
             borderRadius: BorderRadius.circular(16),
@@ -192,7 +247,6 @@ class CartScreen extends ConsumerWidget {
           ),
           child: Row(
             children: [
-              // Product Image
               ClipRRect(
                 borderRadius: BorderRadius.circular(10),
                 child: SizedBox(
@@ -274,7 +328,7 @@ class CartScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildOrderSummary(cartState, double loyaltyPoints, WidgetRef ref, BuildContext context) {
+  Widget _buildOrderSummary(cartState, double loyaltyPoints, storeConfig) {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -290,6 +344,71 @@ class CartScreen extends ConsumerWidget {
             style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900, letterSpacing: 1, color: AppColors.textPrimary),
           ),
           const SizedBox(height: 16),
+
+          // Coupon / Promo Code Box
+          if (cartState.appliedCouponCode != null) ...[
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: AppColors.primaryGold.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: AppColors.primaryGoldLight),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.confirmation_number_outlined, color: AppColors.primaryGoldLight, size: 18),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Coupon: ${cartState.appliedCouponCode} (-${Formatters.formatCurrency(cartState.promoDiscount)})',
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: AppColors.primaryGoldLight),
+                      ),
+                    ],
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close, size: 16, color: AppColors.primaryGoldLight),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    onPressed: () => ref.read(cartNotifierProvider.notifier).removeCoupon(),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+          ] else ...[
+            Row(
+              children: [
+                Expanded(
+                  child: AppTextField(
+                    controller: _couponController,
+                    label: 'Have a Promo Code?',
+                    hint: 'e.g. RAMA50, FESTIVE10',
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Padding(
+                  padding: const EdgeInsets.only(top: 24),
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.secondaryFixedDim,
+                      foregroundColor: const Color(0xFF005236),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
+                    onPressed: _applyCoupon,
+                    child: const Text('Apply', style: TextStyle(fontWeight: FontWeight.bold)),
+                  ),
+                ),
+              ],
+            ),
+            if (_couponError != null) ...[
+              const SizedBox(height: 4),
+              Text(_couponError!, style: const TextStyle(fontSize: 11, color: AppColors.error)),
+            ],
+            const SizedBox(height: 12),
+          ],
 
           // Loyalty points toggle
           GestureDetector(
@@ -334,7 +453,7 @@ class CartScreen extends ConsumerWidget {
             children: [
               const Text('Estimated Delivery', style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
               Text(
-                cartState.qualifiesForFreeDelivery ? 'FREE' : Formatters.formatCurrency(AppConstants.flatDeliveryFee),
+                cartState.qualifiesForFreeDelivery ? 'FREE' : Formatters.formatCurrency(cartState.standardDeliveryFee),
                 style: TextStyle(
                   color: cartState.qualifiesForFreeDelivery ? AppColors.secondaryFixedDim : AppColors.textPrimary,
                   fontWeight: FontWeight.bold,
@@ -342,6 +461,16 @@ class CartScreen extends ConsumerWidget {
               ),
             ],
           ),
+          if (cartState.promoDiscount > 0) ...[
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('Promo Coupon Discount', style: TextStyle(color: AppColors.primaryGoldLight, fontSize: 13)),
+                Text('-${Formatters.formatCurrency(cartState.promoDiscount)}', style: const TextStyle(color: AppColors.primaryGoldLight, fontWeight: FontWeight.bold)),
+              ],
+            ),
+          ],
           if (cartState.appliedLoyalty) ...[
             const SizedBox(height: 8),
             Row(

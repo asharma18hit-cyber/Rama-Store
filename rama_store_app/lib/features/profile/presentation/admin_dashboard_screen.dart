@@ -7,8 +7,13 @@ import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/app_text_field.dart';
 import '../../../shared/widgets/frosted_glass_container.dart';
 import '../../../shared/widgets/hover_card.dart';
+import '../../../shared/widgets/shimmer_loader.dart';
 import '../../catalog/data/catalog_models.dart';
 import '../../catalog/presentation/catalog_notifier.dart';
+import '../../orders/data/order_model.dart';
+import '../../orders/presentation/orders_screen.dart';
+import '../../admin/data/store_config_model.dart';
+import '../../admin/presentation/store_config_notifier.dart';
 import '../../../main.dart';
 
 class AdminDashboardScreen extends ConsumerStatefulWidget {
@@ -23,18 +28,16 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> wit
   String _selectedStatusFilter = 'all';
   String? _selectedCategoryFilter;
 
-  // In-memory audit trail records
   final List<Map<String, String>> _auditLogs = [
-    {'action': 'ADMIN_LOGIN', 'detail': 'Admin logged in from Web Session', 'time': 'Just now'},
-    {'action': 'STOCK_LOCK', 'detail': '2 units reserved for Order #TRK-882941', 'time': '5 mins ago'},
-    {'action': 'PRODUCT_PUBLISHED', 'detail': 'Published "Organic Mountain Tea" to Grocery', 'time': '12 mins ago'},
-    {'action': 'CATEGORY_CREATED', 'detail': 'Created new department "Tech-Fab"', 'time': '1 hour ago'},
+    {'action': 'Store Policy Synchronized', 'detail': 'Free delivery threshold set to ₹500', 'time': '1 min ago'},
+    {'action': 'MFA Session Verified', 'detail': 'Admin authentication successful', 'time': '2 mins ago'},
+    {'action': 'Catalog In-Sync', 'detail': 'Live product catalog loaded with real-time state', 'time': '5 mins ago'},
   ];
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 5, vsync: this);
+    _tabController = TabController(length: 6, vsync: this);
   }
 
   @override
@@ -43,20 +46,24 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> wit
     super.dispose();
   }
 
+  void _addAuditLog(String action, String detail) {
+    setState(() {
+      _auditLogs.insert(0, {
+        'action': action,
+        'detail': detail,
+        'time': 'Just now',
+      });
+    });
+  }
+
   void _showPublishProductDialog() {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => _PublishProductSheet(
-        onPublished: (logDetail) {
-          setState(() {
-            _auditLogs.insert(0, {
-              'action': 'PRODUCT_PUBLISHED',
-              'detail': logDetail,
-              'time': 'Just now',
-            });
-          });
+        onPublished: (title) {
+          _addAuditLog('Product Published', title);
         },
       ),
     );
@@ -64,48 +71,128 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> wit
 
   void _showCreateCategoryDialog() {
     final nameController = TextEditingController();
+    final slugController = TextEditingController();
+
     showDialog(
       context: context,
-      builder: (dialogCtx) => AlertDialog(
-        backgroundColor: AppColors.surface,
-        title: const Text('Add New Store Category', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold)),
-        content: AppTextField(
-          controller: nameController,
-          label: 'Category Name',
-          hint: 'e.g. Sports & Outdoors',
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF161F30),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Create Store Category', style: TextStyle(color: AppColors.textPrimary)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AppTextField(
+              controller: nameController,
+              label: 'Category Name',
+              hint: 'e.g. Gourmet Spices',
+              onChanged: (val) => slugController.text = val.toLowerCase().replaceAll(' ', '-'),
+            ),
+            const SizedBox(height: 12),
+            AppTextField(
+              controller: slugController,
+              label: 'Category Slug',
+              hint: 'gourmet-spices',
+            ),
+          ],
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(dialogCtx),
+            onPressed: () => Navigator.pop(ctx),
             child: const Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
           ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.secondaryFixedDim),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.secondaryFixedDim,
+              foregroundColor: const Color(0xFF005236),
+            ),
             onPressed: () {
               final name = nameController.text.trim();
+              final slug = slugController.text.trim();
               if (name.isNotEmpty) {
                 final newCat = Category(
                   id: DateTime.now().millisecondsSinceEpoch ~/ 1000,
                   name: name,
                 );
                 ref.read(catalogNotifierProvider.notifier).addCategory(newCat);
-                setState(() {
-                  _auditLogs.insert(0, {
-                    'action': 'CATEGORY_CREATED',
-                    'detail': 'Created category "$name"',
-                    'time': 'Just now',
-                  });
-                });
-                Navigator.pop(dialogCtx);
+                _addAuditLog('Category Created', 'Added new category "$name"');
+                Navigator.pop(ctx);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    backgroundColor: AppColors.secondaryFixedDim,
-                    content: Text('✨ Category "$name" created successfully!', style: const TextStyle(color: Color(0xFF005236), fontWeight: FontWeight.bold)),
-                  ),
+                  SnackBar(content: Text('✨ Category "$name" created successfully!')),
                 );
               }
             },
-            child: const Text('Create Category', style: TextStyle(color: Color(0xFF005236), fontWeight: FontWeight.bold)),
+            child: const Text('Create Category'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showEditPriceStockDialog(Product product) {
+    final priceController = TextEditingController(text: product.sellingPrice.toStringAsFixed(0));
+    final stockController = TextEditingController(text: product.stock.toString());
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF161F30),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            const Icon(Icons.edit_note_rounded, color: AppColors.secondaryFixedDim),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text('Edit "${product.name}"', style: const TextStyle(color: AppColors.textPrimary, fontSize: 16), overflow: TextOverflow.ellipsis),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Instant Price & Stock Real-Time Sync', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+            const SizedBox(height: 16),
+            AppTextField(
+              controller: priceController,
+              label: 'Selling Price (₹)',
+              keyboardType: TextInputType.number,
+            ),
+            const SizedBox(height: 12),
+            AppTextField(
+              controller: stockController,
+              label: 'Available Stock Units',
+              keyboardType: TextInputType.number,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.secondaryFixedDim,
+              foregroundColor: const Color(0xFF005236),
+            ),
+            onPressed: () {
+              final newPrice = double.tryParse(priceController.text.trim()) ?? product.sellingPrice;
+              final newStock = int.tryParse(stockController.text.trim()) ?? product.stock;
+
+              ref.read(catalogNotifierProvider.notifier).updateProductPriceAndStock(
+                product.id,
+                sellingPrice: newPrice,
+                stock: newStock,
+              );
+
+              _addAuditLog('Price/Stock Updated', 'Updated "${product.name}" price to ₹$newPrice and stock to $newStock');
+              Navigator.pop(ctx);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('✨ "${product.name}" updated live to ₹$newPrice (Stock: $newStock)!')),
+              );
+            },
+            child: const Text('Save & Broadcast Live'),
           ),
         ],
       ),
@@ -170,6 +257,8 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> wit
     }
 
     final catalogState = ref.watch(catalogNotifierProvider);
+    final storeConfig = ref.watch(storeConfigProvider);
+    final ordersAsync = ref.watch(ordersFutureProvider);
     final isDesktop = MediaQuery.of(context).size.width >= 900;
 
     return Scaffold(
@@ -190,7 +279,7 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> wit
               ),
             ),
             const SizedBox(width: 10),
-            const Text('Rama Store v3.0 Master', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+            const Text('Rama Store Master Center', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
           ],
         ),
         actions: [
@@ -222,9 +311,10 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> wit
           labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
           tabs: const [
             Tab(icon: Icon(Icons.dashboard_rounded), text: 'Dashboard'),
-            Tab(icon: Icon(Icons.inventory_2_rounded), text: 'Products & Publishing'),
+            Tab(icon: Icon(Icons.inventory_2_rounded), text: 'Products & Prices'),
             Tab(icon: Icon(Icons.category_rounded), text: 'Categories'),
-            Tab(icon: Icon(Icons.shopping_cart_checkout_rounded), text: 'Orders'),
+            Tab(icon: Icon(Icons.tune_rounded), text: 'Delivery & Offers'),
+            Tab(icon: Icon(Icons.shopping_cart_checkout_rounded), text: 'Orders OMS'),
             Tab(icon: Icon(Icons.history_rounded), text: 'Audit Trail'),
           ],
         ),
@@ -232,37 +322,65 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> wit
       body: TabBarView(
         controller: _tabController,
         children: [
-          // 1. Metrics & Overview
-          _buildDashboardTab(catalogState),
+          // 1. Real-Time Metrics & Overview
+          _buildDashboardTab(catalogState, ordersAsync),
 
-          // 2. Products Management & Publishing
+          // 2. Products Management & Live Price Editor
           _buildProductsTab(catalogState),
 
           // 3. Category Manager
           _buildCategoriesTab(catalogState),
 
-          // 4. Orders Management
+          // 4. Store Policy, Delivery & Coupons Control
+          _buildStoreConfigTab(storeConfig),
+
+          // 5. Orders OMS Management
           _buildOrdersTab(),
 
-          // 5. Audit Trail Logs
+          // 6. Audit Trail Logs
           _buildAuditLogsTab(),
         ],
       ),
     );
   }
 
-  // TAB 1: METRICS DASHBOARD
-  Widget _buildDashboardTab(CatalogState catalogState) {
+  // TAB 1: METRICS DASHBOARD (100% Real-Time Live Computed)
+  Widget _buildDashboardTab(CatalogState catalogState, AsyncValue<List<OrderModel>> ordersAsync) {
+    final orders = ordersAsync.valueOrNull ?? [];
     final publishedCount = catalogState.products.where((p) => p.status == 'published').length;
     final draftCount = catalogState.products.where((p) => p.status != 'published').length;
-    final lowStockCount = catalogState.products.where((p) => p.stock < 5).length;
+    final lowStockCount = catalogState.products.where((p) => p.stock <= 5).length;
+
+    final totalRevenue = orders.fold(0.0, (sum, o) => sum + (o.orderStatus != 'Cancelled' ? o.totalAmount : 0.0));
+    final activeOrders = orders.where((o) => o.orderStatus != 'Delivered' && o.orderStatus != 'Cancelled').length;
+    final deliveredOrders = orders.where((o) => o.orderStatus == 'Delivered').length;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Real-Time Store Metrics', style: Theme.of(context).textTheme.headlineMedium),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Real-Time Store Metrics', style: Theme.of(context).textTheme.headlineMedium),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppColors.secondaryFixedDim.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: AppColors.secondaryFixedDim),
+                ),
+                child: Row(
+                  children: const [
+                    Icon(Icons.circle, size: 8, color: AppColors.secondaryFixedDim),
+                    SizedBox(width: 6),
+                    Text('LIVE SYNC ACTIVE', style: TextStyle(color: AppColors.secondaryFixedDim, fontSize: 10, fontWeight: FontWeight.bold)),
+                  ],
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 16),
 
           // Metrics Grid
@@ -270,10 +388,38 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> wit
             spacing: 16,
             runSpacing: 16,
             children: [
-              _buildMetricCard('Total Revenue (August)', '₹1,48,900', '+18.4%', Icons.currency_rupee, AppColors.secondaryFixedDim, true),
-              _buildMetricCard('Active Orders', '42 Orders', '12 processing', Icons.shopping_bag_outlined, AppColors.primaryFixedDim, false),
-              _buildMetricCard('Published Live Items', '$publishedCount Products', '$draftCount in draft', Icons.inventory_2_outlined, AppColors.primaryGoldLight, false),
-              _buildMetricCard('Low Stock Alerts', '$lowStockCount Items', 'Needs Reorder', Icons.warning_amber_rounded, AppColors.error, false),
+              _buildMetricCard(
+                'Live Store Revenue',
+                Formatters.formatCurrency(totalRevenue),
+                '${orders.length} Total Orders Placed',
+                Icons.currency_rupee,
+                AppColors.secondaryFixedDim,
+                true,
+              ),
+              _buildMetricCard(
+                'Active Fulfillment Orders',
+                '$activeOrders Orders',
+                '$deliveredOrders Delivered to Date',
+                Icons.shopping_bag_outlined,
+                AppColors.primaryFixedDim,
+                false,
+              ),
+              _buildMetricCard(
+                'Published Live Items',
+                '$publishedCount Products',
+                '$draftCount in draft/unpublished',
+                Icons.inventory_2_outlined,
+                AppColors.primaryGoldLight,
+                false,
+              ),
+              _buildMetricCard(
+                'Low Stock Alerts',
+                '$lowStockCount Items',
+                lowStockCount > 0 ? 'Action Required (≤5 units)' : 'Healthy Inventory',
+                Icons.warning_amber_rounded,
+                lowStockCount > 0 ? AppColors.error : AppColors.secondaryFixedDim,
+                false,
+              ),
             ],
           ),
 
@@ -310,7 +456,7 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> wit
     return HoverCard(
       child: FrostedGlassContainer(
         padding: const EdgeInsets.all(20),
-        width: 240,
+        width: 250,
         borderRadius: BorderRadius.circular(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -328,7 +474,7 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> wit
     );
   }
 
-  // TAB 2: PRODUCTS & PUBLISHING
+  // TAB 2: PRODUCTS & PUBLISHING WITH LIVE PRICE EDITOR
   Widget _buildProductsTab(CatalogState catalogState) {
     var filtered = catalogState.products;
     if (_selectedStatusFilter != 'all') {
@@ -346,7 +492,7 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> wit
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Products Management (${filtered.length})', style: Theme.of(context).textTheme.titleLarge),
+              Text('Products Management & Real-Time Price Editor (${filtered.length})', style: Theme.of(context).textTheme.titleLarge),
               ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.secondaryFixedDim,
@@ -360,122 +506,148 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> wit
           ),
           const SizedBox(height: 16),
 
-          // Filters Bar
-          Wrap(
-            spacing: 8,
-            children: ['all', 'published', 'draft', 'unpublished'].map((status) {
-              final isSel = _selectedStatusFilter == status;
-              return ChoiceChip(
-                label: Text(status.toUpperCase(), style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: isSel ? Colors.white : AppColors.textSecondary)),
-                selected: isSel,
-                selectedColor: AppColors.primaryContainer,
-                backgroundColor: AppColors.surface,
-                onSelected: (val) {
-                  if (val) setState(() => _selectedStatusFilter = status);
-                },
-              );
-            }).toList(),
+          // Filters Row
+          Row(
+            children: [
+              _buildFilterChip('All', 'all'),
+              const SizedBox(width: 8),
+              _buildFilterChip('Published', 'published'),
+              const SizedBox(width: 8),
+              _buildFilterChip('Drafts', 'draft'),
+            ],
           ),
           const SizedBox(height: 16),
 
-          // Products List
+          // Product Table List
           Expanded(
-            child: ListView.separated(
-              itemCount: filtered.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 10),
-              itemBuilder: (context, index) {
-                final product = filtered[index];
-                final isPublished = product.status == 'published';
+            child: filtered.isEmpty
+                ? const Center(child: Text('No products match criteria', style: TextStyle(color: AppColors.textSecondary)))
+                : ListView.separated(
+                    itemCount: filtered.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 12),
+                    itemBuilder: (context, index) {
+                      final product = filtered[index];
+                      final isPublished = product.status == 'published';
 
-                return FrostedGlassContainer(
-                  padding: const EdgeInsets.all(14),
-                  borderRadius: BorderRadius.circular(12),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 48,
-                        height: 48,
+                      return Container(
+                        padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: AppColors.inputBackground,
-                          borderRadius: BorderRadius.circular(8),
+                          color: AppColors.surface,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: AppColors.surfaceLight),
                         ),
-                        child: const Icon(Icons.inventory, color: AppColors.secondaryFixedDim),
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        child: Row(
                           children: [
-                            Row(
-                              children: [
-                                Text(product.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.textPrimary)),
-                                const SizedBox(width: 8),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                  decoration: BoxDecoration(
-                                    color: isPublished ? AppColors.success.withValues(alpha: 0.2) : AppColors.warning.withValues(alpha: 0.2),
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                  child: Text(
-                                    product.status.toUpperCase(),
-                                    style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: isPublished ? AppColors.success : AppColors.warning),
-                                  ),
-                                ),
-                              ],
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Container(
+                                width: 52,
+                                height: 52,
+                                color: AppColors.surfaceLight,
+                                child: product.imageUrl != null
+                                    ? Image.network(product.imageUrl!, fit: BoxFit.cover)
+                                    : const Icon(Icons.shopping_bag, color: AppColors.textMuted),
+                              ),
                             ),
-                            const SizedBox(height: 2),
-                            Text(
-                              'Category: ${product.categoryName ?? "General"} • SKU: ${product.sku} • Stock: ${product.stock} units',
-                              style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          product.name,
+                                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.textPrimary),
+                                        ),
+                                      ),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                        decoration: BoxDecoration(
+                                          color: isPublished
+                                              ? AppColors.secondaryFixedDim.withValues(alpha: 0.2)
+                                              : AppColors.accentAmber.withValues(alpha: 0.2),
+                                          borderRadius: BorderRadius.circular(6),
+                                        ),
+                                        child: Text(
+                                          isPublished ? 'LIVE' : 'DRAFT',
+                                          style: TextStyle(
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.bold,
+                                            color: isPublished ? AppColors.secondaryFixedDim : AppColors.accentAmber,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Row(
+                                    children: [
+                                      Text(
+                                        Formatters.formatCurrency(product.sellingPrice),
+                                        style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primaryGoldLight, fontSize: 13),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Text(
+                                        'Stock: ${product.stock} units',
+                                        style: TextStyle(
+                                          color: product.stock <= 5 ? AppColors.error : AppColors.textSecondary,
+                                          fontSize: 12,
+                                          fontWeight: product.stock <= 5 ? FontWeight.bold : FontWeight.normal,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Text(product.categoryName ?? 'General', style: const TextStyle(color: AppColors.textMuted, fontSize: 12)),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            OutlinedButton.icon(
+                              icon: const Icon(Icons.edit, size: 14),
+                              label: const Text('Edit Price & Stock', style: TextStyle(fontSize: 11)),
+                              onPressed: () => _showEditPriceStockDialog(product),
+                            ),
+                            const SizedBox(width: 8),
+                            Switch(
+                              value: isPublished,
+                              activeColor: AppColors.secondaryFixedDim,
+                              onChanged: (val) {
+                                final newStatus = val ? 'published' : 'draft';
+                                ref.read(catalogNotifierProvider.notifier).updateProductStatus(product.id, newStatus);
+                                _addAuditLog('Status Changed', 'Changed "${product.name}" to $newStatus');
+                              },
                             ),
                           ],
                         ),
-                      ),
-                      Text(
-                        Formatters.formatCurrency(product.sellingPrice),
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: AppColors.secondaryFixedDim),
-                      ),
-                      const SizedBox(width: 14),
-
-                      // Publish / Unpublish Action Toggle
-                      OutlinedButton.icon(
-                        style: OutlinedButton.styleFrom(
-                          side: BorderSide(color: isPublished ? AppColors.warning : AppColors.success),
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                          minimumSize: const Size(0, 32),
-                        ),
-                        icon: Icon(isPublished ? Icons.visibility_off : Icons.publish, size: 14, color: isPublished ? AppColors.warning : AppColors.success),
-                        label: Text(
-                          isPublished ? 'Unpublish' : 'Publish',
-                          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: isPublished ? AppColors.warning : AppColors.success),
-                        ),
-                        onPressed: () {
-                          final newStatus = isPublished ? 'unpublished' : 'published';
-                          ref.read(catalogNotifierProvider.notifier).updateProductStatus(product.id, newStatus);
-                          setState(() {
-                            _auditLogs.insert(0, {
-                              'action': isPublished ? 'PRODUCT_UNPUBLISHED' : 'PRODUCT_PUBLISHED',
-                              'detail': '${isPublished ? "Unpublished" : "Published"} "${product.name}"',
-                              'time': 'Just now',
-                            });
-                          });
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Product "${product.name}" is now $newStatus!')),
-                          );
-                        },
-                      ),
-                    ],
+                      );
+                    },
                   ),
-                );
-              },
-            ),
           ),
         ],
       ),
     );
   }
 
-  // TAB 3: CATEGORIES
+  Widget _buildFilterChip(String label, String value) {
+    final isSelected = _selectedStatusFilter == value;
+    return ChoiceChip(
+      label: Text(label),
+      selected: isSelected,
+      selectedColor: AppColors.secondaryFixedDim,
+      labelStyle: TextStyle(
+        color: isSelected ? const Color(0xFF005236) : AppColors.textSecondary,
+        fontWeight: FontWeight.bold,
+      ),
+      onSelected: (val) {
+        if (val) setState(() => _selectedStatusFilter = value);
+      },
+    );
+  }
+
+  // TAB 3: CATEGORIES MANAGER
   Widget _buildCategoriesTab(CatalogState catalogState) {
     return Padding(
       padding: const EdgeInsets.all(24),
@@ -487,9 +659,12 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> wit
             children: [
               Text('Store Categories (${catalogState.categories.length})', style: Theme.of(context).textTheme.titleLarge),
               ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(backgroundColor: AppColors.secondaryFixedDim),
-                icon: const Icon(Icons.add, color: Color(0xFF005236)),
-                label: const Text('Add Category', style: TextStyle(color: Color(0xFF005236), fontWeight: FontWeight.bold)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.secondaryFixedDim,
+                  foregroundColor: const Color(0xFF005236),
+                ),
+                icon: const Icon(Icons.create_new_folder),
+                label: const Text('Add Category', style: TextStyle(fontWeight: FontWeight.bold)),
                 onPressed: _showCreateCategoryDialog,
               ),
             ],
@@ -501,33 +676,27 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> wit
               separatorBuilder: (_, __) => const SizedBox(height: 8),
               itemBuilder: (context, index) {
                 final cat = catalogState.categories[index];
-                final count = catalogState.products.where((p) => p.categoryId == cat.id || p.categoryName == cat.name).length;
+                final productCount = catalogState.products.where((p) => p.categoryId == cat.id || p.categoryName == cat.name).length;
 
-                return FrostedGlassContainer(
-                  padding: const EdgeInsets.all(14),
-                  borderRadius: BorderRadius.circular(12),
+                return Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.surfaceLight),
+                  ),
                   child: Row(
                     children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryContainer.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Icon(Icons.folder_open_rounded, color: AppColors.secondaryFixedDim),
-                      ),
-                      const SizedBox(width: 14),
+                      const Icon(Icons.folder_outlined, color: AppColors.secondaryFixedDim),
+                      const SizedBox(width: 16),
                       Expanded(
-                        child: Text(cat.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.textPrimary)),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: AppColors.surface,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: AppColors.surfaceLight),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(cat.name, style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                            Text('$productCount active products in department', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                          ],
                         ),
-                        child: Text('$count Products', style: const TextStyle(fontSize: 11, color: AppColors.textSecondary, fontWeight: FontWeight.w600)),
                       ),
                     ],
                   ),
@@ -540,9 +709,13 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> wit
     );
   }
 
-  // TAB 4: ORDERS
-  Widget _buildOrdersTab() {
-    return Padding(
+  // TAB 4: STORE POLICY, DELIVERY CHARGES & PROMO COUPONS CONTROL CENTER
+  Widget _buildStoreConfigTab(StoreConfig storeConfig) {
+    final thresholdController = TextEditingController(text: storeConfig.freeDeliveryThreshold.toStringAsFixed(0));
+    final feeController = TextEditingController(text: storeConfig.standardDeliveryFee.toStringAsFixed(0));
+    final announcementController = TextEditingController(text: storeConfig.announcementText);
+
+    return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -550,128 +723,469 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> wit
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Customer Orders & Fulfillment', style: Theme.of(context).textTheme.titleLarge),
-              Text('Live OMS Feed', style: TextStyle(fontSize: 12, color: AppColors.secondaryFixedDim, fontWeight: FontWeight.bold)),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Expanded(
-            child: ListView(
-              children: [
-                _buildAdminOrderRow('TRK-982410', 'Rahul Sharma', '₹2,499.00', 'Delivered', 'Paid', 'Card', '2x Sourdough Bread, 1x Clean Code Book', null),
-                _buildAdminOrderRow('TRK-741203', 'Anita Verma', '₹899.00', 'Confirmed', 'Payment Pending', 'COD', '1x Himalayan Pure Honey', null),
-                _buildAdminOrderRow('TRK-551029', 'Vikram Singh', '₹1,249.00', 'Dispatched', 'Payment Pending', 'COD', '1x Titanium Fiber Gear Pack', null),
-                _buildAdminOrderRow('TRK-440192', 'Priya Patel', '₹499.00', 'Cancelled', 'Not Paid', 'COD', '1x Bakery Croissant Box', 'I ordered by mistake'),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAdminOrderRow(
-    String trk,
-    String customer,
-    String amount,
-    String orderStatus,
-    String paymentStatus,
-    String paymentMethod,
-    String items,
-    String? cancellationReason,
-  ) {
-    Color statusColor = AppColors.info;
-    if (orderStatus == 'Delivered') statusColor = AppColors.success;
-    if (orderStatus == 'Confirmed' || orderStatus == 'Packed') statusColor = AppColors.secondaryFixedDim;
-    if (orderStatus == 'Cancelled') statusColor = AppColors.error;
-
-    Color paymentColor = paymentStatus == 'Paid' ? AppColors.success : (paymentStatus == 'Not Paid' ? AppColors.textMuted : AppColors.accentAmber);
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.surfaceLight),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Text('Order #$trk', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.textPrimary)),
-                        const SizedBox(width: 8),
-                        Text('• $customer', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: AppColors.surfaceLight,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(paymentMethod, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Text(items, style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
-                  ],
-                ),
-              ),
-              Text(amount, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.secondaryFixedDim)),
-              const SizedBox(width: 12),
-              Wrap(
-                spacing: 6,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: statusColor.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: statusColor.withValues(alpha: 0.4)),
-                    ),
-                    child: Text(orderStatus, style: TextStyle(color: statusColor, fontWeight: FontWeight.bold, fontSize: 10)),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: paymentColor.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: paymentColor.withValues(alpha: 0.4)),
-                    ),
-                    child: Text(paymentStatus, style: TextStyle(color: paymentColor, fontWeight: FontWeight.bold, fontSize: 10)),
-                  ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  Text('⚙️ Real-Time Store Policy & Offers Controller', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                  SizedBox(height: 2),
+                  Text('Changes immediately broadcast to customer carts, checkout, and storefront', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                 ],
               ),
             ],
           ),
-          if (cancellationReason != null) ...[
-            const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: AppColors.error.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Text(
-                'Cancellation Reason: $cancellationReason',
-                style: const TextStyle(fontSize: 11, color: AppColors.error, fontWeight: FontWeight.w500),
-              ),
+          const SizedBox(height: 20),
+
+          // 1. Delivery Charges Card
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: AppColors.secondaryFixedDim.withValues(alpha: 0.3)),
             ),
-          ],
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: const [
+                    Icon(Icons.local_shipping_outlined, color: AppColors.secondaryFixedDim),
+                    SizedBox(width: 10),
+                    Text('Delivery Charge & Free Shipping Threshold', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: AppTextField(
+                        controller: thresholdController,
+                        label: 'Free Delivery Order Minimum (₹)',
+                        hint: '500',
+                        keyboardType: TextInputType.number,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: AppTextField(
+                        controller: feeController,
+                        label: 'Standard Delivery Fee (₹)',
+                        hint: '40',
+                        keyboardType: TextInputType.number,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                AppButton(
+                  text: 'Save Delivery Policy & Sync Storefront',
+                  icon: Icons.sync,
+                  onPressed: () {
+                    final threshold = double.tryParse(thresholdController.text.trim()) ?? 500.0;
+                    final fee = double.tryParse(feeController.text.trim()) ?? 40.0;
+
+                    ref.read(storeConfigProvider.notifier).updateDeliverySettings(
+                      freeThreshold: threshold,
+                      standardFee: fee,
+                    );
+                    ref.read(cartNotifierProvider.notifier).updateDeliveryConfig(
+                      threshold: threshold,
+                      fee: fee,
+                    );
+
+                    _addAuditLog('Delivery Policy Updated', 'Free shipping above ₹$threshold, Flat fee ₹$fee');
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('✨ Delivery Policy Synced: Free above ₹$threshold | Flat ₹$fee')),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 24),
+
+          // 2. Storewide Announcement Banner
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: AppColors.primaryGold.withValues(alpha: 0.3)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: const [
+                    Icon(Icons.campaign_outlined, color: AppColors.primaryGoldLight),
+                    SizedBox(width: 10),
+                    Text('Storewide Live Announcement & Banner', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                AppTextField(
+                  controller: announcementController,
+                  label: 'Storefront Broadcast Text',
+                  hint: '✨ Festive Offer: Free Delivery on orders above ₹500...',
+                  maxLines: 2,
+                ),
+                const SizedBox(height: 16),
+                AppButton(
+                  text: 'Broadcast Announcement Live',
+                  icon: Icons.broadcast_on_personal_rounded,
+                  onPressed: () {
+                    final text = announcementController.text.trim();
+                    ref.read(storeConfigProvider.notifier).updateAnnouncement(text);
+                    _addAuditLog('Announcement Broadcast', text);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('✨ New announcement broadcasted to storefront!')),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 24),
+
+          // 3. Coupons & Promo Code Manager
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Coupons & Promo Codes (${storeConfig.coupons.length})', style: Theme.of(context).textTheme.titleLarge),
+              ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.secondaryFixedDim,
+                  foregroundColor: const Color(0xFF005236),
+                ),
+                icon: const Icon(Icons.confirmation_number_outlined),
+                label: const Text('Add Coupon Code', style: TextStyle(fontWeight: FontWeight.bold)),
+                onPressed: () => _showAddCouponDialog(),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+
+          ListView.separated(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: storeConfig.coupons.length,
+            separatorBuilder: (_, __) => const SizedBox(height: 8),
+            itemBuilder: (context, index) {
+              final coupon = storeConfig.coupons[index];
+              return Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: coupon.isActive ? AppColors.secondaryFixedDim.withValues(alpha: 0.3) : AppColors.surfaceLight),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryGold.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(color: AppColors.primaryGoldLight),
+                      ),
+                      child: Text(
+                        coupon.code,
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.primaryGoldLight, letterSpacing: 1),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(coupon.description, style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary, fontSize: 13)),
+                          Text(
+                            coupon.discountType == 'percent'
+                                ? '${coupon.discountValue.toStringAsFixed(0)}% OFF (Min Order: ₹${coupon.minOrderAmount.toStringAsFixed(0)})'
+                                : '₹${coupon.discountValue.toStringAsFixed(0)} Flat OFF (Min Order: ₹${coupon.minOrderAmount.toStringAsFixed(0)})',
+                            style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(
+                        coupon.isActive ? Icons.toggle_on : Icons.toggle_off,
+                        color: coupon.isActive ? AppColors.secondaryFixedDim : AppColors.textMuted,
+                        size: 32,
+                      ),
+                      onPressed: () {
+                        ref.read(storeConfigProvider.notifier).toggleCouponStatus(coupon.code);
+                        _addAuditLog('Coupon Toggled', 'Toggled ${coupon.code} state');
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete_outline, color: AppColors.error, size: 20),
+                      onPressed: () {
+                        ref.read(storeConfigProvider.notifier).removeCoupon(coupon.code);
+                        _addAuditLog('Coupon Deleted', 'Removed coupon ${coupon.code}');
+                      },
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
         ],
       ),
     );
   }
 
-  // TAB 5: AUDIT LOGS
+  void _showAddCouponDialog() {
+    final codeController = TextEditingController();
+    final descController = TextEditingController();
+    final valueController = TextEditingController(text: '50');
+    final minController = TextEditingController(text: '299');
+    String discountType = 'flat';
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          backgroundColor: const Color(0xFF161F30),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: const Text('Add Promotional Coupon', style: TextStyle(color: AppColors.textPrimary)),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                AppTextField(
+                  controller: codeController,
+                  label: 'Coupon Code',
+                  hint: 'e.g. MEGA100',
+                ),
+                const SizedBox(height: 12),
+                AppTextField(
+                  controller: descController,
+                  label: 'Coupon Description',
+                  hint: 'e.g. ₹100 Flat Discount on Weekend Orders',
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ChoiceChip(
+                        label: const Center(child: Text('Flat ₹ Off')),
+                        selected: discountType == 'flat',
+                        selectedColor: AppColors.secondaryFixedDim,
+                        onSelected: (val) => setDialogState(() => discountType = 'flat'),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: ChoiceChip(
+                        label: const Center(child: Text('% Percentage')),
+                        selected: discountType == 'percent',
+                        selectedColor: AppColors.secondaryFixedDim,
+                        onSelected: (val) => setDialogState(() => discountType = 'percent'),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: AppTextField(
+                        controller: valueController,
+                        label: discountType == 'percent' ? 'Discount %' : 'Discount ₹',
+                        keyboardType: TextInputType.number,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: AppTextField(
+                        controller: minController,
+                        label: 'Min Order (₹)',
+                        keyboardType: TextInputType.number,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.secondaryFixedDim,
+                foregroundColor: const Color(0xFF005236),
+              ),
+              onPressed: () {
+                final code = codeController.text.trim().toUpperCase();
+                final desc = descController.text.trim();
+                final val = double.tryParse(valueController.text.trim()) ?? 0.0;
+                final min = double.tryParse(minController.text.trim()) ?? 0.0;
+
+                if (code.isNotEmpty && val > 0) {
+                  final newCoupon = StoreCoupon(
+                    code: code,
+                    description: desc.isNotEmpty ? desc : '$code Promo Offer',
+                    discountType: discountType,
+                    discountValue: val,
+                    minOrderAmount: min,
+                    isActive: true,
+                  );
+                  ref.read(storeConfigProvider.notifier).addCoupon(newCoupon);
+                  _addAuditLog('Coupon Created', 'Added new coupon $code');
+                  Navigator.pop(ctx);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('✨ Coupon $code created and active live!')),
+                  );
+                }
+              },
+              child: const Text('Create Coupon'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // TAB 5: ORDERS MANAGEMENT
+  Widget _buildOrdersTab() {
+    final ordersAsync = ref.watch(ordersFutureProvider);
+
+    return ordersAsync.when(
+      loading: () => const Padding(padding: EdgeInsets.all(24), child: ProductCardShimmer()),
+      error: (e, _) => Center(child: Text('Error loading orders: $e', style: const TextStyle(color: AppColors.error))),
+      data: (orders) {
+        if (orders.isEmpty) {
+          return const Center(child: Text('No orders found', style: TextStyle(color: AppColors.textSecondary)));
+        }
+
+        return ListView.separated(
+          padding: const EdgeInsets.all(24),
+          itemCount: orders.length,
+          separatorBuilder: (_, __) => const SizedBox(height: 12),
+          itemBuilder: (context, index) {
+            final order = orders[index];
+            final isCod = order.isCod;
+            final isCancelled = order.orderStatus == 'Cancelled';
+
+            return Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: isCancelled ? AppColors.error.withValues(alpha: 0.3) : AppColors.surfaceLight,
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Tracking: ${order.trackingNumber}',
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.primaryGoldLight),
+                      ),
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: order.orderStatus == 'Confirmed'
+                                  ? AppColors.primaryGold.withValues(alpha: 0.2)
+                                  : order.orderStatus == 'Delivered'
+                                      ? AppColors.secondaryFixedDim.withValues(alpha: 0.2)
+                                      : isCancelled
+                                          ? AppColors.error.withValues(alpha: 0.2)
+                                          : AppColors.primaryFixedDim.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              order.orderStatus.toUpperCase(),
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: isCancelled ? AppColors.error : AppColors.textPrimary,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: order.isPaid
+                                  ? AppColors.secondaryFixedDim.withValues(alpha: 0.2)
+                                  : AppColors.accentAmber.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              '${order.paymentMethod.toUpperCase()}: ${order.paymentStatus.toUpperCase()}',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: order.isPaid ? AppColors.secondaryFixedDim : AppColors.accentAmber,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const Divider(height: 20),
+                  Text(
+                    'Order Total: ${Formatters.formatCurrency(order.totalAmount)}  •  ${order.items.length} Items',
+                    style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.textPrimary, fontSize: 13),
+                  ),
+                  if (order.amountDue > 0) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      'Amount Due on Delivery: ${Formatters.formatCurrency(order.amountDue)}',
+                      style: const TextStyle(color: AppColors.accentAmber, fontWeight: FontWeight.bold, fontSize: 12),
+                    ),
+                  ],
+                  if (order.cancellationReason != null) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      'Cancellation Reason: ${order.cancellationReason}${order.cancellationReasonDetail != null ? " (${order.cancellationReasonDetail})" : ""}',
+                      style: const TextStyle(color: AppColors.error, fontSize: 11),
+                    ),
+                  ],
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      if (isCod && !order.isPaid && !isCancelled)
+                        ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.secondaryFixedDim,
+                            foregroundColor: const Color(0xFF005236),
+                          ),
+                          icon: const Icon(Icons.payments_rounded, size: 14),
+                          label: const Text('Collect COD Payment', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                          onPressed: () async {
+                            await ref.read(ordersRepositoryProvider).adminCollectCodPayment(order.trackingNumber);
+                            ref.refresh(ordersFutureProvider);
+                            _addAuditLog('COD Collected', 'Marked COD order ${order.trackingNumber} as Paid');
+                          },
+                        ),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  // TAB 6: AUDIT LOGS
   Widget _buildAuditLogsTab() {
     return Padding(
       padding: const EdgeInsets.all(24),
@@ -744,9 +1258,7 @@ class _PublishProductSheetState extends ConsumerState<_PublishProductSheet> {
 
   String _selectedCategory = 'Groceries';
   int _selectedCategoryId = 2;
-  String _selectedBadge = 'Popular';
   String _publicationStatus = 'published';
-  bool _isPublishing = false;
 
   final Map<String, int> _categories = {
     'Bakery': 1,
@@ -788,8 +1300,6 @@ class _PublishProductSheetState extends ConsumerState<_PublishProductSheet> {
       );
       return;
     }
-
-    setState(() => _isPublishing = true);
 
     final newProduct = Product(
       id: DateTime.now().millisecondsSinceEpoch ~/ 1000,
@@ -980,7 +1490,9 @@ class _PublishProductSheetState extends ConsumerState<_PublishProductSheet> {
                       label: const Center(child: Text('PUBLISHED (Live)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold))),
                       selected: _publicationStatus == 'published',
                       selectedColor: AppColors.secondaryFixedDim,
-                      backgroundColor: AppColors.surface,
+                      labelStyle: TextStyle(
+                        color: _publicationStatus == 'published' ? const Color(0xFF005236) : AppColors.textSecondary,
+                      ),
                       onSelected: (val) {
                         if (val) setState(() => _publicationStatus = 'published');
                       },
@@ -989,10 +1501,12 @@ class _PublishProductSheetState extends ConsumerState<_PublishProductSheet> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: ChoiceChip(
-                      label: const Center(child: Text('SAVE DRAFT', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold))),
+                      label: const Center(child: Text('DRAFT (Hidden)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold))),
                       selected: _publicationStatus == 'draft',
-                      selectedColor: AppColors.primaryContainer,
-                      backgroundColor: AppColors.surface,
+                      selectedColor: AppColors.accentAmber,
+                      labelStyle: TextStyle(
+                        color: _publicationStatus == 'draft' ? const Color(0xFF005236) : AppColors.textSecondary,
+                      ),
                       onSelected: (val) {
                         if (val) setState(() => _publicationStatus = 'draft');
                       },
@@ -1000,12 +1514,12 @@ class _PublishProductSheetState extends ConsumerState<_PublishProductSheet> {
                   ),
                 ],
               ),
+              const SizedBox(height: 24),
 
-              const SizedBox(height: 28),
+              // Publish Button
               AppButton(
-                text: _publicationStatus == 'published' ? 'Publish to Live Catalog' : 'Save as Draft',
+                text: 'Publish Product to Storefront',
                 icon: Icons.rocket_launch_rounded,
-                isLoading: _isPublishing,
                 onPressed: _submit,
               ),
             ],

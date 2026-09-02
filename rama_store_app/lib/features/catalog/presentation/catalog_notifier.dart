@@ -151,6 +151,27 @@ class CatalogNotifier extends StateNotifier<CatalogState> {
     state = state.copyWith(products: updatedList);
   }
 
+  void updateProductPriceAndStock(int productId, {required double sellingPrice, required int stock}) {
+    final updatedList = state.products.map((p) {
+      if (p.id == productId) {
+        return Product(
+          id: p.id,
+          sku: p.sku,
+          name: p.name,
+          categoryId: p.categoryId,
+          categoryName: p.categoryName,
+          sellingPrice: sellingPrice,
+          stock: stock,
+          status: p.status,
+          imageUrl: p.imageUrl,
+        );
+      }
+      return p;
+    }).toList();
+
+    state = state.copyWith(products: updatedList);
+  }
+
   void addCategory(Category category) {
     state = state.copyWith(
       categories: [...state.categories, category],

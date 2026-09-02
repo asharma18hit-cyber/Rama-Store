@@ -10,7 +10,8 @@ import '../../../shared/widgets/rating_stars.dart';
 import '../../../shared/widgets/hover_card.dart';
 import '../../../main.dart';
 import '../data/catalog_models.dart';
-import 'catalog_notifier.dart';
+import '../presentation/catalog_notifier.dart';
+import '../../admin/presentation/store_config_notifier.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -158,8 +159,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   // --- 1. TOP ANNOUNCEMENT RIBBON ---
   Widget _buildTopAnnouncementRibbon(CatalogState state) {
-    final text = state.announcement?.loyaltyOffer ??
-        '⚡ 10% Instant Loyalty Cashback on all orders • Free local delivery on orders above ₹500';
+    final storeConfig = ref.watch(storeConfigProvider);
+    final text = storeConfig.announcementText.isNotEmpty
+        ? storeConfig.announcementText
+        : (state.announcement?.loyaltyOffer ??
+            '⚡ 10% Instant Loyalty Cashback on all orders • Free local delivery on orders above ₹500');
 
     return Container(
       width: double.infinity,
