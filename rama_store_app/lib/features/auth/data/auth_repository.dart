@@ -60,18 +60,6 @@ class ApiAuthRepository implements AuthRepository {
     final cleanInput = emailOrPhone.trim().toLowerCase();
     final cleanPass = password.trim();
 
-    // Direct Administrator Credentials Check
-    if ((cleanInput == 'admin@ramastore.com' || cleanInput == 'admin') &&
-        (cleanPass == 'Admin@RamaStore2026' || cleanPass == 'admin123')) {
-      final adminUser = AuthUser(
-        emailOrPhone: 'admin@ramastore.com',
-        fullname: 'Rama Store Administrator',
-        role: 'super_admin',
-      );
-      await _saveUserLocal(adminUser);
-      return adminUser;
-    }
-
     if (useMocks) {
       final user = AuthUser(
         emailOrPhone: emailOrPhone,
@@ -84,8 +72,8 @@ class ApiAuthRepository implements AuthRepository {
 
     try {
       final res = await apiClient.post('/api/auth/login', data: {
-        'email_or_phone': emailOrPhone,
-        'password': password,
+        'email_or_phone': cleanInput,
+        'password': cleanPass,
       });
       final user = AuthUser.fromJson(res['user']);
       await _saveUserLocal(user);
