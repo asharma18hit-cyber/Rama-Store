@@ -6,6 +6,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/app_text_field.dart';
+import '../../../shared/widgets/product_image_view.dart';
 import '../../admin/data/store_config_model.dart';
 import '../../admin/presentation/store_config_notifier.dart';
 import '../../../main.dart';
@@ -247,25 +248,11 @@ class _CartScreenState extends ConsumerState<CartScreen> {
           ),
           child: Row(
             children: [
-              ClipRRect(
+              ProductImageView(
+                imageUrl: item.product.imageUrl,
+                width: 64,
+                height: 64,
                 borderRadius: BorderRadius.circular(10),
-                child: SizedBox(
-                  width: 64,
-                  height: 64,
-                  child: item.product.imageUrl != null && item.product.imageUrl!.isNotEmpty
-                      ? CachedNetworkImage(
-                          imageUrl: item.product.imageUrl!,
-                          fit: BoxFit.cover,
-                          errorWidget: (context, url, err) => Container(
-                            color: const Color(0xFF334155),
-                            child: const Icon(Icons.inventory_2_outlined, color: AppColors.textMuted),
-                          ),
-                        )
-                      : Container(
-                          color: const Color(0xFF334155),
-                          child: const Icon(Icons.inventory_2_outlined, color: AppColors.textMuted),
-                        ),
-                ),
               ),
               const SizedBox(width: 14),
 

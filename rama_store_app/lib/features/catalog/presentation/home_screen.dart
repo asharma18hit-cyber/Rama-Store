@@ -8,6 +8,7 @@ import '../../../shared/widgets/offline_banner.dart';
 import '../../../shared/widgets/shimmer_loader.dart';
 import '../../../shared/widgets/rating_stars.dart';
 import '../../../shared/widgets/hover_card.dart';
+import '../../../shared/widgets/product_image_view.dart';
 import '../../../main.dart';
 import '../data/catalog_models.dart';
 import '../presentation/catalog_notifier.dart';
@@ -860,23 +861,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             // Image Stack
             Stack(
               children: [
-                ClipRRect(
+                ProductImageView(
+                  imageUrl: product.imageUrl,
+                  height: 115,
+                  width: double.infinity,
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                  child: SizedBox(
-                    height: 115,
-                    width: double.infinity,
-                    child: product.imageUrl != null && product.imageUrl!.isNotEmpty
-                        ? CachedNetworkImage(
-                            imageUrl: product.imageUrl!,
-                            fit: BoxFit.cover,
-                            placeholder: (context, url) => const ShimmerLoader(width: double.infinity, height: 115),
-                            errorWidget: (context, url, error) => Container(color: const Color(0xFF334155)),
-                          )
-                        : Container(
-                            color: const Color(0xFF334155),
-                            child: const Icon(Icons.inventory_2_outlined, color: AppColors.textMuted),
-                          ),
-                  ),
                 ),
                 Positioned(
                   top: 8,
