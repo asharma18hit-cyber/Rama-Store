@@ -3,264 +3,271 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../shared/widgets/app_button.dart';
+import '../../../shared/widgets/hover_card.dart';
 import '../../../main.dart';
 
-class ProfileScreen extends ConsumerStatefulWidget {
+class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
   @override
-  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
-}
-
-class _ProfileScreenState extends ConsumerState<ProfileScreen> {
-  final _adminPasswordController = TextEditingController();
-  final _adminOtpController = TextEditingController();
-  bool _adminOtpSent = false;
-  bool _showAdminGate = false;
-
-  @override
-  void dispose() {
-    _adminPasswordController.dispose();
-    _adminOtpController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authNotifierProvider);
     final user = authState.user;
+    final loyaltyPoints = ref.watch(loyaltyRepositoryProvider).getStoredPoints();
+    final isDesktop = MediaQuery.of(context).size.width >= 1024;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: const Color(0xFF0B0F19),
       appBar: AppBar(
-        title: const Text('Account Profile'),
+        backgroundColor: const Color(0xFF0B0F19),
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_rounded, color: AppColors.textPrimary),
+          onPressed: () => context.pop(),
+        ),
+        title: const Text(
+          'ACCOUNT & PROFILE',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, letterSpacing: 1, color: AppColors.textPrimary),
+        ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // User Header Card
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppColors.primaryGold.withValues(alpha: 0.3)),
-              ),
-              child: Row(
-                children: [
-                  CircleAvatar(
-                    radius: 30,
-                    backgroundColor: AppColors.primaryGold,
-                    child: Text(
-                      user != null && user.fullname.isNotEmpty ? user.fullname[0].toUpperCase() : 'G',
-                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
-                    ),
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: isDesktop ? 64.0 : 16.0, vertical: 16.0),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 800),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // User Header Bento Card
+                Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1E293B),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: const Color(0xFF334155)),
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          user?.fullname ?? 'Guest Visitor',
-                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          user?.emailOrPhone ?? 'Not Signed In',
-                          style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
-                        ),
-                        const SizedBox(height: 6),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: user?.isAdmin == true ? AppColors.accentAmber.withValues(alpha: 0.2) : AppColors.surfaceLight,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            user?.isAdmin == true ? 'STORE OWNER / ADMIN' : 'CUSTOMER ACCOUNT',
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                              color: user?.isAdmin == true ? AppColors.accentAmber : AppColors.textSecondary,
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 64,
+                        height: 64,
+                        decoration: BoxDecoration(
+                          color: AppColors.secondaryFixedDim,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.secondaryFixedDim.withValues(alpha: 0.3),
+                              blurRadius: 16,
+                              spreadRadius: 2,
                             ),
+                          ],
+                        ),
+                        child: Center(
+                          child: Text(
+                            user != null && user.fullname.isNotEmpty ? user.fullname[0].toUpperCase() : 'R',
+                            style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w900, color: Color(0xFF005236)),
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            // Profile Menu List
-            _buildProfileMenuItem(
-              icon: Icons.favorite_outline,
-              title: 'Saved Wishlist',
-              subtitle: 'View items saved to your favorites',
-              onTap: () => context.push('/wishlist'),
-            ),
-            _buildProfileMenuItem(
-              icon: Icons.loyalty,
-              title: 'Loyalty Rewards Wallet',
-              subtitle: 'Check 10% cash-back points balance',
-              onTap: () => context.push('/loyalty'),
-            ),
-            _buildProfileMenuItem(
-              icon: Icons.history_outlined,
-              title: 'Order History',
-              subtitle: 'View trackings & reorder previous items',
-              onTap: () => context.go('/orders'),
-            ),
-            if (user?.isAdmin == true || user?.role == 'admin' || user?.role == 'super_admin') ...[
-              _buildProfileMenuItem(
-                icon: Icons.admin_panel_settings_outlined,
-                title: 'Stitch Admin Dashboard',
-                subtitle: 'Manage revenue metrics, inventory & new products',
-                onTap: () => context.push('/admin'),
-              ),
-            ],
-            Container(
-              margin: const EdgeInsets.only(bottom: 12),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: SwitchListTile(
-                secondary: Icon(
-                  ref.watch(themeModeNotifierProvider) == ThemeMode.dark ? Icons.dark_mode : Icons.light_mode,
-                  color: AppColors.primaryGold,
-                ),
-                title: const Text('Dark Mode Display', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.textPrimary)),
-                subtitle: Text(
-                  ref.watch(themeModeNotifierProvider) == ThemeMode.dark ? 'Enabled (Dark Ledger theme)' : 'Light Mode Enabled',
-                  style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
-                ),
-                value: ref.watch(themeModeNotifierProvider) == ThemeMode.dark,
-                activeThumbColor: AppColors.primaryGold,
-                onChanged: (val) => ref.read(themeModeNotifierProvider.notifier).toggleTheme(),
-              ),
-            ),
-
-            // Owner 2FA Portal Security Gate section
-            if (user?.isAdmin == true || user?.emailOrPhone.contains('admin') == true || user?.emailOrPhone.contains('7268903804') == true) ...[
-              const SizedBox(height: 24),
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.warning),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: const [
-                        Icon(Icons.admin_panel_settings, color: AppColors.accentAmber),
-                        SizedBox(width: 8),
-                        Text('Owner 2FA Gate Security Portal', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    const Text('Mirror site 2FA verification to manage inventory and status updates.', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-                    const SizedBox(height: 12),
-                    if (!_showAdminGate)
-                      AppButton(
-                        text: 'Trigger Owner 2FA Auth',
-                        isOutlined: true,
-                        color: AppColors.accentAmber,
-                        onPressed: () => setState(() => _showAdminGate = true),
-                      )
-                    else ...[
-                      if (!_adminOtpSent) ...[
-                        TextField(
-                          controller: _adminPasswordController,
-                          obscureText: true,
-                          style: const TextStyle(color: AppColors.textPrimary),
-                          decoration: const InputDecoration(hintText: 'Enter Owner Password'),
+                      ),
+                      const SizedBox(width: 20),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              user?.fullname.isNotEmpty == true ? user!.fullname : 'Rama Store Member',
+                              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: AppColors.textPrimary),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              user?.emailOrPhone.isNotEmpty == true ? user!.emailOrPhone : 'Guest Session',
+                              style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                            ),
+                            const SizedBox(height: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF3525CD).withValues(alpha: 0.25),
+                                borderRadius: BorderRadius.circular(6),
+                                border: Border.all(color: const Color(0xFF3525CD)),
+                              ),
+                              child: Text(
+                                user?.isAdmin == true ? '👑 STORE OWNER / ADMINISTRATOR' : '⚡ EMERALD TIER MEMBER',
+                                style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 0.8, color: AppColors.primaryFixedDim),
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 8),
-                        AppButton(
-                          text: 'Request Admin 2FA Code',
-                          color: AppColors.accentAmber,
-                          onPressed: () async {
-                            final pass = _adminPasswordController.text;
-                            if (pass.isEmpty) return;
-                            final ok = await ref.read(authNotifierProvider.notifier).loginPassword(user!.emailOrPhone, pass);
-                            if (ok) setState(() => _adminOtpSent = true);
-                          },
-                        ),
-                      ] else ...[
-                        TextField(
-                          controller: _adminOtpController,
-                          keyboardType: TextInputType.number,
-                          style: const TextStyle(color: AppColors.textPrimary),
-                          decoration: const InputDecoration(hintText: 'Enter 6-digit 2FA Code'),
-                        ),
-                        const SizedBox(height: 8),
-                        AppButton(
-                          text: 'Verify 2FA Security',
-                          color: AppColors.success,
-                          onPressed: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Owner 2FA Verification Confirmed!')),
-                            );
-                          },
-                        ),
-                      ],
+                      ),
                     ],
-                  ],
+                  ),
                 ),
-              ),
-            ],
 
-            const SizedBox(height: 36),
-            if (authState.isAuthenticated)
-              AppButton(
-                text: 'Log Out of Account',
-                isOutlined: true,
-                color: AppColors.error,
-                onPressed: () async {
-                  await ref.read(authNotifierProvider.notifier).logout();
-                  if (context.mounted) {
-                    context.go('/auth');
-                  }
-                },
-              )
-            else
-              AppButton(
-                text: 'Sign In / Register',
-                onPressed: () => context.go('/auth'),
-              ),
-          ],
+                const SizedBox(height: 20),
+
+                // Loyalty Points Balance Bento
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1E293B),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: const Color(0xFF334155)),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: AppColors.secondaryFixedDim.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(Icons.stars_rounded, color: AppColors.secondaryFixedDim, size: 24),
+                          ),
+                          const SizedBox(width: 14),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text('Loyalty Cashback Coins', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                              Text('10% Cashback applied on orders', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                            ],
+                          ),
+                        ],
+                      ),
+                      Text(
+                        '${loyaltyPoints.toStringAsFixed(0)} PTS',
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.secondaryFixedDim),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 28),
+
+                const Text(
+                  'STORE SERVICES',
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w900, letterSpacing: 1.2, color: AppColors.textMuted),
+                ),
+                const SizedBox(height: 12),
+
+                // Menu items
+                _buildMenuItem(
+                  icon: Icons.receipt_long_rounded,
+                  title: 'Order History & Tracking',
+                  subtitle: 'View live fulfillment timelines and invoices',
+                  onTap: () => context.push('/orders'),
+                ),
+                const SizedBox(height: 10),
+
+                _buildMenuItem(
+                  icon: Icons.favorite_rounded,
+                  title: 'My Wishlist',
+                  subtitle: 'Saved items for later purchase',
+                  onTap: () => context.push('/wishlist'),
+                ),
+                const SizedBox(height: 10),
+
+                _buildMenuItem(
+                  icon: Icons.download_rounded,
+                  title: 'Download Native Android App',
+                  subtitle: 'Install APK directly on your mobile device',
+                  onTap: () => context.push('/downloads'),
+                ),
+                const SizedBox(height: 10),
+
+                if (user?.isAdmin == true) ...[
+                  _buildMenuItem(
+                    icon: Icons.admin_panel_settings_rounded,
+                    title: 'Administrator Dashboard',
+                    subtitle: 'Manage products, publishing, stock and orders',
+                    highlight: true,
+                    onTap: () => context.push('/admin'),
+                  ),
+                  const SizedBox(height: 10),
+                ],
+
+                const SizedBox(height: 24),
+
+                // Auth Action
+                if (authState.isAuthenticated)
+                  AppButton(
+                    text: 'Sign Out Account',
+                    icon: Icons.logout_rounded,
+                    isOutlined: true,
+                    onPressed: () async {
+                      await ref.read(authNotifierProvider.notifier).logout();
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Signed out successfully')),
+                        );
+                      }
+                    },
+                  )
+                else
+                  AppButton(
+                    text: 'Sign In / Register',
+                    icon: Icons.login_rounded,
+                    onPressed: () => context.push('/auth'),
+                  ),
+
+                const SizedBox(height: 48),
+              ],
+            ),
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildProfileMenuItem({
+  Widget _buildMenuItem({
     required IconData icon,
     required String title,
     required String subtitle,
     required VoidCallback onTap,
+    bool highlight = false,
   }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: ListTile(
-        leading: Icon(icon, color: AppColors.primaryGold),
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.textPrimary)),
-        subtitle: Text(subtitle, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-        trailing: const Icon(Icons.chevron_right, color: AppColors.textMuted),
-        onTap: onTap,
+    return HoverCard(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1E293B),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: highlight ? AppColors.secondaryFixedDim : const Color(0xFF334155)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: highlight ? AppColors.secondaryFixedDim.withValues(alpha: 0.15) : const Color(0xFF0F172A),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(icon, color: highlight ? AppColors.secondaryFixedDim : AppColors.primaryFixedDim, size: 22),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: highlight ? AppColors.secondaryFixedDim : AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(subtitle, style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                ],
+              ),
+            ),
+            const Icon(Icons.chevron_right_rounded, color: AppColors.textMuted, size: 20),
+          ],
+        ),
       ),
     );
   }
