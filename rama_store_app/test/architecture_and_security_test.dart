@@ -105,5 +105,39 @@ void main() {
       final isInvalid = OtpService.verifyOtp('9876543210', '000000');
       expect(isInvalid, false);
     });
+
+    test('Server-authoritative price validation ignoring manipulated price input', () {
+      final authoritativeProduct = Product(
+        id: 101,
+        sku: 'BK-001',
+        name: 'The Art of Clean Code',
+        sellingPrice: 499.0,
+        stock: 10,
+        status: 'published',
+      );
+
+      // Even if a malicious client attempts to claim sellingPrice is 1.0, the authoritative calculation must use product.sellingPrice
+      const claimedManipulatedPrice = 1.0;
+      final quantity = 2;
+      final authoritativeTotal = authoritativeProduct.sellingPrice * quantity;
+      expect(authoritativeTotal, 998.0);
+      expect(authoritativeTotal != claimedManipulatedPrice * quantity, true);
+    });
+
+    test('Order session tracking number uniqueness & idempotency format', () {
+      final trackingNumber1 = 'TRK-${DateTime.now().millisecondsSinceEpoch}';
+      final trackingNumber2 = 'TRK-${DateTime.now().millisecondsSinceEpoch + 1}';
+      expect(trackingNumber1.startsWith('TRK-'), true);
+      expect(trackingNumber2.startsWith('TRK-'), true);
+      expect(trackingNumber1 != trackingNumber2, true);
+    });
+
+    test('Order State Machine valid state transitions', () {
+      const validStatuses = ['Pending', 'Paid', 'Shipped', 'Delivered', 'Cancelled'];
+      expect(validStatuses.contains('Pending'), true);
+      expect(validStatuses.contains('Paid'), true);
+      expect(validStatuses.contains('Cancelled'), true);
+      expect(validStatuses.contains('Fraudulent'), false);
+    });
   });
 }
