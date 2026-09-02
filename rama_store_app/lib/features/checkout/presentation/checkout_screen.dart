@@ -48,12 +48,49 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       appBar: AppBar(
         title: const Text('Checkout & Payment'),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Order Summary Header
+      body: cartState.items.isEmpty
+          ? Center(
+              child: Padding(
+                padding: const EdgeInsets.all(32.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(28),
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF1E293B),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.shopping_bag_outlined, size: 64, color: AppColors.textMuted),
+                    ),
+                    const SizedBox(height: 24),
+                    const Text(
+                      'YOUR BAG IS EMPTY',
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, letterSpacing: 1.2, color: AppColors.textPrimary),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Please add items to your shopping bag before proceeding to checkout.',
+                      style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 28),
+                    AppButton(
+                      text: 'Explore Catalog',
+                      icon: Icons.storefront_rounded,
+                      width: 220,
+                      onPressed: () => context.go('/catalog'),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          : SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Order Summary Header
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -279,6 +316,11 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                 final expiry = _expiryController.text.trim();
                 final upiId = _upiIdController.text.trim();
                 final messenger = ScaffoldMessenger.of(context);
+
+                if (cartState.items.isEmpty) {
+                  messenger.showSnackBar(const SnackBar(content: Text('Your bag is empty. Please add items to place an order.')));
+                  return;
+                }
 
                 if (addr.isEmpty) {
                   messenger.showSnackBar(const SnackBar(content: Text('Please enter delivery address')));

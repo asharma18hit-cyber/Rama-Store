@@ -22,8 +22,10 @@ class ApiOrdersRepository implements OrdersRepository {
 
   @override
   Future<void> saveLocalOrder(OrderModel order) async {
+    // Only save valid non-empty orders
+    if (order.items.isEmpty || order.totalAmount <= 0) return;
+
     final existingOrders = await _getLocalOrders();
-    // Prepend new order at the top
     existingOrders.removeWhere((o) => o.trackingNumber == order.trackingNumber);
     existingOrders.insert(0, order);
     final jsonList = existingOrders.map((o) => o.toJson()).toList();
@@ -35,7 +37,11 @@ class ApiOrdersRepository implements OrdersRepository {
       final raw = storage.getString(AppConstants.keyCachedOrders);
       if (raw != null && raw.isNotEmpty) {
         final decoded = jsonDecode(raw) as List;
-        return decoded.map((i) => OrderModel.fromJson(i is Map<String, dynamic> ? i : Map<String, dynamic>.from(i))).toList();
+        final list = decoded
+            .map((i) => OrderModel.fromJson(i is Map<String, dynamic> ? i : Map<String, dynamic>.from(i)))
+            .where((o) => o.items.isNotEmpty && o.totalAmount > 0)
+            .toList();
+        return list;
       }
     } catch (_) {}
     return [];
@@ -65,7 +71,10 @@ class ApiOrdersRepository implements OrdersRepository {
     try {
       final res = await apiClient.get('/api/orders/history');
       if (res is List) {
-        final remoteOrders = res.map((i) => OrderModel.fromJson(i is Map<String, dynamic> ? i : Map<String, dynamic>.from(i))).toList();
+        final remoteOrders = res
+            .map((i) => OrderModel.fromJson(i is Map<String, dynamic> ? i : Map<String, dynamic>.from(i)))
+            .where((o) => o.items.isNotEmpty && o.totalAmount > 0)
+            .toList();
         final Map<String, OrderModel> merged = {};
         for (var o in localOrders) {
           merged[o.trackingNumber] = o;
