@@ -50,6 +50,28 @@ class MockCatalogRepository implements CatalogRepository {
       homeDelivery: 'Free Delivery Available',
     );
   }
+
+  @override
+  Future<void> saveProduct(Product product) async {
+    mockProducts.removeWhere((p) => p.id == product.id);
+    mockProducts.insert(0, product);
+  }
+
+  @override
+  Future<void> deleteProduct(int productId) async {
+    mockProducts.removeWhere((p) => p.id == productId);
+  }
+
+  @override
+  Future<void> updateProduct(Product product) async {
+    final idx = mockProducts.indexWhere((p) => p.id == product.id);
+    if (idx != -1) mockProducts[idx] = product;
+  }
+
+  @override
+  Future<void> saveCategory(Category category) async {
+    mockCategories.add(category);
+  }
 }
 
 void main() {

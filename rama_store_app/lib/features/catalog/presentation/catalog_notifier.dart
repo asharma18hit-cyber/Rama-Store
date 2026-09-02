@@ -124,16 +124,23 @@ class CatalogNotifier extends StateNotifier<CatalogState> {
     }
   }
 
-  void addProduct(Product product) {
-    state = state.copyWith(
-      products: [product, ...state.products],
-    );
+  Future<void> addProduct(Product product) async {
+    final updated = [product, ...state.products.where((p) => p.id != product.id && p.sku != product.sku)];
+    state = state.copyWith(products: updated);
+    await repository.saveProduct(product);
   }
 
-  void updateProductStatus(int productId, String newStatus) {
+  Future<void> deleteProduct(int productId) async {
+    final updated = state.products.where((p) => p.id != productId).toList();
+    state = state.copyWith(products: updated);
+    await repository.deleteProduct(productId);
+  }
+
+  Future<void> updateProductStatus(int productId, String newStatus) async {
+    Product? target;
     final updatedList = state.products.map((p) {
       if (p.id == productId) {
-        return Product(
+        target = Product(
           id: p.id,
           sku: p.sku,
           name: p.name,
@@ -144,17 +151,22 @@ class CatalogNotifier extends StateNotifier<CatalogState> {
           status: newStatus,
           imageUrl: p.imageUrl,
         );
+        return target!;
       }
       return p;
     }).toList();
 
     state = state.copyWith(products: updatedList);
+    if (target != null) {
+      await repository.updateProduct(target!);
+    }
   }
 
-  void updateProductPriceAndStock(int productId, {required double sellingPrice, required int stock}) {
+  Future<void> updateProductPriceAndStock(int productId, {required double sellingPrice, required int stock}) async {
+    Product? target;
     final updatedList = state.products.map((p) {
       if (p.id == productId) {
-        return Product(
+        target = Product(
           id: p.id,
           sku: p.sku,
           name: p.name,
@@ -165,17 +177,21 @@ class CatalogNotifier extends StateNotifier<CatalogState> {
           status: p.status,
           imageUrl: p.imageUrl,
         );
+        return target!;
       }
       return p;
     }).toList();
 
     state = state.copyWith(products: updatedList);
+    if (target != null) {
+      await repository.updateProduct(target!);
+    }
   }
 
-  void addCategory(Category category) {
-    state = state.copyWith(
-      categories: [...state.categories, category],
-    );
+  Future<void> addCategory(Category category) async {
+    final updated = [...state.categories.where((c) => c.id != category.id), category];
+    state = state.copyWith(categories: updated);
+    await repository.saveCategory(category);
   }
 
   Future<void> _fetchProducts() async {

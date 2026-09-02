@@ -199,6 +199,45 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> wit
     );
   }
 
+  void _showDeleteProductDialog(Product product) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF161F30),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: const [
+            Icon(Icons.warning_amber_rounded, color: AppColors.error),
+            SizedBox(width: 8),
+            Text('Delete Product', style: TextStyle(color: AppColors.textPrimary)),
+          ],
+        ),
+        content: Text(
+          'Are you sure you want to permanently delete "${product.name}" (SKU: ${product.sku}) from the store catalog?',
+          style: const TextStyle(color: AppColors.textSecondary),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.error, foregroundColor: Colors.white),
+            onPressed: () {
+              ref.read(catalogNotifierProvider.notifier).deleteProduct(product.id);
+              _addAuditLog('Product Deleted', 'Permanently removed "${product.name}"');
+              Navigator.pop(ctx);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('🗑️ Product "${product.name}" removed from store')),
+              );
+            },
+            child: const Text('Delete Permanently'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authNotifierProvider);
@@ -619,6 +658,12 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> wit
                                 ref.read(catalogNotifierProvider.notifier).updateProductStatus(product.id, newStatus);
                                 _addAuditLog('Status Changed', 'Changed "${product.name}" to $newStatus');
                               },
+                            ),
+                            const SizedBox(width: 6),
+                            IconButton(
+                              icon: const Icon(Icons.delete_outline_rounded, color: AppColors.error, size: 20),
+                              tooltip: 'Delete Product',
+                              onPressed: () => _showDeleteProductDialog(product),
                             ),
                           ],
                         ),
@@ -1254,20 +1299,53 @@ class _PublishProductSheetState extends ConsumerState<_PublishProductSheet> {
   final _sellingPriceController = TextEditingController(text: '499');
   final _purchasePriceController = TextEditingController(text: '299');
   final _stockController = TextEditingController(text: '20');
-  final _imageUrlController = TextEditingController(text: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800');
+  final _imageUrlController = TextEditingController(text: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=600');
 
-  String _selectedCategory = 'Groceries';
-  int _selectedCategoryId = 2;
+  String _selectedCategory = 'Books';
+  int _selectedCategoryId = 4;
   String _publicationStatus = 'published';
 
   final Map<String, int> _categories = {
+    'Books': 4,
     'Bakery': 1,
     'Groceries': 2,
     'Medicine': 3,
-    'Books': 4,
     'Stationery': 5,
-    'Sports': 6,
-    'Tech-Fab': 7,
+    'Sports Gear': 6,
+    'Tech & Electronics': 7,
+  };
+
+  final Map<String, List<Map<String, String>>> _curatedImagePresets = {
+    'Books': [
+      {'title': 'Clean Code & Tech', 'url': 'https://images.unsplash.com/photo-1532012164546-f432f2e37b73?w=600'},
+      {'title': 'Psychology & Finance', 'url': 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=600'},
+      {'title': 'Hardcover Novel', 'url': 'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=600'},
+      {'title': 'Academic Textbook', 'url': 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=600'},
+    ],
+    'Groceries': [
+      {'title': 'Organic Produce', 'url': 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=600'},
+      {'title': 'Honey & Grains', 'url': 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=600'},
+    ],
+    'Bakery': [
+      {'title': 'Butter Croissant', 'url': 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=600'},
+      {'title': 'Fresh Artisan Bread', 'url': 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600'},
+    ],
+    'Medicine': [
+      {'title': 'First Aid Kit', 'url': 'https://images.unsplash.com/photo-1603398938378-e54eab446dde?w=600'},
+      {'title': 'Health Supplements', 'url': 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=600'},
+    ],
+    'Tech & Electronics': [
+      {'title': 'Wireless Headphones', 'url': 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600'},
+      {'title': 'Smart Wearable', 'url': 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600'},
+    ],
+    'Sports Gear': [
+      {'title': 'Fitness Equipment', 'url': 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=600'},
+      {'title': 'Badminton Racket', 'url': 'https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=600'},
+    ],
+    'Stationery': [
+      {'title': 'Leather Journal', 'url': 'https://images.unsplash.com/photo-1531346878377-a5be20888e57?w=600'},
+      {'title': 'Writing Desk Set', 'url': 'https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?w=600'},
+    ],
   };
 
   @override
@@ -1285,6 +1363,19 @@ class _PublishProductSheetState extends ConsumerState<_PublishProductSheet> {
     _stockController.dispose();
     _imageUrlController.dispose();
     super.dispose();
+  }
+
+  void _onCategoryChanged(String? val) {
+    if (val != null) {
+      setState(() {
+        _selectedCategory = val;
+        _selectedCategoryId = _categories[val] ?? 4;
+        final presets = _curatedImagePresets[val];
+        if (presets != null && presets.isNotEmpty) {
+          _imageUrlController.text = presets.first['url']!;
+        }
+      });
+    }
   }
 
   void _submit() {
@@ -1313,7 +1404,7 @@ class _PublishProductSheetState extends ConsumerState<_PublishProductSheet> {
       imageUrl: imageUrl.isNotEmpty ? imageUrl : null,
     );
 
-    // Add to Live Catalog State
+    // Add to Live Catalog State & Storage
     ref.read(catalogNotifierProvider.notifier).addProduct(newProduct);
     widget.onPublished?.call('Published "$name" to $_selectedCategory');
 
@@ -1328,7 +1419,7 @@ class _PublishProductSheetState extends ConsumerState<_PublishProductSheet> {
             const SizedBox(width: 10),
             Expanded(
               child: Text(
-                '✨ "$name" published as $_publicationStatus to $_selectedCategory!',
+                '✨ "$name" published as $_publicationStatus in $_selectedCategory!',
                 style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF005236)),
               ),
             ),
@@ -1340,6 +1431,8 @@ class _PublishProductSheetState extends ConsumerState<_PublishProductSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final currentPresets = _curatedImagePresets[_selectedCategory] ?? [];
+
     return DraggableScrollableSheet(
       initialChildSize: 0.9,
       maxChildSize: 0.95,
@@ -1380,7 +1473,7 @@ class _PublishProductSheetState extends ConsumerState<_PublishProductSheet> {
               AppTextField(
                 controller: _nameController,
                 label: 'Product Title',
-                hint: 'e.g. Wireless Noise-Cancelling Headphones',
+                hint: 'e.g. The Psychology of Money (Hardcover Edition)',
                 prefixIcon: const Icon(Icons.shopping_bag_outlined, color: AppColors.textSecondary),
               ),
               const SizedBox(height: 16),
@@ -1392,7 +1485,7 @@ class _PublishProductSheetState extends ConsumerState<_PublishProductSheet> {
                     child: AppTextField(
                       controller: _skuController,
                       label: 'SKU / Barcode',
-                      hint: 'RAMA-001',
+                      hint: 'RAMA-BK01',
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -1420,14 +1513,7 @@ class _PublishProductSheetState extends ConsumerState<_PublishProductSheet> {
                                   child: Text(cat, style: const TextStyle(color: AppColors.textPrimary, fontSize: 13)),
                                 );
                               }).toList(),
-                              onChanged: (val) {
-                                if (val != null) {
-                                  setState(() {
-                                    _selectedCategory = val;
-                                    _selectedCategoryId = _categories[val] ?? 1;
-                                  });
-                                }
-                              },
+                              onChanged: _onCategoryChanged,
                             ),
                           ),
                         ),
@@ -1469,14 +1555,123 @@ class _PublishProductSheetState extends ConsumerState<_PublishProductSheet> {
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
 
-              // Image URL
-              AppTextField(
-                controller: _imageUrlController,
-                label: 'Cover Image URL',
-                hint: 'https://images.unsplash.com/...',
-                prefixIcon: const Icon(Icons.image_outlined, color: AppColors.textSecondary),
+              // Image Upload / Preset Selection Section
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF0F172A),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: const Color(0xFF334155)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          '📷 Product Cover Image',
+                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: AppColors.secondaryFixedDim.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: const Text(
+                            'LIVE PREVIEW',
+                            style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.secondaryFixedDim),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+
+                    // Live Thumbnail Preview Card
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Container(
+                            width: 100,
+                            height: 100,
+                            color: const Color(0xFF1E293B),
+                            child: _imageUrlController.text.isNotEmpty
+                                ? Image.network(
+                                    _imageUrlController.text,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, __, ___) => const Center(
+                                      child: Icon(Icons.broken_image_rounded, color: AppColors.error, size: 32),
+                                    ),
+                                  )
+                                : const Center(
+                                    child: Icon(Icons.image_outlined, color: AppColors.textMuted, size: 32),
+                                  ),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Select from category gallery or paste custom URL below:',
+                                style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                              ),
+                              const SizedBox(height: 8),
+                              Wrap(
+                                spacing: 8,
+                                runSpacing: 6,
+                                children: currentPresets.map((preset) {
+                                  final isSelected = _imageUrlController.text == preset['url'];
+                                  return InkWell(
+                                    onTap: () {
+                                      setState(() {
+                                        _imageUrlController.text = preset['url']!;
+                                      });
+                                    },
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                      decoration: BoxDecoration(
+                                        color: isSelected ? AppColors.secondaryFixedDim : const Color(0xFF1E293B),
+                                        borderRadius: BorderRadius.circular(8),
+                                        border: Border.all(
+                                          color: isSelected ? AppColors.secondaryFixedDim : const Color(0xFF334155),
+                                        ),
+                                      ),
+                                      child: Text(
+                                        preset['title']!,
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.bold,
+                                          color: isSelected ? const Color(0xFF005236) : AppColors.textPrimary,
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 14),
+
+                    // Custom URL Field
+                    AppTextField(
+                      controller: _imageUrlController,
+                      label: 'Custom Image URL / CDN Link',
+                      hint: 'https://...',
+                      prefixIcon: const Icon(Icons.link_rounded, color: AppColors.textSecondary),
+                      onChanged: (_) => setState(() {}),
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(height: 16),
 
@@ -1487,7 +1682,7 @@ class _PublishProductSheetState extends ConsumerState<_PublishProductSheet> {
                 children: [
                   Expanded(
                     child: ChoiceChip(
-                      label: const Center(child: Text('PUBLISHED (Live)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold))),
+                      label: const Center(child: Text('PUBLISHED (Live on Store)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold))),
                       selected: _publicationStatus == 'published',
                       selectedColor: AppColors.secondaryFixedDim,
                       labelStyle: TextStyle(

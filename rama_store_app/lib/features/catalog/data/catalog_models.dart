@@ -16,6 +16,14 @@ class Category {
       parentId: json['parent_id'],
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'parent_id': parentId,
+    };
+  }
 }
 
 class Product {

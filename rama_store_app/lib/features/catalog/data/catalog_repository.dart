@@ -7,13 +7,17 @@ import 'catalog_models.dart';
 abstract class CatalogRepository {
   Future<ProductResponse> getProducts({
     int page = 1,
-    int perPage = 8,
+    int perPage = 20,
     String search = '',
     int? categoryId,
     double? maxPrice,
   });
   Future<List<Category>> getCategories();
   Future<Announcement> getAnnouncements();
+  Future<void> saveProduct(Product product);
+  Future<void> deleteProduct(int productId);
+  Future<void> updateProduct(Product product);
+  Future<void> saveCategory(Category category);
 }
 
 class ApiCatalogRepository implements CatalogRepository {
@@ -21,99 +25,17 @@ class ApiCatalogRepository implements CatalogRepository {
   final LocalStorageService storage;
   final bool useMocks;
 
+  static const String keyPersistentProducts = 'persistent_store_products_v3';
+  static const String keyPersistentCategories = 'persistent_store_categories_v3';
+
   ApiCatalogRepository({
     required this.apiClient,
     required this.storage,
     this.useMocks = const bool.fromEnvironment('USE_MOCKS', defaultValue: false),
   });
 
-  @override
-  Future<ProductResponse> getProducts({
-    int page = 1,
-    int perPage = 8,
-    String search = '',
-    int? categoryId,
-    double? maxPrice,
-  }) async {
-    if (useMocks) {
-      return _getMockProducts(page: page, search: search, categoryId: categoryId);
-    }
-
-    try {
-      final params = <String, dynamic>{
-        'page': page,
-        'per_page': perPage,
-      };
-      if (search.isNotEmpty) params['search'] = search;
-      if (categoryId != null) params['category_id'] = categoryId;
-      if (maxPrice != null) params['max_price'] = maxPrice;
-
-      final res = await apiClient.get('/api/store/products', queryParameters: params);
-      final responseObj = ProductResponse.fromJson(res);
-
-      // Cache first page for offline store browsing
-      if (page == 1 && search.isEmpty && categoryId == null) {
-        await storage.setString(AppConstants.keyCachedProducts, jsonEncode(res));
-      }
-
-      return responseObj;
-    } catch (_) {
-      // Offline fallback from local cache
-      final cachedJson = storage.getString(AppConstants.keyCachedProducts);
-      if (cachedJson != null && cachedJson.isNotEmpty) {
-        return ProductResponse.fromJson(jsonDecode(cachedJson));
-      }
-      return _getMockProducts(page: page, search: search, categoryId: categoryId);
-    }
-  }
-
-  @override
-  Future<List<Category>> getCategories() async {
-    if (useMocks) return _getMockCategories();
-
-    try {
-      final res = await apiClient.get('/api/categories');
-      final list = (res as List).map((i) => Category.fromJson(i)).toList();
-      return list;
-    } catch (_) {
-      return _getMockCategories();
-    }
-  }
-
-  @override
-  Future<Announcement> getAnnouncements() async {
-    if (useMocks) {
-      return Announcement(
-        stockStatus: 'Fresh Inventory Active',
-        loyaltyOffer: '10% Cash-Back Loyalty Points Credit',
-        homeDelivery: 'Free Local Delivery on Orders > ₹500',
-      );
-    }
-    try {
-      final res = await apiClient.get('/api/announcements');
-      return Announcement.fromJson(res);
-    } catch (_) {
-      return Announcement(
-        stockStatus: 'Store Operational',
-        loyaltyOffer: '10% Loyalty Cash-Back Active',
-        homeDelivery: 'Free Delivery above ₹500',
-      );
-    }
-  }
-
-  List<Category> _getMockCategories() {
+  List<Product> _getInitialDefaultProducts() {
     return [
-      Category(id: 1, name: 'Bakery'),
-      Category(id: 2, name: 'Groceries'),
-      Category(id: 3, name: 'Medicine'),
-      Category(id: 4, name: 'Books'),
-      Category(id: 5, name: 'Stationery'),
-      Category(id: 6, name: 'Sports Gear'),
-    ];
-  }
-
-  ProductResponse _getMockProducts({int page = 1, String search = '', int? categoryId}) {
-    final allMocks = [
       Product(
         id: 101,
         sku: 'BK-001',
@@ -180,22 +102,160 @@ class ApiCatalogRepository implements CatalogRepository {
         status: 'published',
         imageUrl: 'https://images.unsplash.com/photo-1531346878377-a5be20888e57?w=400',
       ),
+      Product(
+        id: 107,
+        sku: 'TECH-001',
+        name: 'Noise-Cancelling Wireless Earbuds',
+        categoryId: 7,
+        categoryName: 'Tech & Electronics',
+        sellingPrice: 2499.0,
+        stock: 18,
+        status: 'published',
+        imageUrl: 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=400',
+      ),
     ];
+  }
 
-    var filtered = allMocks;
-    if (search.isNotEmpty) {
-      filtered = filtered.where((p) => p.name.toLowerCase().contains(search.toLowerCase())).toList();
+  List<Product> _loadStoredProducts() {
+    final raw = storage.getString(keyPersistentProducts);
+    if (raw != null && raw.isNotEmpty) {
+      try {
+        final decoded = jsonDecode(raw) as List;
+        return decoded.map((item) => Product.fromJson(item as Map<String, dynamic>)).toList();
+      } catch (_) {}
     }
+    final defaults = _getInitialDefaultProducts();
+    _saveStoredProducts(defaults);
+    return defaults;
+  }
+
+  Future<void> _saveStoredProducts(List<Product> products) async {
+    final jsonList = products.map((p) => p.toJson()).toList();
+    await storage.setString(keyPersistentProducts, jsonEncode(jsonList));
+  }
+
+  @override
+  Future<ProductResponse> getProducts({
+    int page = 1,
+    int perPage = 20,
+    String search = '',
+    int? categoryId,
+    double? maxPrice,
+  }) async {
+    // 1. Load from Persistent Storage
+    final allProducts = _loadStoredProducts();
+
+    var filtered = List<Product>.from(allProducts);
+
+    if (search.isNotEmpty) {
+      final q = search.toLowerCase();
+      filtered = filtered.where((p) =>
+        p.name.toLowerCase().contains(q) ||
+        p.sku.toLowerCase().contains(q) ||
+        (p.categoryName?.toLowerCase().contains(q) ?? false)
+      ).toList();
+    }
+
     if (categoryId != null) {
       filtered = filtered.where((p) => p.categoryId == categoryId).toList();
+    }
+
+    if (maxPrice != null) {
+      filtered = filtered.where((p) => p.sellingPrice <= maxPrice).toList();
     }
 
     return ProductResponse(
       products: filtered,
       page: page,
-      perPage: 8,
+      perPage: perPage,
       totalCount: filtered.length,
       totalPages: 1,
+    );
+  }
+
+  @override
+  Future<void> saveProduct(Product product) async {
+    final products = _loadStoredProducts();
+    products.removeWhere((p) => p.id == product.id || p.sku == product.sku);
+    products.insert(0, product);
+    await _saveStoredProducts(products);
+
+    // Also sync to backend API if available
+    try {
+      await apiClient.post('/api/admin/products', data: product.toJson());
+    } catch (_) {}
+  }
+
+  @override
+  Future<void> deleteProduct(int productId) async {
+    final products = _loadStoredProducts();
+    products.removeWhere((p) => p.id == productId);
+    await _saveStoredProducts(products);
+
+    try {
+      await apiClient.delete('/api/admin/products/$productId');
+    } catch (_) {}
+  }
+
+  @override
+  Future<void> updateProduct(Product product) async {
+    final products = _loadStoredProducts();
+    final idx = products.indexWhere((p) => p.id == product.id);
+    if (idx != -1) {
+      products[idx] = product;
+    } else {
+      products.add(product);
+    }
+    await _saveStoredProducts(products);
+
+    try {
+      await apiClient.put('/api/admin/products/${product.id}', data: product.toJson());
+    } catch (_) {}
+  }
+
+  @override
+  Future<List<Category>> getCategories() async {
+    final raw = storage.getString(keyPersistentCategories);
+    if (raw != null && raw.isNotEmpty) {
+      try {
+        final decoded = jsonDecode(raw) as List;
+        return decoded.map((i) => Category.fromJson(i)).toList();
+      } catch (_) {}
+    }
+
+    final defaultCats = [
+      Category(id: 1, name: 'Bakery'),
+      Category(id: 2, name: 'Groceries'),
+      Category(id: 3, name: 'Medicine'),
+      Category(id: 4, name: 'Books'),
+      Category(id: 5, name: 'Stationery'),
+      Category(id: 6, name: 'Sports Gear'),
+      Category(id: 7, name: 'Tech & Electronics'),
+    ];
+
+    await saveCategoriesList(defaultCats);
+    return defaultCats;
+  }
+
+  Future<void> saveCategoriesList(List<Category> categories) async {
+    final jsonList = categories.map((c) => c.toJson()).toList();
+    await storage.setString(keyPersistentCategories, jsonEncode(jsonList));
+  }
+
+  @override
+  Future<void> saveCategory(Category category) async {
+    final current = await getCategories();
+    current.removeWhere((c) => c.id == category.id || c.name.toLowerCase() == category.name.toLowerCase());
+    current.add(category);
+    await saveCategoriesList(current);
+  }
+
+  @override
+  Future<Announcement> getAnnouncements() async {
+    return Announcement(
+      stockStatus: 'Store Operational',
+      loyaltyOffer: '10% Loyalty Cash-Back Active',
+      homeDelivery: 'Free Delivery above ₹500',
     );
   }
 }
