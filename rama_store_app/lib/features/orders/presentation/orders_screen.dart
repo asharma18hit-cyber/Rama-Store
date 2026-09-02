@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../shared/widgets/app_button.dart';
@@ -295,7 +298,7 @@ class OrdersScreen extends ConsumerWidget {
                     const SizedBox(height: 12),
                     AppButton(
                       text: 'Pay Now Online (${Formatters.formatCurrency(order.totalAmount)})',
-                      icon: Icons.payment_rounded,
+                      icon: Icons.qr_code_2_rounded,
                       height: 38,
                       onPressed: () => _openPayNowModal(context, order, ref),
                     ),
@@ -340,10 +343,15 @@ class OrdersScreen extends ConsumerWidget {
   }
 
   void _openPayNowModal(BuildContext context, OrderModel order, WidgetRef ref) {
-    String selectedMethod = 'card';
+    const merchantVpa = 'ramastore.official@icici';
+    const merchantName = 'Rama Store Inc';
+    final amountStr = order.totalAmount.toStringAsFixed(2);
+    final upiPayload = 'upi://pay?pa=$merchantVpa&pn=${Uri.encodeComponent(merchantName)}&am=$amountStr&cu=INR&tn=Order%20${order.trackingNumber}&tr=${order.trackingNumber}';
+    final qrCodeUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${Uri.encodeComponent(upiPayload)}';
+
+    String selectedMethod = 'upi';
     final cardController = TextEditingController(text: '4532 1111 2222 3333');
     final cvvController = TextEditingController(text: '123');
-    final upiController = TextEditingController(text: 'user@upi');
     bool isProcessing = false;
 
     showDialog(
@@ -353,63 +361,129 @@ class OrdersScreen extends ConsumerWidget {
         builder: (context, setModalState) {
           return AlertDialog(
             backgroundColor: AppColors.surface,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            title: Text('Pay for Order #${order.trackingNumber}', style: const TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.bold)),
-            content: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Amount to Pay: ${Formatters.formatCurrency(order.totalAmount)}', style: const TextStyle(color: AppColors.secondaryFixedDim, fontWeight: FontWeight.bold, fontSize: 14)),
-                  const SizedBox(height: 16),
-                  const Text('Select Payment Option:', style: TextStyle(color: AppColors.textSecondary, fontSize: 12, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ChoiceChip(
-                          label: const Center(child: Text('Card')),
-                          selected: selectedMethod == 'card',
-                          onSelected: (val) => setModalState(() => selectedMethod = 'card'),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            title: Row(
+              children: [
+                const Icon(Icons.payment_rounded, color: AppColors.primaryGoldLight, size: 22),
+                const SizedBox(width: 8),
+                Text('Pay for Order #${order.trackingNumber}', style: const TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.bold)),
+              ],
+            ),
+            content: SizedBox(
+              width: 360,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text('Total Amount Due: ${Formatters.formatCurrency(order.totalAmount)}',
+                        style: const TextStyle(color: AppColors.secondaryFixedDim, fontWeight: FontWeight.bold, fontSize: 15)),
+                    const SizedBox(height: 14),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ChoiceChip(
+                            label: const Center(child: Text('Scan & Pay UPI')),
+                            selected: selectedMethod == 'upi',
+                            onSelected: (val) => setModalState(() => selectedMethod = 'upi'),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: ChoiceChip(
+                            label: const Center(child: Text('Debit/Credit Card')),
+                            selected: selectedMethod == 'card',
+                            onSelected: (val) => setModalState(() => selectedMethod = 'card'),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    if (selectedMethod == 'upi') ...[
+                      // Dynamic Live Scannable UPI QR Code
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.3),
+                              blurRadius: 8,
+                            ),
+                          ],
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: CachedNetworkImage(
+                            imageUrl: qrCodeUrl,
+                            width: 170,
+                            height: 170,
+                            placeholder: (c, u) => const SizedBox(
+                              width: 170,
+                              height: 170,
+                              child: Center(child: CircularProgressIndicator()),
+                            ),
+                            errorWidget: (c, u, e) => const Icon(Icons.qr_code_2, size: 90, color: Colors.black),
+                          ),
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: ChoiceChip(
-                          label: const Center(child: Text('UPI / GPay')),
-                          selected: selectedMethod == 'upi',
-                          onSelected: (val) => setModalState(() => selectedMethod = 'upi'),
-                        ),
+                      const SizedBox(height: 10),
+                      const Text(
+                        'Scan with Google Pay, PhonePe, Paytm, BHIM or any UPI App',
+                        style: TextStyle(fontSize: 11, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          _buildUpiIntentChip('PhonePe', () async {
+                            final uri = Uri.parse('phonepe://upi/pay?pa=$merchantVpa&pn=${Uri.encodeComponent(merchantName)}&am=$amountStr&cu=INR&tn=Order%20${order.trackingNumber}');
+                            if (await canLaunchUrl(uri)) {
+                              await launchUrl(uri);
+                            } else {
+                              await launchUrl(Uri.parse(upiPayload), mode: LaunchMode.externalApplication);
+                            }
+                          }),
+                          _buildUpiIntentChip('GPay', () async {
+                            final uri = Uri.parse('gpay://upi/pay?pa=$merchantVpa&pn=${Uri.encodeComponent(merchantName)}&am=$amountStr&cu=INR&tn=Order%20${order.trackingNumber}');
+                            if (await canLaunchUrl(uri)) {
+                              await launchUrl(uri);
+                            } else {
+                              await launchUrl(Uri.parse(upiPayload), mode: LaunchMode.externalApplication);
+                            }
+                          }),
+                          _buildUpiIntentChip('Paytm', () async {
+                            final uri = Uri.parse('paytmmp://upi/pay?pa=$merchantVpa&pn=${Uri.encodeComponent(merchantName)}&am=$amountStr&cu=INR&tn=Order%20${order.trackingNumber}');
+                            if (await canLaunchUrl(uri)) {
+                              await launchUrl(uri);
+                            } else {
+                              await launchUrl(Uri.parse(upiPayload), mode: LaunchMode.externalApplication);
+                            }
+                          }),
+                        ],
+                      ),
+                    ] else ...[
+                      AppTextField(
+                        controller: cardController,
+                        label: 'Card Number',
+                        hint: '4532 1111 2222 3333',
+                      ),
+                      const SizedBox(height: 8),
+                      AppTextField(
+                        controller: cvvController,
+                        label: 'CVV',
+                        hint: '123',
                       ),
                     ],
-                  ),
-                  const SizedBox(height: 16),
-                  if (selectedMethod == 'card') ...[
-                    AppTextField(
-                      controller: cardController,
-                      label: 'Card Number',
-                      hint: '4532 1111 2222 3333',
-                    ),
-                    const SizedBox(height: 8),
-                    AppTextField(
-                      controller: cvvController,
-                      label: 'CVV',
-                      hint: '123',
-                    ),
-                  ] else ...[
-                    AppTextField(
-                      controller: upiController,
-                      label: 'UPI ID',
-                      hint: 'user@upi',
-                    ),
                   ],
-                ],
+                ),
               ),
             ),
             actions: [
               TextButton(
                 onPressed: isProcessing ? null : () => Navigator.pop(dialogContext),
-                child: const Text('Cancel', style: TextStyle(color: AppColors.textPrimary)),
+                child: const Text('Cancel', style: TextStyle(color: AppColors.textMuted)),
               ),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
@@ -425,7 +499,6 @@ class OrdersScreen extends ConsumerWidget {
                               order.trackingNumber,
                               selectedMethod == 'card' ? 'Card' : 'UPI',
                               cardNumber: cardController.text,
-                              upiId: upiController.text,
                             );
                         ref.refresh(ordersFutureProvider);
                         if (context.mounted) {
@@ -440,11 +513,26 @@ class OrdersScreen extends ConsumerWidget {
                       },
                 child: isProcessing
                     ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                    : Text('Pay ${Formatters.formatCurrency(order.totalAmount)}'),
+                    : Text(selectedMethod == 'upi' ? 'I Have Completed Payment' : 'Pay ${Formatters.formatCurrency(order.totalAmount)}'),
               ),
             ],
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildUpiIntentChip(String label, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: AppColors.surfaceLight,
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(color: AppColors.primaryGold.withValues(alpha: 0.3)),
+        ),
+        child: Text(label, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.primaryGoldLight)),
       ),
     );
   }
