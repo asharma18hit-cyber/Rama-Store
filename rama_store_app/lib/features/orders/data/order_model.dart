@@ -36,7 +36,9 @@ class OrderModel {
   final double totalAmount;
   final double taxAmount;
   final String? shippingAddress;
-  final String status; // 'Pending', 'Paid', 'Shipped', 'Delivered', 'Cancelled'
+  final String orderStatus; // 'Confirmed', 'Packed', 'Dispatched', 'Delivered', 'Cancelled'
+  final String paymentStatus; // 'Pending', 'Paid', 'Refund Pending', 'Failed'
+  final String paymentMethod; // 'COD', 'Card', 'UPI'
   final String createdAt;
   final List<OrderItem> items;
 
@@ -46,20 +48,41 @@ class OrderModel {
     required this.totalAmount,
     required this.taxAmount,
     this.shippingAddress,
-    required this.status,
+    required this.orderStatus,
+    required this.paymentStatus,
+    required this.paymentMethod,
     required this.createdAt,
     required this.items,
   });
 
+  // Backward compatibility alias
+  String get status => orderStatus;
+
+  bool get isCancellable {
+    final s = orderStatus.toLowerCase();
+    return s != 'dispatched' && s != 'out for delivery' && s != 'delivered' && s != 'cancelled';
+  }
+
+  bool get isCod => paymentMethod.toUpperCase() == 'COD';
+
   factory OrderModel.fromJson(Map<String, dynamic> json) {
-    final list = (json['items'] as List? ?? []).map((i) => OrderItem.fromJson(i is Map<String, dynamic> ? i : Map<String, dynamic>.from(i))).toList();
+    final list = (json['items'] as List? ?? [])
+        .map((i) => OrderItem.fromJson(i is Map<String, dynamic> ? i : Map<String, dynamic>.from(i)))
+        .toList();
+
+    final rawStatus = json['order_status'] ?? json['status'] ?? 'Confirmed';
+    final rawPaymentStatus = json['payment_status'] ?? (json['payment_method']?.toString().toUpperCase() == 'COD' ? 'Pending' : 'Paid');
+    final rawPaymentMethod = json['payment_method'] ?? 'Card';
+
     return OrderModel(
       id: json['id'] ?? 0,
       trackingNumber: json['tracking_number'] ?? '',
       totalAmount: (json['total_amount'] as num?)?.toDouble() ?? 0.0,
       taxAmount: (json['tax_amount'] as num?)?.toDouble() ?? 0.0,
       shippingAddress: json['shipping_address'],
-      status: json['status'] ?? 'Pending',
+      orderStatus: rawStatus,
+      paymentStatus: rawPaymentStatus,
+      paymentMethod: rawPaymentMethod,
       createdAt: json['created_at'] ?? '',
       items: list,
     );
@@ -72,9 +95,38 @@ class OrderModel {
       'total_amount': totalAmount,
       'tax_amount': taxAmount,
       'shipping_address': shippingAddress,
-      'status': status,
+      'order_status': orderStatus,
+      'status': orderStatus,
+      'payment_status': paymentStatus,
+      'payment_method': paymentMethod,
       'created_at': createdAt,
       'items': items.map((i) => i.toJson()).toList(),
     };
+  }
+
+  OrderModel copyWith({
+    int? id,
+    String? trackingNumber,
+    double? totalAmount,
+    double? taxAmount,
+    String? shippingAddress,
+    String? orderStatus,
+    String? paymentStatus,
+    String? paymentMethod,
+    String? createdAt,
+    List<OrderItem>? items,
+  }) {
+    return OrderModel(
+      id: id ?? this.id,
+      trackingNumber: trackingNumber ?? this.trackingNumber,
+      totalAmount: totalAmount ?? this.totalAmount,
+      taxAmount: taxAmount ?? this.taxAmount,
+      shippingAddress: shippingAddress ?? this.shippingAddress,
+      orderStatus: orderStatus ?? this.orderStatus,
+      paymentStatus: paymentStatus ?? this.paymentStatus,
+      paymentMethod: paymentMethod ?? this.paymentMethod,
+      createdAt: createdAt ?? this.createdAt,
+      items: items ?? this.items,
+    );
   }
 }

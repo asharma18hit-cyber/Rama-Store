@@ -66,14 +66,37 @@ class OrdersScreen extends ConsumerWidget {
   }
 
   Widget _buildOrderCard(BuildContext context, OrderModel order, WidgetRef ref) {
-    final statusColor = order.status == 'Delivered'
-        ? AppColors.success
-        : (order.status == 'Paid' || order.status == 'Shipped' ? AppColors.info : AppColors.warning);
+    final isCancelled = order.orderStatus == 'Cancelled';
+    final isCod = order.isCod;
+
+    Color orderStatusColor;
+    if (isCancelled) {
+      orderStatusColor = AppColors.error;
+    } else if (order.orderStatus == 'Delivered') {
+      orderStatusColor = AppColors.success;
+    } else if (order.orderStatus == 'Dispatched' || order.orderStatus == 'Shipped') {
+      orderStatusColor = AppColors.info;
+    } else {
+      orderStatusColor = AppColors.secondaryFixedDim;
+    }
+
+    Color paymentStatusColor;
+    String paymentBadgeText;
+    if (isCancelled) {
+      paymentStatusColor = AppColors.textMuted;
+      paymentBadgeText = isCod ? 'COD: Not Paid (₹0 Due)' : 'Refund Pending';
+    } else if (order.paymentStatus == 'Paid') {
+      paymentStatusColor = AppColors.success;
+      paymentBadgeText = 'Prepaid: Paid';
+    } else {
+      paymentStatusColor = AppColors.accentAmber;
+      paymentBadgeText = 'COD: Payment Pending';
+    }
 
     int currentStep = 1;
-    if (order.status == 'Paid' || order.status == 'Processing') currentStep = 2;
-    if (order.status == 'Shipped' || order.status == 'In Transit') currentStep = 3;
-    if (order.status == 'Delivered') currentStep = 4;
+    if (order.orderStatus == 'Packed' || order.orderStatus == 'Processing') currentStep = 2;
+    if (order.orderStatus == 'Dispatched' || order.orderStatus == 'Shipped' || order.orderStatus == 'In Transit') currentStep = 3;
+    if (order.orderStatus == 'Delivered') currentStep = 4;
 
     return HoverCard(
       child: FrostedGlassContainer(
@@ -82,6 +105,7 @@ class OrdersScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Top Row: Tracking & Status Badges
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -95,17 +119,36 @@ class OrdersScreen extends ConsumerWidget {
                     ),
                   ],
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: statusColor.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: statusColor.withValues(alpha: 0.4)),
-                  ),
-                  child: Text(
-                    order.status,
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: statusColor),
-                  ),
+                Wrap(
+                  spacing: 6,
+                  children: [
+                    // Order Status Badge
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: orderStatusColor.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: orderStatusColor.withValues(alpha: 0.4)),
+                      ),
+                      child: Text(
+                        order.orderStatus,
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: orderStatusColor),
+                      ),
+                    ),
+                    // Payment Status Badge
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: paymentStatusColor.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: paymentStatusColor.withValues(alpha: 0.4)),
+                      ),
+                      child: Text(
+                        paymentBadgeText,
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: paymentStatusColor),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -113,8 +156,33 @@ class OrdersScreen extends ConsumerWidget {
             Text(Formatters.formatDate(order.createdAt), style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
             const SizedBox(height: 16),
 
-            // Live Delivery Stepper Indicator
-            _buildLiveDeliveryStepper(currentStep),
+            // Stepper / Cancelled Banner
+            if (isCancelled)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                decoration: BoxDecoration(
+                  color: AppColors.error.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.cancel_outlined, color: AppColors.error, size: 18),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        isCod
+                            ? 'Order Cancelled — No payment was collected. Items returned to inventory.'
+                            : 'Order Cancelled — Refund is being processed.',
+                        style: const TextStyle(color: AppColors.error, fontSize: 12, fontWeight: FontWeight.w500),
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            else
+              _buildLiveDeliveryStepper(currentStep),
 
             const Divider(color: AppColors.surfaceLight, height: 24),
 
@@ -137,25 +205,102 @@ class OrdersScreen extends ConsumerWidget {
                 )),
 
             const Divider(color: AppColors.surfaceLight, height: 20),
+
+            // Bottom Bar: Amounts & Actions
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Total: ${Formatters.formatCurrency(order.totalAmount)}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.secondaryFixedDim)),
-                AppButton(
-                  text: 'Reorder',
-                  width: 100,
-                  height: 36,
-                  isOutlined: true,
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Items from order #${order.trackingNumber} reordered!')),
-                    );
-                  },
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      isCod && !isCancelled
+                          ? 'Pay on Delivery: ${Formatters.formatCurrency(order.totalAmount)}'
+                          : 'Total: ${Formatters.formatCurrency(order.totalAmount)}',
+                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.secondaryFixedDim),
+                    ),
+                    if (isCod && !isCancelled)
+                      const Text(
+                        'Cash to collect at doorstep',
+                        style: TextStyle(fontSize: 10, color: AppColors.accentAmber),
+                      ),
+                  ],
+                ),
+                Wrap(
+                  spacing: 8,
+                  children: [
+                    if (order.isCancellable)
+                      AppButton(
+                        text: 'Cancel Order',
+                        width: 120,
+                        height: 36,
+                        isOutlined: true,
+                        onPressed: () => _confirmCancelOrder(context, order, ref),
+                      ),
+                    AppButton(
+                      text: 'Reorder',
+                      width: 90,
+                      height: 36,
+                      isOutlined: true,
+                      onPressed: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Items from order #${order.trackingNumber} reordered!')),
+                        );
+                      },
+                    ),
+                  ],
                 ),
               ],
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _confirmCancelOrder(BuildContext context, OrderModel order, WidgetRef ref) {
+    final isCod = order.isCod;
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Cancel this order?', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold)),
+        content: Text(
+          isCod
+              ? 'Your Cash on Delivery order has not been dispatched yet. No payment has been collected.'
+              : 'Your prepaid order has not been dispatched yet. Cancelling will initiate your refund.',
+          style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Keep Order', style: TextStyle(color: AppColors.textPrimary)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.error,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            onPressed: () async {
+              Navigator.pop(dialogContext);
+              await ref.read(ordersRepositoryProvider).cancelOrder(order.trackingNumber);
+              ref.refresh(ordersFutureProvider);
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(isCod
+                        ? 'Your COD order #${order.trackingNumber} has been cancelled. No payment was collected.'
+                        : 'Order #${order.trackingNumber} has been cancelled.'),
+                    backgroundColor: AppColors.error,
+                  ),
+                );
+              }
+            },
+            child: const Text('Cancel Order'),
+          ),
+        ],
       ),
     );
   }

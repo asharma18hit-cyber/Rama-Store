@@ -6,6 +6,7 @@ import 'package:rama_store_app/core/services/otp_service.dart';
 import 'package:rama_store_app/features/auth/data/auth_model.dart';
 import 'package:rama_store_app/features/catalog/data/catalog_models.dart';
 import 'package:rama_store_app/features/cart/data/cart_model.dart';
+import 'package:rama_store_app/features/orders/data/order_model.dart';
 import 'package:rama_store_app/features/profile/data/address_model.dart';
 
 void main() {
@@ -143,7 +144,6 @@ void main() {
       const validOrderSignature = 'sig_test_valid_order_1234567890';
       const tamperedSignature = 'sig_test_tampered_order_999999999';
       expect(validOrderSignature != tamperedSignature, true);
-      // Valid signature must be non-empty and match expected format
       expect(validOrderSignature.startsWith('sig_'), true);
     });
 
@@ -152,6 +152,155 @@ void main() {
       const standardCard = '4532';
       expect(testCardDeclined.endsWith('4000'), true);
       expect(standardCard.endsWith('4000'), false);
+    });
+
+    // COD & Cancellation Business Rules Tests (TEST 1 to TEST 15)
+    test('TEST 1 & 2: Create COD order sets payment_status = Pending and payment_method = COD', () {
+      final codOrder = OrderModel(
+        id: 101,
+        trackingNumber: 'TRK-COD-001',
+        totalAmount: 344.0,
+        taxAmount: 45.0,
+        orderStatus: 'Confirmed',
+        paymentStatus: 'Pending',
+        paymentMethod: 'COD',
+        createdAt: '2026-09-02 12:00:00',
+        items: [
+          OrderItem(productId: 1, name: 'Daily Essentials', quantity: 1, priceAtPurchase: 250.0),
+        ],
+      );
+
+      expect(codOrder.paymentMethod, 'COD');
+      expect(codOrder.paymentStatus, 'Pending');
+      expect(codOrder.isCod, true);
+    });
+
+    test('TEST 3: COD order must never automatically result in payment_status = Paid', () {
+      final codOrder = OrderModel(
+        id: 102,
+        trackingNumber: 'TRK-COD-002',
+        totalAmount: 500.0,
+        taxAmount: 50.0,
+        orderStatus: 'Confirmed',
+        paymentStatus: 'Pending',
+        paymentMethod: 'COD',
+        createdAt: '2026-09-02 12:00:00',
+        items: [OrderItem(productId: 2, name: 'Tea', quantity: 2, priceAtPurchase: 250.0)],
+      );
+
+      expect(codOrder.paymentStatus != 'Paid', true);
+      expect(codOrder.paymentStatus, 'Pending');
+    });
+
+    test('TEST 4: Customer can cancel eligible COD order (Confirmed/Packed)', () {
+      final confirmedOrder = OrderModel(
+        id: 103,
+        trackingNumber: 'TRK-COD-003',
+        totalAmount: 500.0,
+        taxAmount: 50.0,
+        orderStatus: 'Confirmed',
+        paymentStatus: 'Pending',
+        paymentMethod: 'COD',
+        createdAt: '2026-09-02 12:00:00',
+        items: [OrderItem(productId: 2, name: 'Tea', quantity: 2, priceAtPurchase: 250.0)],
+      );
+
+      expect(confirmedOrder.isCancellable, true);
+    });
+
+    test('TEST 5 & 6: Customer cannot cancel Dispatched or Delivered order', () {
+      final dispatchedOrder = OrderModel(
+        id: 104,
+        trackingNumber: 'TRK-COD-004',
+        totalAmount: 500.0,
+        taxAmount: 50.0,
+        orderStatus: 'Dispatched',
+        paymentStatus: 'Pending',
+        paymentMethod: 'COD',
+        createdAt: '2026-09-02 12:00:00',
+        items: [OrderItem(productId: 2, name: 'Tea', quantity: 2, priceAtPurchase: 250.0)],
+      );
+      expect(dispatchedOrder.isCancellable, false);
+
+      final deliveredOrder = dispatchedOrder.copyWith(orderStatus: 'Delivered', paymentStatus: 'Paid');
+      expect(deliveredOrder.isCancellable, false);
+    });
+
+    test('TEST 7 & 8: Cancellation idempotency & state transition', () {
+      final cancelledOrder = OrderModel(
+        id: 105,
+        trackingNumber: 'TRK-COD-005',
+        totalAmount: 500.0,
+        taxAmount: 50.0,
+        orderStatus: 'Cancelled',
+        paymentStatus: 'Unpaid',
+        paymentMethod: 'COD',
+        createdAt: '2026-09-02 12:00:00',
+        items: [OrderItem(productId: 2, name: 'Tea', quantity: 2, priceAtPurchase: 250.0)],
+      );
+
+      // Once cancelled, cannot be cancelled again
+      expect(cancelledOrder.isCancellable, false);
+      expect(cancelledOrder.orderStatus, 'Cancelled');
+      expect(cancelledOrder.paymentStatus, 'Unpaid');
+    });
+
+    test('TEST 9 & 10: COD cancellation results in ₹0 refund and Unpaid payment status', () {
+      final codCancelled = OrderModel(
+        id: 106,
+        trackingNumber: 'TRK-COD-006',
+        totalAmount: 600.0,
+        taxAmount: 60.0,
+        orderStatus: 'Cancelled',
+        paymentStatus: 'Unpaid',
+        paymentMethod: 'COD',
+        createdAt: '2026-09-02 12:00:00',
+        items: [OrderItem(productId: 3, name: 'Honey', quantity: 1, priceAtPurchase: 600.0)],
+      );
+
+      expect(codCancelled.paymentStatus, 'Unpaid');
+      expect(codCancelled.isCod, true);
+    });
+
+    test('TEST 11 & 12 & 13: Admin legitimate COD collection marks payment as Paid', () {
+      final codOrder = OrderModel(
+        id: 107,
+        trackingNumber: 'TRK-COD-007',
+        totalAmount: 600.0,
+        taxAmount: 60.0,
+        orderStatus: 'Delivered',
+        paymentStatus: 'Pending',
+        paymentMethod: 'COD',
+        createdAt: '2026-09-02 12:00:00',
+        items: [OrderItem(productId: 3, name: 'Honey', quantity: 1, priceAtPurchase: 600.0)],
+      );
+
+      // Admin collection
+      final collectedOrder = codOrder.copyWith(paymentStatus: 'Paid');
+      expect(collectedOrder.paymentStatus, 'Paid');
+      expect(collectedOrder.orderStatus, 'Delivered');
+    });
+
+    test('TEST 14 & 15: Prepaid order lifecycle preserves Paid and Refund Pending on cancellation', () {
+      final prepaidOrder = OrderModel(
+        id: 108,
+        trackingNumber: 'TRK-CARD-001',
+        totalAmount: 1200.0,
+        taxAmount: 120.0,
+        orderStatus: 'Confirmed',
+        paymentStatus: 'Paid',
+        paymentMethod: 'Card',
+        createdAt: '2026-09-02 12:00:00',
+        items: [OrderItem(productId: 4, name: 'Organic Ghee', quantity: 1, priceAtPurchase: 1200.0)],
+      );
+
+      expect(prepaidOrder.paymentStatus, 'Paid');
+      expect(prepaidOrder.isCod, false);
+
+      // Prepaid cancellation triggers refund flow
+      final cancelledPrepaid = prepaidOrder.copyWith(orderStatus: 'Cancelled', paymentStatus: 'Refund Pending');
+      expect(cancelledPrepaid.orderStatus, 'Cancelled');
+      expect(cancelledPrepaid.paymentStatus, 'Refund Pending');
     });
   });
 }

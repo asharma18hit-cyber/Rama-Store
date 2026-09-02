@@ -554,6 +554,48 @@ def update_order_payment_status(db_path, tracking_number, payment_success):
             
     return True
 
+def cancel_order(db_path, tracking_number, user_id=None):
+    """Cancels an order if eligible (not dispatched/delivered) and transactionally restores inventory."""
+    with get_db_connection(db_path) as conn:
+        cursor = conn.cursor()
+        if user_id:
+            cursor.execute("SELECT id, status, customer_id FROM orders WHERE tracking_number = ? AND customer_id = ?", (tracking_number, user_id))
+        else:
+            cursor.execute("SELECT id, status, customer_id FROM orders WHERE tracking_number = ?", (tracking_number,))
+            
+        order_row = cursor.fetchone()
+        if not order_row:
+            raise ValueError(f"Order '{tracking_number}' not found.")
+            
+        order = dict(order_row)
+        current_status = order['status']
+        
+        if current_status in ['Dispatched', 'Delivered']:
+            raise ValueError("Order cannot be cancelled after dispatch or delivery.")
+            
+        if current_status == 'Cancelled':
+            return True  # Idempotent
+            
+        # Restore reserved inventory
+        cursor.execute("SELECT product_id, quantity FROM order_items WHERE order_id = ?", (order['id'],))
+        for item in cursor.fetchall():
+            cursor.execute("UPDATE products SET stock = stock + ? WHERE id = ?", (item['quantity'], item['product_id']))
+            
+        cursor.execute("UPDATE orders SET status = 'Cancelled' WHERE id = ?", (order['id'],))
+        return True
+
+def admin_collect_cod_payment(db_path, tracking_number):
+    """Admin authorized workflow to mark COD payment as collected."""
+    with get_db_connection(db_path) as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, status FROM orders WHERE tracking_number = ?", (tracking_number,))
+        order_row = cursor.fetchone()
+        if not order_row:
+            raise ValueError(f"Order '{tracking_number}' not found.")
+            
+        cursor.execute("UPDATE orders SET status = 'Paid' WHERE tracking_number = ?", (tracking_number,))
+        return True
+
 def get_user_orders(db_path, user_id):
     """Retrieves customer purchase orders timeline history."""
     with get_db_connection(db_path) as conn:

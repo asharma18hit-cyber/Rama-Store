@@ -348,9 +348,15 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                       sessionRes['tracking_number']?.toString() ??
                       'TRK-${DateTime.now().millisecondsSinceEpoch.toString().substring(5)}';
 
-                  // 2. Process payment (mock / sandbox API)
-                  final payCard = _selectedPaymentMethod == 'card' ? card : '4532111122223333';
-                  await checkoutRepo.processPayment(trackingNumber, payCard, '123', '12/28');
+                  // 2. Process payment for prepaid methods
+                  final isCod = _selectedPaymentMethod == 'cod';
+                  if (!isCod) {
+                    final payCard = _selectedPaymentMethod == 'card' ? card : '4532111122223333';
+                    await checkoutRepo.processPayment(trackingNumber, payCard, '123', '12/28');
+                  }
+
+                  final paymentMethodLabel = isCod ? 'COD' : (_selectedPaymentMethod == 'upi' ? 'UPI' : 'Card');
+                  final paymentStatus = isCod ? 'Pending' : 'Paid';
 
                   // 3. Persist placed order into Orders store
                   final placedOrder = OrderModel(
@@ -359,7 +365,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                     totalAmount: cartState.grandTotal,
                     taxAmount: cartState.taxAmount,
                     shippingAddress: addr,
-                    status: 'Paid',
+                    orderStatus: 'Confirmed',
+                    paymentStatus: paymentStatus,
+                    paymentMethod: paymentMethodLabel,
                     createdAt: DateTime.now().toIso8601String().substring(0, 19).replaceAll('T', ' '),
                     items: cartState.items.map((i) => OrderItem(
                       productId: i.product.id,
@@ -376,7 +384,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   if (!mounted) return;
                   setState(() => _isProcessing = false);
                   
-                  _showOrderSuccessCelebration(context, trackingNumber);
+                  _showOrderSuccessCelebration(context, trackingNumber, isCod, placedOrder.totalAmount);
                 } catch (e) {
                   if (!mounted) return;
                   setState(() => _isProcessing = false);
@@ -424,7 +432,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     );
   }
 
-  void _showOrderSuccessCelebration(BuildContext context, String trackingNumber) {
+  void _showOrderSuccessCelebration(BuildContext context, String trackingNumber, bool isCod, double totalAmount) {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -455,9 +463,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                 child: const Icon(Icons.check_rounded, color: Color(0xFF005236), size: 42),
               ),
               const SizedBox(height: 18),
-              const Text(
-                '🎉 ORDER CONFIRMED!',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: AppColors.textPrimary, letterSpacing: 0.5),
+              Text(
+                isCod ? '🎉 COD ORDER CONFIRMED!' : '🎉 PAYMENT CONFIRMED!',
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.textPrimary, letterSpacing: 0.5),
+                textAlign: TextAlign.center,
               ),
               const SizedBox(height: 6),
               Text(
@@ -468,27 +477,29 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                 decoration: BoxDecoration(
-                  color: AppColors.primaryContainer.withValues(alpha: 0.2),
+                  color: isCod ? AppColors.accentAmber.withValues(alpha: 0.15) : AppColors.primaryContainer.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.primaryContainer.withValues(alpha: 0.4)),
+                  border: Border.all(color: isCod ? AppColors.accentAmber.withValues(alpha: 0.4) : AppColors.primaryContainer.withValues(alpha: 0.4)),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
-                  children: const [
-                    Icon(Icons.stars_rounded, color: AppColors.primaryGoldLight, size: 18),
-                    SizedBox(width: 6),
+                  children: [
+                    Icon(isCod ? Icons.local_atm_rounded : Icons.check_circle_rounded, color: isCod ? AppColors.accentAmber : AppColors.primaryGoldLight, size: 18),
+                    const SizedBox(width: 6),
                     Text(
-                      '+10% Cashback Credited to Loyalty Balance',
-                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.primaryGoldLight),
+                      isCod ? 'Amount Payable on Delivery: ${Formatters.formatCurrency(totalAmount)}' : 'Payment Received: ${Formatters.formatCurrency(totalAmount)}',
+                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: isCod ? AppColors.accentAmber : AppColors.primaryGoldLight),
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: 16),
-              const Text(
-                'Your items have been locked from inventory and dispatched to our priority fulfillment team.',
+              Text(
+                isCod
+                    ? 'Your Cash on Delivery order has been registered. Cash will be collected upon doorstep delivery.'
+                    : 'Your prepaid order has been confirmed and locked for priority fulfillment.',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 12, color: AppColors.textSecondary, height: 1.4),
+                style: const TextStyle(fontSize: 12, color: AppColors.textSecondary, height: 1.4),
               ),
               const SizedBox(height: 24),
               AppButton(
