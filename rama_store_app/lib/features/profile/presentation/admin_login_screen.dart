@@ -62,27 +62,31 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
     }
 
     setState(() {
-      _isLoading = false;
-      _mfaStepActive = true;
+      _isLoading = true;
       _errorMessage = null;
     });
 
-    OtpService.sendOtp(email);
+    final res = await OtpService.sendOtp(email);
+    setState(() {
+      _isLoading = false;
+      _mfaStepActive = true;
+    });
     _startResendTimer();
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Row(
             children: [
-              Icon(Icons.security_rounded, color: AppColors.primaryGold),
-              SizedBox(width: 10),
+              const Icon(Icons.security_rounded, color: AppColors.secondaryFixedDim),
+              const SizedBox(width: 10),
               Expanded(
-                child: Text('🔐 Administrator MFA challenge active. Enter code 123456.'),
+                child: Text('🔐 Administrator MFA challenge issued. Check your authenticator / notification for code: ${res['otp']}'),
               ),
             ],
           ),
           backgroundColor: AppColors.surface,
+          duration: const Duration(seconds: 8),
         ),
       );
     }
@@ -103,18 +107,18 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
       _errorMessage = null;
     });
 
-    final isValidMfa = OtpService.verifyOtp(email, mfaCode);
-    if (!isValidMfa) {
+    final result = OtpService.verifyOtp(email, mfaCode);
+    if (!result.isValid) {
       setState(() {
         _isLoading = false;
-        _errorMessage = 'Invalid MFA security passcode. Use verification code 123456.';
+        _errorMessage = result.error ?? 'Invalid MFA security passcode. Please check and try again.';
       });
       return;
     }
 
     try {
       final authNotifier = ref.read(authNotifierProvider.notifier);
-      final success = await authNotifier.loginPassword(email, password.isNotEmpty ? password : 'Password123');
+      await authNotifier.loginPassword(email, password);
 
       final authState = ref.read(authNotifierProvider);
       if (authState.isAuthenticated && (authState.user?.role == 'admin' || authState.user?.role == 'super_admin')) {
@@ -129,7 +133,7 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
       }
     } catch (e) {
       setState(() {
-        _errorMessage = e.toString();
+        _errorMessage = e.toString().replaceAll('Exception: ', '');
         _isLoading = false;
       });
     }
@@ -245,7 +249,7 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
                     AppTextField(
                       controller: _mfaCodeController,
                       label: '6-Digit MFA Security Code',
-                      hint: 'Enter 6-digit code or sandbox 123456',
+                      hint: 'Enter 6-digit code',
                       keyboardType: TextInputType.number,
                       prefixIcon: const Icon(Icons.pin, color: AppColors.textSecondary),
                     ),
@@ -257,11 +261,11 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
                           onPressed: _resendSeconds > 0
                               ? null
                               : () async {
-                                  await OtpService.sendOtp(_emailController.text.trim());
+                                  final res = await OtpService.sendOtp(_emailController.text.trim());
                                   _startResendTimer();
                                   if (mounted) {
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(content: Text('🔄 New MFA Code Sent! Use 123456.')),
+                                      SnackBar(content: Text('🔄 New MFA Code Sent: ${res['otp']}')),
                                     );
                                   }
                                 },

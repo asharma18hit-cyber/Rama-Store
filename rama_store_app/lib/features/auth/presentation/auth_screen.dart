@@ -39,7 +39,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
   final _forgotNewPassController = TextEditingController();
 
   bool _rememberDevice = true;
-  bool _requireMfa = true; // Enterprise default: Credentials with MFA
+  bool _requireMfa = true;
   bool _mfaStepActive = false;
   bool _otpSentForLogin = false;
   bool _otpSentForReg = false;
@@ -218,7 +218,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
           AppTextField(
             controller: _mfaCodeController,
             label: '6-Digit MFA Security Code',
-            hint: 'Enter 6-digit code or sandbox 123456',
+            hint: 'Enter 6-digit code',
             keyboardType: TextInputType.number,
             prefixIcon: const Icon(Icons.security_rounded, color: AppColors.textSecondary),
           ),
@@ -239,15 +239,15 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
                 );
                 return;
               }
-              final isValid = OtpService.verifyOtp(_loginIdentifierController.text.trim(), code);
-              if (isValid) {
+              final result = OtpService.verifyOtp(_loginIdentifierController.text.trim(), code);
+              if (result.isValid) {
                 ref.read(authNotifierProvider.notifier).loginPassword(
                       _loginIdentifierController.text.trim(),
                       _loginPasswordController.text,
                     );
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Invalid MFA security code. Try sandbox code 123456.'), backgroundColor: AppColors.error),
+                  SnackBar(content: Text(result.error ?? 'Invalid MFA security code. Please check and try again.'), backgroundColor: AppColors.error),
                 );
               }
             },
@@ -310,7 +310,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
         AppButton(
           text: _requireMfa ? 'Proceed to 2-Step MFA Challenge' : 'Sign In to Store',
           isLoading: authState.isLoading,
-          onPressed: () {
+          onPressed: () async {
             final id = _loginIdentifierController.text.trim();
             final pass = _loginPasswordController.text;
             if (id.isEmpty || pass.isEmpty) {
@@ -321,15 +321,18 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
             }
 
             if (_requireMfa) {
-              OtpService.sendOtp(id);
+              final res = await OtpService.sendOtp(id);
               _startResendTimer();
               setState(() => _mfaStepActive = true);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('🔐 2-Factor Authentication challenge dispatched. Enter code 123456.'),
-                  backgroundColor: AppColors.surface,
-                ),
-              );
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('🔐 2-Factor Authentication challenge dispatched: ${res['otp']}'),
+                    backgroundColor: AppColors.surface,
+                    duration: const Duration(seconds: 8),
+                  ),
+                );
+              }
             } else {
               ref.read(authNotifierProvider.notifier).loginPassword(id, pass);
             }
@@ -361,32 +364,31 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
                 );
                 return;
               }
-              await OtpService.sendOtp(id);
+              final res = await OtpService.sendOtp(id);
               setState(() {
                 _otpSentForLogin = true;
               });
               _startResendTimer();
               if (mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
+                  SnackBar(
                     content: Row(
                       children: [
-                        Icon(Icons.sms_rounded, color: AppColors.primaryGold),
-                        SizedBox(width: 10),
+                        const Icon(Icons.sms_rounded, color: AppColors.primaryGold),
+                        const SizedBox(width: 10),
                         Expanded(
                           child: Text(
-                            '📱 OTP Request dispatched. Enter code or use sandbox 123456.',
-                            style: TextStyle(fontWeight: FontWeight.bold),
+                            '📱 OTP code sent: ${res['otp']}',
+                            style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                         ),
                       ],
                     ),
-                    duration: Duration(seconds: 5),
+                    duration: const Duration(seconds: 8),
                     backgroundColor: AppColors.surface,
                   ),
                 );
               }
-              ref.read(authNotifierProvider.notifier).loginOtpRequest(id);
             },
           ),
         ] else ...[
@@ -412,8 +414,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
                       ),
                       const SizedBox(height: 2),
                       const Text(
-                        'Didn\'t receive SMS? Enter sandbox code 123456 or tap Resend OTP below.',
-                        style: TextStyle(color: AppColors.accentAmber, fontSize: 11, fontWeight: FontWeight.w500),
+                        'Enter the 6-digit code sent to your device to sign in.',
+                        style: TextStyle(color: AppColors.textSecondary, fontSize: 11, fontWeight: FontWeight.w500),
                       ),
                     ],
                   ),
@@ -424,7 +426,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
           AppTextField(
             controller: _otpCodeController,
             label: 'Enter 6-Digit OTP Code',
-            hint: '123456',
+            hint: 'Enter OTP',
             keyboardType: TextInputType.number,
             prefixIcon: const Icon(Icons.pin, color: AppColors.textSecondary),
           ),
@@ -436,11 +438,11 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
                 onPressed: _resendSeconds > 0
                     ? null
                     : () async {
-                        await OtpService.sendOtp(_otpPhoneController.text.trim());
+                        final res = await OtpService.sendOtp(_otpPhoneController.text.trim());
                         _startResendTimer();
                         if (mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('🔄 New OTP Sent! Use code 123456.')),
+                            SnackBar(content: Text('🔄 New OTP Sent: ${res['otp']}')),
                           );
                         }
                       },
@@ -467,7 +469,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
                 );
                 return;
               }
-              ref.read(authNotifierProvider.notifier).loginOtpVerify(code);
+              ref.read(authNotifierProvider.notifier).loginOtpVerify(_otpPhoneController.text.trim(), code);
             },
           ),
         ],
@@ -515,12 +517,19 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
                 );
                 return;
               }
-              await OtpService.sendOtp(email);
+              final res = await OtpService.sendOtp(email);
               setState(() {
                 _otpSentForReg = true;
               });
               _startResendTimer();
-              ref.read(authNotifierProvider.notifier).registerRequest(user, email, pass);
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('📱 Verification code dispatched: ${res['otp']}'),
+                    duration: const Duration(seconds: 8),
+                  ),
+                );
+              }
             },
           ),
         ] else ...[
@@ -546,8 +555,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
                       ),
                       const SizedBox(height: 2),
                       const Text(
-                        'Enter sandbox code 123456 or SMS code to activate your account.',
-                        style: TextStyle(color: AppColors.accentAmber, fontSize: 11, fontWeight: FontWeight.w500),
+                        'Enter the 6-digit code sent to your email/phone to activate your account.',
+                        style: TextStyle(color: AppColors.textSecondary, fontSize: 11, fontWeight: FontWeight.w500),
                       ),
                     ],
                   ),
@@ -558,7 +567,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
           AppTextField(
             controller: _regOtpController,
             label: 'Enter 6-Digit Verification Code',
-            hint: '123456',
+            hint: 'Enter OTP',
             keyboardType: TextInputType.number,
             prefixIcon: const Icon(Icons.security, color: AppColors.textSecondary),
           ),
@@ -570,11 +579,11 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
                 onPressed: _resendSeconds > 0
                     ? null
                     : () async {
-                        await OtpService.sendOtp(_regEmailController.text.trim());
+                        final res = await OtpService.sendOtp(_regEmailController.text.trim());
                         _startResendTimer();
                         if (mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('🔄 New Code Sent! Use 123456.')),
+                            SnackBar(content: Text('🔄 New Code Sent: ${res['otp']}')),
                           );
                         }
                       },
@@ -601,7 +610,11 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
                 );
                 return;
               }
-              ref.read(authNotifierProvider.notifier).registerVerify(code);
+              ref.read(authNotifierProvider.notifier).registerVerify(
+                    _regEmailController.text.trim(),
+                    code,
+                    username: _regUsernameController.text.trim(),
+                  );
             },
           ),
         ],
@@ -631,14 +644,14 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
                 );
                 return;
               }
-              await OtpService.sendOtp(id);
+              final res = await OtpService.sendOtp(id);
               setState(() {
                 _otpSentForForgot = true;
               });
               _startResendTimer();
               if (mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('📱 Password Reset Code dispatched. Use 123456.')),
+                  SnackBar(content: Text('📱 Password Reset Code dispatched: ${res['otp']}')),
                 );
               }
             },
@@ -647,7 +660,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
           AppTextField(
             controller: _forgotOtpController,
             label: 'Enter 6-Digit Reset Code',
-            hint: '123456',
+            hint: 'Enter OTP',
             keyboardType: TextInputType.number,
             prefixIcon: const Icon(Icons.pin, color: AppColors.textSecondary),
           ),
@@ -672,15 +685,15 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
                 );
                 return;
               }
-              final isValid = OtpService.verifyOtp(_forgotEmailController.text.trim(), code);
-              if (isValid) {
+              final result = OtpService.verifyOtp(_forgotEmailController.text.trim(), code);
+              if (result.isValid) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('✨ Password updated successfully! Signing you in...'), backgroundColor: AppColors.success),
                 );
                 ref.read(authNotifierProvider.notifier).loginPassword(_forgotEmailController.text.trim(), newPass);
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Invalid code. Try sandbox code 123456.'), backgroundColor: AppColors.error),
+                  SnackBar(content: Text(result.error ?? 'Invalid code. Please check and try again.'), backgroundColor: AppColors.error),
                 );
               }
             },

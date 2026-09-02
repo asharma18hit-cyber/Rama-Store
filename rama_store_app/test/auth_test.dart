@@ -19,15 +19,15 @@ class MockAuthRepository implements AuthRepository {
 
   @override
   Future<Map<String, dynamic>> registerRequest(String username, String email, String password) async {
-    return {'message': 'OTP Sent', 'otp_sent': true, 'debug_otp': '123456'};
+    return {'message': 'OTP Sent', 'otp_sent': true};
   }
 
   @override
-  Future<AuthUser> registerVerify(String otp) async {
-    if (otp == '123456') {
-      return AuthUser(emailOrPhone: 'newuser@example.com', fullname: 'New User', role: 'customer');
+  Future<AuthUser> registerVerify(String email, String otp, {String? username}) async {
+    if (otp == '987654') {
+      return AuthUser(emailOrPhone: email, fullname: username ?? 'New User', role: 'customer');
     }
-    throw Exception('Invalid verification code');
+    throw Exception('Incorrect OTP. Please check and try again.');
   }
 
   @override
@@ -36,8 +36,8 @@ class MockAuthRepository implements AuthRepository {
   }
 
   @override
-  Future<AuthUser> loginOtpVerify(String otp) async {
-    return AuthUser(emailOrPhone: 'otpuser@example.com', fullname: 'OTP User', role: 'customer');
+  Future<AuthUser> loginOtpVerify(String emailOrPhone, String otp) async {
+    return AuthUser(emailOrPhone: emailOrPhone, fullname: 'OTP User', role: 'customer');
   }
 
   @override
@@ -54,7 +54,7 @@ class MockAuthRepository implements AuthRepository {
   }
 
   @override
-  Future<void> adminLoginVerify(String otp) async {}
+  Future<void> adminLoginVerify(String emailOrPhone, String otp) async {}
 
   @override
   Future<void> logout() async {}
@@ -89,10 +89,10 @@ void main() {
       expect(authNotifier.state.errorMessage != null, true);
     });
 
-    test('Registration request sets pending OTP state', () async {
+    test('Registration request sets info message', () async {
       final ok = await authNotifier.registerRequest('johndoe', 'john@example.com', 'Password123');
       expect(ok, true);
-      expect(authNotifier.state.pendingOtp, '123456');
+      expect(authNotifier.state.infoMessage, 'OTP Sent');
     });
 
     test('Logout resets authenticated state', () async {

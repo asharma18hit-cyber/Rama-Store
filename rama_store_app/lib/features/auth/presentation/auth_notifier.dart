@@ -7,14 +7,12 @@ class AuthState {
   final bool isLoading;
   final String? errorMessage;
   final String? infoMessage;
-  final String? pendingOtp; // For debug display if present
 
   AuthState({
     this.user,
     this.isLoading = false,
     this.errorMessage,
     this.infoMessage,
-    this.pendingOtp,
   });
 
   bool get isAuthenticated => user != null;
@@ -24,7 +22,6 @@ class AuthState {
     bool? isLoading,
     String? errorMessage,
     String? infoMessage,
-    String? pendingOtp,
     bool clearUser = false,
   }) {
     return AuthState(
@@ -32,7 +29,6 @@ class AuthState {
       isLoading: isLoading ?? this.isLoading,
       errorMessage: errorMessage,
       infoMessage: infoMessage,
-      pendingOtp: pendingOtp ?? this.pendingOtp,
     );
   }
 }
@@ -61,7 +57,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       state = state.copyWith(user: user, isLoading: false, infoMessage: 'Welcome back, ${user.fullname}!');
       return true;
     } catch (e) {
-      state = state.copyWith(isLoading: false, errorMessage: e.toString());
+      state = state.copyWith(isLoading: false, errorMessage: e.toString().replaceAll('Exception: ', ''));
       return false;
     }
   }
@@ -72,24 +68,23 @@ class AuthNotifier extends StateNotifier<AuthState> {
       final res = await repository.registerRequest(username, email, password);
       state = state.copyWith(
         isLoading: false,
-        infoMessage: res['message'] ?? 'OTP sent',
-        pendingOtp: res['debug_otp']?.toString(),
+        infoMessage: res['message'] ?? 'OTP sent successfully.',
       );
       return true;
     } catch (e) {
-      state = state.copyWith(isLoading: false, errorMessage: e.toString());
+      state = state.copyWith(isLoading: false, errorMessage: e.toString().replaceAll('Exception: ', ''));
       return false;
     }
   }
 
-  Future<bool> registerVerify(String otp) async {
+  Future<bool> registerVerify(String email, String otp, {String? username}) async {
     state = state.copyWith(isLoading: true, errorMessage: null);
     try {
-      final user = await repository.registerVerify(otp);
-      state = state.copyWith(user: user, isLoading: false, infoMessage: 'Registration successful!');
+      final user = await repository.registerVerify(email, otp, username: username);
+      state = state.copyWith(user: user, isLoading: false, infoMessage: 'Registration successful! Welcome to Rama Store.');
       return true;
     } catch (e) {
-      state = state.copyWith(isLoading: false, errorMessage: e.toString());
+      state = state.copyWith(isLoading: false, errorMessage: e.toString().replaceAll('Exception: ', ''));
       return false;
     }
   }
@@ -100,24 +95,23 @@ class AuthNotifier extends StateNotifier<AuthState> {
       final res = await repository.loginOtpRequest(emailOrPhone);
       state = state.copyWith(
         isLoading: false,
-        infoMessage: res['message'] ?? 'OTP code sent',
-        pendingOtp: res['debug_otp']?.toString(),
+        infoMessage: res['message'] ?? 'OTP code sent successfully.',
       );
       return true;
     } catch (e) {
-      state = state.copyWith(isLoading: false, errorMessage: e.toString());
+      state = state.copyWith(isLoading: false, errorMessage: e.toString().replaceAll('Exception: ', ''));
       return false;
     }
   }
 
-  Future<bool> loginOtpVerify(String otp) async {
+  Future<bool> loginOtpVerify(String emailOrPhone, String otp) async {
     state = state.copyWith(isLoading: true, errorMessage: null);
     try {
-      final user = await repository.loginOtpVerify(otp);
-      state = state.copyWith(user: user, isLoading: false, infoMessage: 'Welcome!');
+      final user = await repository.loginOtpVerify(emailOrPhone, otp);
+      state = state.copyWith(user: user, isLoading: false, infoMessage: 'Authentication successful! Welcome.');
       return true;
     } catch (e) {
-      state = state.copyWith(isLoading: false, errorMessage: e.toString());
+      state = state.copyWith(isLoading: false, errorMessage: e.toString().replaceAll('Exception: ', ''));
       return false;
     }
   }
@@ -128,12 +122,11 @@ class AuthNotifier extends StateNotifier<AuthState> {
       final res = await repository.forgotPasswordRequest(emailOrPhone);
       state = state.copyWith(
         isLoading: false,
-        infoMessage: res['message'] ?? 'Reset code sent',
-        pendingOtp: res['debug_otp']?.toString(),
+        infoMessage: res['message'] ?? 'Password reset OTP sent.',
       );
       return true;
     } catch (e) {
-      state = state.copyWith(isLoading: false, errorMessage: e.toString());
+      state = state.copyWith(isLoading: false, errorMessage: e.toString().replaceAll('Exception: ', ''));
       return false;
     }
   }
@@ -142,10 +135,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
     state = state.copyWith(isLoading: true, errorMessage: null);
     try {
       await repository.resetPassword(emailOrPhone, otp, newPassword);
-      state = state.copyWith(isLoading: false, infoMessage: 'Password reset successfully! Please log in.');
+      state = state.copyWith(isLoading: false, infoMessage: 'Password reset successfully! Please sign in.');
       return true;
     } catch (e) {
-      state = state.copyWith(isLoading: false, errorMessage: e.toString());
+      state = state.copyWith(isLoading: false, errorMessage: e.toString().replaceAll('Exception: ', ''));
       return false;
     }
   }
@@ -153,6 +146,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<void> logout() async {
     state = state.copyWith(isLoading: true);
     await repository.logout();
-    state = state.copyWith(clearUser: true, isLoading: false, infoMessage: 'Logged out successfully');
+    state = state.copyWith(clearUser: true, isLoading: false, infoMessage: 'Signed out successfully.');
   }
 }
