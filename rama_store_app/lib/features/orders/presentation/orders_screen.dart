@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../shared/widgets/app_button.dart';
+import '../../../shared/widgets/app_text_field.dart';
 import '../../../shared/widgets/frosted_glass_container.dart';
 import '../../../shared/widgets/hover_card.dart';
 import '../../../shared/widgets/shimmer_loader.dart';
@@ -66,8 +67,9 @@ class OrdersScreen extends ConsumerWidget {
   }
 
   Widget _buildOrderCard(BuildContext context, OrderModel order, WidgetRef ref) {
-    final isCancelled = order.orderStatus == 'Cancelled';
+    final isCancelled = order.isCancelled;
     final isCod = order.isCod;
+    final isPaid = order.isPaid;
 
     Color orderStatusColor;
     if (isCancelled) {
@@ -84,13 +86,13 @@ class OrdersScreen extends ConsumerWidget {
     String paymentBadgeText;
     if (isCancelled) {
       paymentStatusColor = AppColors.textMuted;
-      paymentBadgeText = isCod ? 'COD: Not Paid (₹0 Due)' : 'Refund Pending';
-    } else if (order.paymentStatus == 'Paid') {
+      paymentBadgeText = isPaid ? 'Refund Pending' : 'Not Paid';
+    } else if (isPaid) {
       paymentStatusColor = AppColors.success;
-      paymentBadgeText = 'Prepaid: Paid';
+      paymentBadgeText = 'Paid';
     } else {
       paymentStatusColor = AppColors.accentAmber;
-      paymentBadgeText = 'COD: Payment Pending';
+      paymentBadgeText = 'Payment Pending';
     }
 
     int currentStep = 1;
@@ -100,7 +102,7 @@ class OrdersScreen extends ConsumerWidget {
 
     return HoverCard(
       child: FrostedGlassContainer(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(18),
         borderRadius: BorderRadius.circular(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -135,24 +137,23 @@ class OrdersScreen extends ConsumerWidget {
                         style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: orderStatusColor),
                       ),
                     ),
-                    // Payment Status Badge
+                    // Payment Method Badge
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: paymentStatusColor.withValues(alpha: 0.15),
+                        color: AppColors.surfaceLight,
                         borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: paymentStatusColor.withValues(alpha: 0.4)),
                       ),
                       child: Text(
-                        paymentBadgeText,
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: paymentStatusColor),
+                        order.paymentMethod,
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: AppColors.textPrimary),
                       ),
                     ),
                   ],
                 ),
               ],
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 4),
             Text(Formatters.formatDate(order.createdAt), style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
             const SizedBox(height: 16),
 
@@ -160,23 +161,45 @@ class OrdersScreen extends ConsumerWidget {
             if (isCancelled)
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: AppColors.error.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(10),
                   border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
                 ),
-                child: Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(Icons.cancel_outlined, color: AppColors.error, size: 18),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        isCod
-                            ? 'Order Cancelled — No payment was collected. Items returned to inventory.'
-                            : 'Order Cancelled — Refund is being processed.',
-                        style: const TextStyle(color: AppColors.error, fontSize: 12, fontWeight: FontWeight.w500),
+                    Row(
+                      children: [
+                        const Icon(Icons.cancel_outlined, color: AppColors.error, size: 18),
+                        const SizedBox(width: 8),
+                        const Text(
+                          'Order Cancelled',
+                          style: TextStyle(color: AppColors.error, fontSize: 13, fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                    if (order.cancellationReason != null) ...[
+                      const SizedBox(height: 6),
+                      Text(
+                        'Reason: ${order.cancellationReason}${order.cancellationReasonDetail != null && order.cancellationReasonDetail!.isNotEmpty ? ' (${order.cancellationReasonDetail})' : ''}',
+                        style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
                       ),
+                    ],
+                    if (order.cancelledAt != null) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        'Cancelled On: ${Formatters.formatDate(order.cancelledAt!)}',
+                        style: const TextStyle(color: AppColors.textMuted, fontSize: 11),
+                      ),
+                    ],
+                    const SizedBox(height: 4),
+                    Text(
+                      isPaid
+                          ? 'Refund Status: Refund Pending (${Formatters.formatCurrency(order.totalAmount)})'
+                          : 'Payment Status: Not Paid (₹0.00 Collected)',
+                      style: TextStyle(color: isPaid ? AppColors.accentAmber : AppColors.textMuted, fontSize: 11, fontWeight: FontWeight.w600),
                     ),
                   ],
                 ),
@@ -187,6 +210,8 @@ class OrdersScreen extends ConsumerWidget {
             const Divider(color: AppColors.surfaceLight, height: 24),
 
             // Items Summary
+            const Text('ORDER ITEMS', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.8, color: AppColors.textMuted)),
+            const SizedBox(height: 8),
             ...order.items.map((item) => Padding(
                   padding: const EdgeInsets.only(bottom: 6.0),
                   child: Row(
@@ -206,49 +231,105 @@ class OrdersScreen extends ConsumerWidget {
 
             const Divider(color: AppColors.surfaceLight, height: 20),
 
-            // Bottom Bar: Amounts & Actions
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      isCod && !isCancelled
-                          ? 'Pay on Delivery: ${Formatters.formatCurrency(order.totalAmount)}'
-                          : 'Total: ${Formatters.formatCurrency(order.totalAmount)}',
-                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.secondaryFixedDim),
-                    ),
-                    if (isCod && !isCancelled)
-                      const Text(
-                        'Cash to collect at doorstep',
-                        style: TextStyle(fontSize: 10, color: AppColors.accentAmber),
+            // Dedicated Payment Section
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: AppColors.surfaceLight),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('PAYMENT INFORMATION', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.8, color: AppColors.textMuted)),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: paymentStatusColor.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: paymentStatusColor.withValues(alpha: 0.4)),
+                        ),
+                        child: Text(
+                          paymentBadgeText,
+                          style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: paymentStatusColor),
+                        ),
                       ),
-                  ],
-                ),
-                Wrap(
-                  spacing: 8,
-                  children: [
-                    if (order.isCancellable)
-                      AppButton(
-                        text: 'Cancel Order',
-                        width: 120,
-                        height: 36,
-                        isOutlined: true,
-                        onPressed: () => _confirmCancelOrder(context, order, ref),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Payment Method:', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                      Text(isCod ? 'Cash on Delivery (COD)' : order.paymentMethod, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Total Amount:', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                      Text(Formatters.formatCurrency(order.totalAmount), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Amount Due:', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                      Text(
+                        Formatters.formatCurrency(order.amountDue),
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          color: order.amountDue > 0 ? AppColors.accentAmber : AppColors.success,
+                        ),
                       ),
+                    ],
+                  ),
+                  if (order.canPayNow) ...[
+                    const SizedBox(height: 12),
                     AppButton(
-                      text: 'Reorder',
-                      width: 90,
-                      height: 36,
-                      isOutlined: true,
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Items from order #${order.trackingNumber} reordered!')),
-                        );
-                      },
+                      text: 'Pay Now Online (${Formatters.formatCurrency(order.totalAmount)})',
+                      icon: Icons.payment_rounded,
+                      height: 38,
+                      onPressed: () => _openPayNowModal(context, order, ref),
                     ),
                   ],
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // Bottom Actions: Cancel / Reorder
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                if (order.isCancellable) ...[
+                  AppButton(
+                    text: 'Cancel Order',
+                    width: 120,
+                    height: 36,
+                    isOutlined: true,
+                    onPressed: () => _openCancelOrderReasonDialog(context, order, ref),
+                  ),
+                  const SizedBox(width: 8),
+                ],
+                AppButton(
+                  text: 'Reorder',
+                  width: 90,
+                  height: 36,
+                  isOutlined: true,
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Items from order #${order.trackingNumber} reordered!')),
+                    );
+                  },
                 ),
               ],
             ),
@@ -258,49 +339,260 @@ class OrdersScreen extends ConsumerWidget {
     );
   }
 
-  void _confirmCancelOrder(BuildContext context, OrderModel order, WidgetRef ref) {
-    final isCod = order.isCod;
+  void _openPayNowModal(BuildContext context, OrderModel order, WidgetRef ref) {
+    String selectedMethod = 'card';
+    final cardController = TextEditingController(text: '4532 1111 2222 3333');
+    final cvvController = TextEditingController(text: '123');
+    final upiController = TextEditingController(text: 'user@upi');
+    bool isProcessing = false;
+
     showDialog(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        backgroundColor: AppColors.surface,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Cancel this order?', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold)),
-        content: Text(
-          isCod
-              ? 'Your Cash on Delivery order has not been dispatched yet. No payment has been collected.'
-              : 'Your prepaid order has not been dispatched yet. Cancelling will initiate your refund.',
-          style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Keep Order', style: TextStyle(color: AppColors.textPrimary)),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.error,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-            ),
-            onPressed: () async {
-              Navigator.pop(dialogContext);
-              await ref.read(ordersRepositoryProvider).cancelOrder(order.trackingNumber);
-              ref.refresh(ordersFutureProvider);
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(isCod
-                        ? 'Your COD order #${order.trackingNumber} has been cancelled. No payment was collected.'
-                        : 'Order #${order.trackingNumber} has been cancelled.'),
-                    backgroundColor: AppColors.error,
+      barrierDismissible: false,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setModalState) {
+          return AlertDialog(
+            backgroundColor: AppColors.surface,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            title: Text('Pay for Order #${order.trackingNumber}', style: const TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.bold)),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Amount to Pay: ${Formatters.formatCurrency(order.totalAmount)}', style: const TextStyle(color: AppColors.secondaryFixedDim, fontWeight: FontWeight.bold, fontSize: 14)),
+                  const SizedBox(height: 16),
+                  const Text('Select Payment Option:', style: TextStyle(color: AppColors.textSecondary, fontSize: 12, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ChoiceChip(
+                          label: const Center(child: Text('Card')),
+                          selected: selectedMethod == 'card',
+                          onSelected: (val) => setModalState(() => selectedMethod = 'card'),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: ChoiceChip(
+                          label: const Center(child: Text('UPI / GPay')),
+                          selected: selectedMethod == 'upi',
+                          onSelected: (val) => setModalState(() => selectedMethod = 'upi'),
+                        ),
+                      ),
+                    ],
                   ),
-                );
-              }
-            },
-            child: const Text('Cancel Order'),
-          ),
-        ],
+                  const SizedBox(height: 16),
+                  if (selectedMethod == 'card') ...[
+                    AppTextField(
+                      controller: cardController,
+                      label: 'Card Number',
+                      hint: '4532 1111 2222 3333',
+                    ),
+                    const SizedBox(height: 8),
+                    AppTextField(
+                      controller: cvvController,
+                      label: 'CVV',
+                      hint: '123',
+                    ),
+                  ] else ...[
+                    AppTextField(
+                      controller: upiController,
+                      label: 'UPI ID',
+                      hint: 'user@upi',
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: isProcessing ? null : () => Navigator.pop(dialogContext),
+                child: const Text('Cancel', style: TextStyle(color: AppColors.textPrimary)),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryGold,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                ),
+                onPressed: isProcessing
+                    ? null
+                    : () async {
+                        setModalState(() => isProcessing = true);
+                        await ref.read(ordersRepositoryProvider).payOrderNow(
+                              order.trackingNumber,
+                              selectedMethod == 'card' ? 'Card' : 'UPI',
+                              cardNumber: cardController.text,
+                              upiId: upiController.text,
+                            );
+                        ref.refresh(ordersFutureProvider);
+                        if (context.mounted) {
+                          Navigator.pop(dialogContext);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Payment confirmed for order #${order.trackingNumber}!'),
+                              backgroundColor: AppColors.success,
+                            ),
+                          );
+                        }
+                      },
+                child: isProcessing
+                    ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                    : Text('Pay ${Formatters.formatCurrency(order.totalAmount)}'),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  void _openCancelOrderReasonDialog(BuildContext context, OrderModel order, WidgetRef ref) {
+    final reasons = [
+      'I ordered by mistake',
+      'I found a better price elsewhere',
+      'I no longer need the product',
+      'Delivery is taking too long',
+      'I want to change the delivery address',
+      'I want to change the payment method',
+      'I ordered the wrong product/quantity',
+      'Other',
+    ];
+
+    String? selectedReason;
+    final otherReasonController = TextEditingController();
+    bool isProcessing = false;
+    String? validationError;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setModalState) {
+          final isOther = selectedReason == 'Other';
+
+          return AlertDialog(
+            backgroundColor: AppColors.surface,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            title: const Text('Cancel Order', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: 16)),
+            content: SizedBox(
+              width: 400,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Please select a reason for cancelling this order:', style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+                    const SizedBox(height: 12),
+                    ...reasons.map((r) => RadioListTile<String>(
+                          value: r,
+                          groupValue: selectedReason,
+                          dense: true,
+                          contentPadding: EdgeInsets.zero,
+                          activeColor: AppColors.primaryGold,
+                          title: Text(r, style: const TextStyle(fontSize: 13, color: AppColors.textPrimary)),
+                          onChanged: isProcessing
+                              ? null
+                              : (val) {
+                                  setModalState(() {
+                                    selectedReason = val;
+                                    validationError = null;
+                                  });
+                                },
+                        )),
+                    if (isOther) ...[
+                      const SizedBox(height: 8),
+                      AppTextField(
+                        controller: otherReasonController,
+                        label: 'Please tell us why you want to cancel (Required)',
+                        hint: 'Enter your reason here...',
+                        maxLines: 2,
+                      ),
+                    ],
+                    if (validationError != null) ...[
+                      const SizedBox(height: 8),
+                      Text(validationError!, style: const TextStyle(color: AppColors.error, fontSize: 12)),
+                    ],
+                    const Divider(color: AppColors.surfaceLight, height: 24),
+                    // Summary before final confirmation
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: AppColors.background,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Order: #${order.trackingNumber}', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                          Text('Amount: ${Formatters.formatCurrency(order.totalAmount)}', style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                          Text(
+                            order.isPaid
+                                ? 'Refund will be initiated to your payment source.'
+                                : 'Cash on Delivery — No payment has been collected.',
+                            style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: order.isPaid ? AppColors.accentAmber : AppColors.textMuted),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: isProcessing ? null : () => Navigator.pop(dialogContext),
+                child: const Text('Keep Order', style: TextStyle(color: AppColors.textPrimary)),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.error,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                ),
+                onPressed: isProcessing
+                    ? null
+                    : () async {
+                        if (selectedReason == null) {
+                          setModalState(() => validationError = 'Please select a cancellation reason.');
+                          return;
+                        }
+                        if (selectedReason == 'Other' && otherReasonController.text.trim().isEmpty) {
+                          setModalState(() => validationError = 'Please provide a custom cancellation reason.');
+                          return;
+                        }
+
+                        setModalState(() => isProcessing = true);
+                        final reasonDetail = isOther ? otherReasonController.text.trim() : null;
+
+                        await ref.read(ordersRepositoryProvider).cancelOrder(
+                              order.trackingNumber,
+                              selectedReason!,
+                              reasonDetail: reasonDetail,
+                            );
+
+                        ref.refresh(ordersFutureProvider);
+                        if (context.mounted) {
+                          Navigator.pop(dialogContext);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(order.isPaid
+                                  ? 'Order #${order.trackingNumber} cancelled. Refund will be processed.'
+                                  : 'Order #${order.trackingNumber} cancelled. No payment was collected.'),
+                              backgroundColor: AppColors.error,
+                            ),
+                          );
+                        }
+                      },
+                child: isProcessing
+                    ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                    : const Text('Confirm Cancellation'),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

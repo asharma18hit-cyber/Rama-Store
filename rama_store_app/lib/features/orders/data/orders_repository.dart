@@ -7,7 +7,8 @@ import 'order_model.dart';
 abstract class OrdersRepository {
   Future<List<OrderModel>> getOrderHistory();
   Future<void> saveLocalOrder(OrderModel order);
-  Future<void> cancelOrder(String trackingNumber);
+  Future<void> cancelOrder(String trackingNumber, String reason, {String? reasonDetail});
+  Future<void> payOrderNow(String trackingNumber, String method, {String? cardNumber, String? upiId});
   Future<void> adminCollectCodPayment(String trackingNumber);
 }
 
@@ -35,10 +36,14 @@ class ApiOrdersRepository implements OrdersRepository {
   }
 
   @override
-  Future<void> cancelOrder(String trackingNumber) async {
+  Future<void> cancelOrder(String trackingNumber, String reason, {String? reasonDetail}) async {
+    final now = DateTime.now().toIso8601String().substring(0, 19).replaceAll('T', ' ');
     // 1. Send cancellation request to backend API if available
     try {
-      await apiClient.post('/api/orders/$trackingNumber/cancel');
+      await apiClient.post('/api/orders/$trackingNumber/cancel', data: {
+        'reason': reason,
+        'reason_detail': reasonDetail,
+      });
     } catch (_) {}
 
     // 2. Update local order status to Cancelled
@@ -46,12 +51,42 @@ class ApiOrdersRepository implements OrdersRepository {
     final index = existingOrders.indexWhere((o) => o.trackingNumber == trackingNumber);
     if (index != -1) {
       final old = existingOrders[index];
-      // For COD, payment status stays Pending (Unpaid) and refund is ₹0.
-      // For Prepaid, refund pending
-      final newPaymentStatus = old.isCod ? 'Unpaid' : 'Refund Pending';
+      // For COD unpaid, payment status becomes Unpaid and refund is None
+      // For Prepaid paid, refund is Refund Pending
+      final newPaymentStatus = old.isPaid ? 'Paid' : 'Unpaid';
+      final newRefundStatus = old.isPaid ? 'Refund Pending' : null;
       existingOrders[index] = old.copyWith(
         orderStatus: 'Cancelled',
         paymentStatus: newPaymentStatus,
+        cancellationReason: reason,
+        cancellationReasonDetail: reasonDetail,
+        cancelledAt: now,
+        refundStatus: newRefundStatus,
+      );
+      final jsonList = existingOrders.map((o) => o.toJson()).toList();
+      await storage.setString(AppConstants.keyCachedOrders, jsonEncode(jsonList));
+    }
+  }
+
+  @override
+  Future<void> payOrderNow(String trackingNumber, String method, {String? cardNumber, String? upiId}) async {
+    final now = DateTime.now().toIso8601String().substring(0, 19).replaceAll('T', ' ');
+    try {
+      await apiClient.post('/api/orders/$trackingNumber/pay-now', data: {
+        'payment_method': method,
+        'card_number': cardNumber,
+        'upi_id': upiId,
+      });
+    } catch (_) {}
+
+    final existingOrders = await _getLocalOrders();
+    final index = existingOrders.indexWhere((o) => o.trackingNumber == trackingNumber);
+    if (index != -1) {
+      final old = existingOrders[index];
+      existingOrders[index] = old.copyWith(
+        paymentStatus: 'Paid',
+        paymentMethod: method,
+        paidAt: now,
       );
       final jsonList = existingOrders.map((o) => o.toJson()).toList();
       await storage.setString(AppConstants.keyCachedOrders, jsonEncode(jsonList));
@@ -60,6 +95,7 @@ class ApiOrdersRepository implements OrdersRepository {
 
   @override
   Future<void> adminCollectCodPayment(String trackingNumber) async {
+    final now = DateTime.now().toIso8601String().substring(0, 19).replaceAll('T', ' ');
     try {
       await apiClient.post('/api/orders/$trackingNumber/collect-cod');
     } catch (_) {}
@@ -70,6 +106,7 @@ class ApiOrdersRepository implements OrdersRepository {
       final old = existingOrders[index];
       existingOrders[index] = old.copyWith(
         paymentStatus: 'Paid',
+        paidAt: now,
       );
       final jsonList = existingOrders.map((o) => o.toJson()).toList();
       await storage.setString(AppConstants.keyCachedOrders, jsonEncode(jsonList));

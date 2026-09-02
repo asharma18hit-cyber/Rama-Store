@@ -37,9 +37,14 @@ class OrderModel {
   final double taxAmount;
   final String? shippingAddress;
   final String orderStatus; // 'Confirmed', 'Packed', 'Dispatched', 'Delivered', 'Cancelled'
-  final String paymentStatus; // 'Pending', 'Paid', 'Refund Pending', 'Failed'
+  final String paymentStatus; // 'Pending', 'Paid', 'Unpaid', 'Refund Pending', 'Refunded', 'Failed'
   final String paymentMethod; // 'COD', 'Card', 'UPI'
   final String createdAt;
+  final String? cancellationReason;
+  final String? cancellationReasonDetail;
+  final String? cancelledAt;
+  final String? paidAt;
+  final String? refundStatus;
   final List<OrderItem> items;
 
   OrderModel({
@@ -52,6 +57,11 @@ class OrderModel {
     required this.paymentStatus,
     required this.paymentMethod,
     required this.createdAt,
+    this.cancellationReason,
+    this.cancellationReasonDetail,
+    this.cancelledAt,
+    this.paidAt,
+    this.refundStatus,
     required this.items,
   });
 
@@ -64,6 +74,14 @@ class OrderModel {
   }
 
   bool get isCod => paymentMethod.toUpperCase() == 'COD';
+
+  bool get isPaid => paymentStatus.toLowerCase() == 'paid';
+
+  bool get isCancelled => orderStatus.toLowerCase() == 'cancelled';
+
+  bool get canPayNow => !isPaid && !isCancelled && orderStatus.toLowerCase() != 'delivered';
+
+  double get amountDue => (isPaid || isCancelled) ? 0.0 : totalAmount;
 
   factory OrderModel.fromJson(Map<String, dynamic> json) {
     final list = (json['items'] as List? ?? [])
@@ -84,6 +102,11 @@ class OrderModel {
       paymentStatus: rawPaymentStatus,
       paymentMethod: rawPaymentMethod,
       createdAt: json['created_at'] ?? '',
+      cancellationReason: json['cancellation_reason'],
+      cancellationReasonDetail: json['cancellation_reason_detail'],
+      cancelledAt: json['cancelled_at'],
+      paidAt: json['paid_at'],
+      refundStatus: json['refund_status'],
       items: list,
     );
   }
@@ -100,6 +123,11 @@ class OrderModel {
       'payment_status': paymentStatus,
       'payment_method': paymentMethod,
       'created_at': createdAt,
+      'cancellation_reason': cancellationReason,
+      'cancellation_reason_detail': cancellationReasonDetail,
+      'cancelled_at': cancelledAt,
+      'paid_at': paidAt,
+      'refund_status': refundStatus,
       'items': items.map((i) => i.toJson()).toList(),
     };
   }
@@ -114,6 +142,11 @@ class OrderModel {
     String? paymentStatus,
     String? paymentMethod,
     String? createdAt,
+    String? cancellationReason,
+    String? cancellationReasonDetail,
+    String? cancelledAt,
+    String? paidAt,
+    String? refundStatus,
     List<OrderItem>? items,
   }) {
     return OrderModel(
@@ -126,6 +159,11 @@ class OrderModel {
       paymentStatus: paymentStatus ?? this.paymentStatus,
       paymentMethod: paymentMethod ?? this.paymentMethod,
       createdAt: createdAt ?? this.createdAt,
+      cancellationReason: cancellationReason ?? this.cancellationReason,
+      cancellationReasonDetail: cancellationReasonDetail ?? this.cancellationReasonDetail,
+      cancelledAt: cancelledAt ?? this.cancelledAt,
+      paidAt: paidAt ?? this.paidAt,
+      refundStatus: refundStatus ?? this.refundStatus,
       items: items ?? this.items,
     );
   }

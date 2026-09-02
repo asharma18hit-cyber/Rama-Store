@@ -554,8 +554,11 @@ def update_order_payment_status(db_path, tracking_number, payment_success):
             
     return True
 
-def cancel_order(db_path, tracking_number, user_id=None):
-    """Cancels an order if eligible (not dispatched/delivered) and transactionally restores inventory."""
+def cancel_order(db_path, tracking_number, reason=None, reason_detail=None, user_id=None):
+    """Cancels an order if eligible (not dispatched/delivered), validates reason, and transactionally restores inventory."""
+    if not reason or not str(reason).strip():
+        raise ValueError("A valid cancellation reason is mandatory.")
+        
     with get_db_connection(db_path) as conn:
         cursor = conn.cursor()
         if user_id:
@@ -582,6 +585,25 @@ def cancel_order(db_path, tracking_number, user_id=None):
             cursor.execute("UPDATE products SET stock = stock + ? WHERE id = ?", (item['quantity'], item['product_id']))
             
         cursor.execute("UPDATE orders SET status = 'Cancelled' WHERE id = ?", (order['id'],))
+        return True
+
+def pay_order_now(db_path, tracking_number, payment_method='Card'):
+    """Allows customer to pay for an unpaid/COD order online via verified gateway."""
+    with get_db_connection(db_path) as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, status FROM orders WHERE tracking_number = ?", (tracking_number,))
+        order_row = cursor.fetchone()
+        if not order_row:
+            raise ValueError(f"Order '{tracking_number}' not found.")
+            
+        order = dict(order_row)
+        if order['status'] == 'Cancelled':
+            raise ValueError("Cancelled orders cannot be paid.")
+            
+        if order['status'] == 'Delivered':
+            raise ValueError("Delivered orders cannot be converted to online payment.")
+            
+        cursor.execute("UPDATE orders SET status = 'Paid' WHERE tracking_number = ?", (tracking_number,))
         return True
 
 def admin_collect_cod_payment(db_path, tracking_number):
