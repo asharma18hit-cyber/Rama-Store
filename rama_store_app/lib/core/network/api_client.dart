@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
 import '../constants/app_constants.dart';
 import '../storage/local_storage_service.dart';
@@ -10,7 +11,10 @@ class ApiClient {
   final String baseUrl;
 
   ApiClient({required this.storage, String? baseUrl})
-      : baseUrl = baseUrl ?? const String.fromEnvironment('BASE_URL', defaultValue: AppConstants.defaultBaseUrl) {
+      : baseUrl = baseUrl ??
+            (kIsWeb
+                ? ''
+                : const String.fromEnvironment('BASE_URL', defaultValue: AppConstants.defaultBaseUrl)) {
     _dio = Dio(
       BaseOptions(
         baseUrl: this.baseUrl,
