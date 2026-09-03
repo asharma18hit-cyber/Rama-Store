@@ -93,9 +93,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
     state = state.copyWith(isLoading: true, errorMessage: null);
     try {
       final res = await repository.loginOtpRequest(emailOrPhone);
+      final infoMsg = res['message']?.toString() ?? 'OTP code sent successfully.';
       state = state.copyWith(
         isLoading: false,
-        infoMessage: res['message'] ?? 'OTP code sent successfully.',
+        infoMessage: infoMsg,
       );
       return true;
     } catch (e) {

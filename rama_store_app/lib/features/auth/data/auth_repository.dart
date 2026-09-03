@@ -1,3 +1,4 @@
+import 'dart:convert';
 import '../../../core/network/api_client.dart';
 import '../../../core/storage/local_storage_service.dart';
 import '../../../core/constants/app_constants.dart';
@@ -29,6 +30,23 @@ class ApiAuthRepository implements AuthRepository {
     required this.storage,
     this.useMocks = const bool.fromEnvironment('USE_MOCKS', defaultValue: false),
   });
+
+  Map<String, dynamic> _toMap(dynamic res) {
+    if (res == null) return {};
+    if (res is Map<String, dynamic>) return res;
+    if (res is Map) return Map<String, dynamic>.from(res);
+    if (res is String) {
+      final trimmed = res.trim();
+      if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
+        try {
+          final decoded = jsonDecode(trimmed);
+          if (decoded is Map) return Map<String, dynamic>.from(decoded);
+        } catch (_) {}
+      }
+      return {'message': trimmed.isNotEmpty ? trimmed : 'OTP sent via SMS.'};
+    }
+    return {};
+  }
 
   @override
   Future<AuthUser?> checkAuthStatus() async {
@@ -143,12 +161,11 @@ class ApiAuthRepository implements AuthRepository {
         final res = await apiClient.post('/api/auth/login-otp-request', data: {
           'email_or_phone': cleanInput,
         });
-        if (res != null) {
-          return {
-            'success': true,
-            'message': res['message']?.toString() ?? 'OTP sent via SMS.',
-          };
-        }
+        final map = _toMap(res);
+        return {
+          'success': true,
+          'message': map['message']?.toString() ?? 'OTP sent via SMS.',
+        };
       } catch (e) {
         throw Exception(e.toString().replaceAll('Exception: ', ''));
       }
@@ -159,7 +176,8 @@ class ApiAuthRepository implements AuthRepository {
       final res = await apiClient.post('/api/auth/login-otp-request', data: {
         'email_or_phone': cleanInput.toLowerCase(),
       });
-      return res ?? {'success': true, 'message': 'Email verification dispatched.'};
+      final map = _toMap(res);
+      return {'success': true, 'message': map['message']?.toString() ?? 'Email verification dispatched.'};
     }
   }
 
@@ -184,8 +202,18 @@ class ApiAuthRepository implements AuthRepository {
           'email_or_phone': cleanInput,
           'otp': cleanOtp,
         });
-        if (res != null && res['user'] != null) {
-          final user = AuthUser.fromJson(res['user']);
+        final map = _toMap(res);
+        final userJson = map['user'] is Map ? Map<String, dynamic>.from(map['user']) : null;
+        if (userJson != null) {
+          final user = AuthUser.fromJson(userJson);
+          await _saveUserLocal(user);
+          return user;
+        } else {
+          final user = AuthUser(
+            emailOrPhone: cleanInput,
+            fullname: 'Customer',
+            role: 'customer',
+          );
           await _saveUserLocal(user);
           return user;
         }
@@ -200,12 +228,14 @@ class ApiAuthRepository implements AuthRepository {
         'otp': cleanOtp,
       });
 
-      if (res != null && res['user'] != null) {
-        final user = AuthUser.fromJson(res['user']);
+      final map = _toMap(res);
+      final userJson = map['user'] is Map ? Map<String, dynamic>.from(map['user']) : null;
+      if (userJson != null) {
+        final user = AuthUser.fromJson(userJson);
         await _saveUserLocal(user);
         return user;
       }
-      throw Exception(res?['error'] ?? 'OTP verification failed.');
+      throw Exception(map['error']?.toString() ?? 'OTP verification failed.');
     }
   }
 
