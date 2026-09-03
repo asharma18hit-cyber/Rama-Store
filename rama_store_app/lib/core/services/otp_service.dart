@@ -58,31 +58,34 @@ class OtpService {
     return rawPhone;
   }
 
-  /// Sends real SMS OTP via Secure Backend -> MSG91 Gateway
+  static Map<String, dynamic>? _toMap(dynamic data) {
+    if (data == null) return null;
+    if (data is Map<String, dynamic>) return data;
+    if (data is Map) return Map<String, dynamic>.from(data);
+    return null;
+  }
+
+  /// Dispatches SMS OTP via Secure Backend Gateway using MSG91
   static Future<OtpSendResult> sendOtp(String identifier, {required ApiClient apiClient}) async {
     final cleanId = identifier.trim();
     if (cleanId.isEmpty) {
       return const OtpSendResult(
         isSuccess: false,
-        errorMessage: 'Please enter a valid mobile number or email address.',
+        errorMessage: 'Please enter a valid mobile number or email.',
       );
     }
 
-    // Client-side rate limiting (30-second cooldown)
     final now = DateTime.now();
     final lastSent = _lastSentTimestamps[cleanId];
-    if (lastSent != null) {
-      final elapsed = now.difference(lastSent).inSeconds;
-      if (elapsed < 30) {
-        return OtpSendResult(
-          isSuccess: false,
-          errorMessage: 'Please wait ${30 - elapsed}s before requesting a new OTP.',
-          cooldownRemaining: 30 - elapsed,
-        );
-      }
+    if (lastSent != null && now.difference(lastSent).inSeconds < 30) {
+      final remaining = 30 - now.difference(lastSent).inSeconds;
+      return OtpSendResult(
+        isSuccess: false,
+        errorMessage: 'Please wait ${remaining}s before requesting a new code.',
+        cooldownRemaining: remaining,
+      );
     }
 
-    // Indian Phone Authentication via MSG91
     if (!cleanId.contains('@')) {
       final formattedPhone = formatPhoneNumber(cleanId);
       final digits = formattedPhone.replaceAll(RegExp(r'\D'), '');
@@ -98,16 +101,17 @@ class OtpService {
           'phone': formattedPhone,
         }).timeout(const Duration(seconds: 15));
 
-        if (res != null && res['success'] == true) {
+        final data = _toMap(res);
+        if (data != null && data['success'] == true) {
           _lastSentTimestamps[cleanId] = now;
           return OtpSendResult(
             isSuccess: true,
-            message: res['message'] ?? 'OTP sent via SMS.',
+            message: data['message']?.toString() ?? 'OTP sent via SMS.',
           );
         } else {
           return OtpSendResult(
             isSuccess: false,
-            errorMessage: res?['message'] ?? res?['error'] ?? 'Failed to send SMS OTP.',
+            errorMessage: data?['message']?.toString() ?? data?['error']?.toString() ?? 'Failed to send SMS OTP.',
           );
         }
       } catch (e) {
@@ -135,7 +139,7 @@ class OtpService {
     if (code.isEmpty || code.length != 6) {
       return const OtpVerificationResult(
         isValid: false,
-        error: 'Please enter the complete 6-digit OTP code.',
+        error: 'Please enter a valid 6-digit verification code.',
       );
     }
 
@@ -148,9 +152,10 @@ class OtpService {
           'otp': code,
         }).timeout(const Duration(seconds: 15));
 
-        if (res != null && res['success'] == true) {
+        final data = _toMap(res);
+        if (data != null && data['success'] == true) {
           _lastSentTimestamps.remove(cleanId);
-          final userJson = res['user'];
+          final userJson = _toMap(data['user']);
           final user = userJson != null ? AuthUser.fromJson(userJson) : AuthUser(
             emailOrPhone: formattedPhone,
             fullname: 'Customer',
@@ -163,7 +168,7 @@ class OtpService {
         } else {
           return OtpVerificationResult(
             isValid: false,
-            error: res?['message'] ?? res?['error'] ?? 'Incorrect OTP. Please check SMS and try again.',
+            error: data?['message']?.toString() ?? data?['error']?.toString() ?? 'Incorrect OTP. Please check SMS and try again.',
           );
         }
       } catch (e) {
@@ -190,16 +195,17 @@ class OtpService {
         'phone': formattedPhone,
       }).timeout(const Duration(seconds: 15));
 
-      if (res != null && res['success'] == true) {
+      final data = _toMap(res);
+      if (data != null && data['success'] == true) {
         _lastSentTimestamps[cleanId] = DateTime.now();
         return OtpSendResult(
           isSuccess: true,
-          message: res['message'] ?? 'New OTP sent via SMS.',
+          message: data['message']?.toString() ?? 'New OTP sent via SMS.',
         );
       } else {
         return OtpSendResult(
           isSuccess: false,
-          errorMessage: res?['message'] ?? 'Failed to resend OTP.',
+          errorMessage: data?['message']?.toString() ?? 'Failed to resend OTP.',
         );
       }
     } catch (e) {
@@ -225,8 +231,9 @@ class OtpService {
         'access_token': token,
       }).timeout(const Duration(seconds: 15));
 
-      if (res != null && res['success'] == true) {
-        final userJson = res['user'];
+      final data = _toMap(res);
+      if (data != null && data['success'] == true) {
+        final userJson = _toMap(data['user']);
         final user = userJson != null ? AuthUser.fromJson(userJson) : null;
         return OtpVerificationResult(
           isValid: true,
@@ -235,7 +242,7 @@ class OtpService {
       } else {
         return OtpVerificationResult(
           isValid: false,
-          error: res?['message'] ?? 'Invalid or expired MSG91 access token.',
+          error: data?['message']?.toString() ?? 'Invalid or expired MSG91 access token.',
         );
       }
     } catch (e) {
