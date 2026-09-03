@@ -208,15 +208,8 @@ class ApiAuthRepository implements AuthRepository {
           final user = AuthUser.fromJson(userJson);
           await _saveUserLocal(user);
           return user;
-        } else {
-          final user = AuthUser(
-            emailOrPhone: cleanInput,
-            fullname: 'Customer',
-            role: 'customer',
-          );
-          await _saveUserLocal(user);
-          return user;
         }
+        throw Exception(map['error']?.toString() ?? map['message']?.toString() ?? 'Invalid verification code. Please check your SMS and try again.');
       } catch (e) {
         throw Exception(e.toString().replaceAll('Exception: ', ''));
       }

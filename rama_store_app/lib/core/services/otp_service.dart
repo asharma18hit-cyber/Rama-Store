@@ -176,24 +176,25 @@ class OtpService {
         }
 
         final data = _toMap(res);
-        if (data != null && (data['success'] == true || data.containsKey('user'))) {
+        final userJson = _toMap(data?['user']);
+        if (data != null && (data['success'] == true || userJson != null)) {
           _lastSentTimestamps.remove(cleanId);
-          final userJson = _toMap(data['user']);
-          final user = userJson != null ? AuthUser.fromJson(userJson) : AuthUser(
-            emailOrPhone: formattedPhone,
-            fullname: 'Customer',
-            role: 'customer',
-          );
-          return OtpVerificationResult(
-            isValid: true,
-            user: user,
-          );
-        } else {
-          return OtpVerificationResult(
-            isValid: false,
-            error: data?['message']?.toString() ?? data?['error']?.toString() ?? 'Incorrect OTP. Please check SMS and try again.',
-          );
+          if (userJson != null) {
+            final user = AuthUser.fromJson(userJson);
+            return OtpVerificationResult(
+              isValid: true,
+              user: user,
+            );
+          } else if (data['success'] == true) {
+            return const OtpVerificationResult(
+              isValid: true,
+            );
+          }
         }
+        return OtpVerificationResult(
+          isValid: false,
+          error: data?['message']?.toString() ?? data?['error']?.toString() ?? 'Incorrect OTP. Please check SMS and try again.',
+        );
       } catch (e) {
         return OtpVerificationResult(
           isValid: false,
