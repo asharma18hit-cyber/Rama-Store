@@ -34,6 +34,9 @@ class Msg91WidgetService {
       if (res.isSuccess) {
         return res;
       }
+      if (res.errorMessage != 'Widget not initialized' && res.errorMessage != 'Non-web platform') {
+        return res;
+      }
     }
 
     // Direct backend dispatch

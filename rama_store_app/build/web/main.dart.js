@@ -31741,7 +31741,7 @@ d=o.pop()
 k=A.a0(d)
 g=J.c0(k)
 j=A.ci(g,"Exception: ","")
-g=J.hZ(j,"503")||J.hZ(j,"unconfigured")?"SMS provider is currently being configured on the server. Please sign in with password.":"Network error communicating with SMS gateway: "+A.n(j)
+g=J.hZ(j,"503")||J.hZ(j,"unconfigured")?"SMS provider is currently being configured on the server. Please sign in with password.":j
 q=new A.fW(!1,null,g)
 s=1
 break
@@ -34333,15 +34333,18 @@ b=o}s=b+2
 if(p===s)return s
 if(a.charCodeAt(s)!==47)return q
 return b+3},
-aq6(a,b){var s=0,r=A.v(t.jV),q,p,o
+aq6(a,b){var s=0,r=A.v(t.jV),q,p,o,n
 var $async$aq6=A.q(function(c,d){if(c===1)return A.r(d,r)
-for(;;)switch(s){case 0:p=A.Vy(a)
+for(;;)switch(s){case 0:o=A.Vy(a)
 s=3
-return A.m(A.aVb(p),$async$aq6)
-case 3:o=d
-if(o.a){q=o
+return A.m(A.aVb(o),$async$aq6)
+case 3:n=d
+if(n.a){q=n
 s=1
-break}q=A.arz(p,b)
+break}p=n.c
+if(p!=="Widget not initialized"&&p!=="Non-web platform"){q=n
+s=1
+break}q=A.arz(o,b)
 s=1
 break
 case 1:return A.t(q,r)}})

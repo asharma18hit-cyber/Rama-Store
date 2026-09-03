@@ -116,7 +116,7 @@ class OtpService {
           isSuccess: false,
           errorMessage: msg.contains('503') || msg.contains('unconfigured')
               ? 'SMS provider is currently being configured on the server. Please sign in with password.'
-              : 'Network error communicating with SMS gateway: $msg',
+              : msg,
         );
       }
     }
