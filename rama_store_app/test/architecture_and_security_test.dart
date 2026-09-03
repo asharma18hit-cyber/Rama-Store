@@ -104,6 +104,7 @@ void main() {
       expect(OtpService.formatPhoneNumber('9876543210'), '+919876543210');
       expect(OtpService.formatPhoneNumber('919876543210'), '+919876543210');
       expect(OtpService.formatPhoneNumber('+919876543210'), '+919876543210');
+      expect(OtpService.maskPhoneNumber('9876543210'), '+91 98*** **210');
     });
 
     test('Server-authoritative price validation ignoring manipulated price input', () {

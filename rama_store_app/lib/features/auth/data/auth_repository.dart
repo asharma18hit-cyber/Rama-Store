@@ -75,7 +75,6 @@ class ApiAuthRepository implements AuthRepository {
         throw Exception(res?['error'] ?? res?['message'] ?? 'Invalid email/phone or password.');
       }
     } catch (e) {
-      // Production Strict: Re-throw real error, NEVER fabricate local user
       final msg = e.toString().replaceAll('Exception: ', '');
       if (msg.contains('401') || msg.contains('Invalid')) {
         throw Exception('Invalid email/phone or password. Please check your credentials.');
@@ -127,14 +126,14 @@ class ApiAuthRepository implements AuthRepository {
     final cleanInput = emailOrPhone.trim();
 
     if (!cleanInput.contains('@')) {
-      // Real Phone OTP via Firebase Authentication
-      final result = await OtpService.sendOtp(cleanInput);
+      // Real Phone OTP via Backend MSG91
+      final result = await OtpService.sendOtp(cleanInput, apiClient: apiClient);
       if (!result.isSuccess) {
         throw Exception(result.errorMessage ?? 'Failed to send SMS OTP.');
       }
       return {
         'success': true,
-        'message': result.message ?? 'OTP code sent via SMS.',
+        'message': result.message ?? 'OTP sent via SMS.',
       };
     } else {
       // Backend email request
@@ -151,16 +150,14 @@ class ApiAuthRepository implements AuthRepository {
     final cleanOtp = otp.trim();
 
     if (!cleanInput.contains('@')) {
-      // Verify Real Phone OTP with Firebase
-      final result = await OtpService.verifyOtp(cleanInput, cleanOtp);
+      // Real Phone OTP verification via Backend MSG91
+      final result = await OtpService.verifyOtp(cleanInput, cleanOtp, apiClient: apiClient);
       if (!result.isValid) {
         throw Exception(result.error ?? 'Invalid SMS code. Please try again.');
       }
 
-      // Synchronize with backend or generate verified customer session
-      final phone = result.credential?.user?.phoneNumber ?? cleanInput;
-      final user = AuthUser(
-        emailOrPhone: phone,
+      final user = result.user ?? AuthUser(
+        emailOrPhone: OtpService.formatPhoneNumber(cleanInput),
         fullname: 'Customer',
         role: 'customer',
       );

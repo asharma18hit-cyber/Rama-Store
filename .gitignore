@@ -1,0 +1,11 @@
+.env
+.env.local
+*.pyc
+__pycache__/
+app/__pycache__/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
