@@ -55,10 +55,14 @@ class ApiClient {
 
     final response = error.response;
     if (response != null) {
-      final data = response.data;
+      final data = _normalizeData(response.data);
       String message = 'An unexpected error occurred.';
-      if (data is Map && data.containsKey('error')) {
-        message = data['error'].toString();
+      if (data is Map) {
+        if (data.containsKey('message') && data['message'] != null && data['message'].toString().isNotEmpty) {
+          message = data['message'].toString();
+        } else if (data.containsKey('error') && data['error'] != null && data['error'].toString().isNotEmpty) {
+          message = data['error'].toString();
+        }
       }
 
       if (response.statusCode == 401) {

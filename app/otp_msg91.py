@@ -147,27 +147,39 @@ def send_msg91_otp(raw_phone):
     otp_length = os.environ.get('MSG91_OTP_LENGTH', '6').strip()
 
     if not auth_key:
-        # Honest reporting: MSG91 is unconfigured on server
         return {
             "success": False,
-            "message": "MSG91 SMS provider is not configured on the production server (Missing MSG91_AUTH_KEY in environment variables)."
+            "message": "MSG91_AUTH_KEY is missing in Render environment variables."
         }, 503
+
+    if not template_id:
+        return {
+            "success": False,
+            "message": "MSG91_TEMPLATE_ID is missing in Render environment variables. Please add your MSG91 DLT Template ID."
+        }, 400
 
     headers = {
         "authkey": auth_key
     }
     
+    params = {
+        "template_id": template_id,
+        "mobile": msg91,
+        "authkey": auth_key,
+        "otp_expiry": otp_expiry,
+        "otp_length": otp_length
+    }
+
     payload = {
+        "template_id": template_id,
         "mobile": msg91,
         "otp_expiry": otp_expiry,
         "otp_length": int(otp_length) if otp_length.isdigit() else 6
     }
-    if template_id:
-        payload["template_id"] = template_id
 
-    status_code, data = _http_request(MSG91_SEND_OTP_URL, method='POST', headers=headers, body=payload, timeout=10)
+    status_code, data = _http_request(MSG91_SEND_OTP_URL, method='POST', headers=headers, body=payload, params=params, timeout=10)
 
-    if status_code == 200 and (data.get('type') == 'success' or 'successfully' in data.get('message', '').lower()):
+    if status_code == 200 and (data.get('type') == 'success' or 'successfully' in data.get('message', '').lower() or 'otp sent' in data.get('message', '').lower()):
         _rate_limits[msg91] = now
         _attempt_tracker[msg91] = 0
         return {
@@ -179,7 +191,7 @@ def send_msg91_otp(raw_phone):
         err_msg = data.get('message') or data.get('error') or f"MSG91 error code {status_code}"
         return {
             "success": False,
-            "message": f"Failed to deliver SMS: {err_msg}"
+            "message": f"{err_msg}"
         }, 400
 
 def verify_msg91_otp(raw_phone, otp_code):
