@@ -146,11 +146,11 @@ def send_msg91_otp(raw_phone):
     otp_expiry = os.environ.get('MSG91_OTP_EXPIRY', '5').strip()
     otp_length = os.environ.get('MSG91_OTP_LENGTH', '6').strip()
 
-    if not auth_key or not template_id:
+    if not auth_key:
         # Honest reporting: MSG91 is unconfigured on server
         return {
             "success": False,
-            "message": "MSG91 SMS provider is not configured on the production server (Missing MSG91_AUTH_KEY or MSG91_TEMPLATE_ID in environment variables)."
+            "message": "MSG91 SMS provider is not configured on the production server (Missing MSG91_AUTH_KEY in environment variables)."
         }, 503
 
     headers = {
@@ -158,11 +158,12 @@ def send_msg91_otp(raw_phone):
     }
     
     payload = {
-        "template_id": template_id,
         "mobile": msg91,
         "otp_expiry": otp_expiry,
         "otp_length": int(otp_length) if otp_length.isdigit() else 6
     }
+    if template_id:
+        payload["template_id"] = template_id
 
     status_code, data = _http_request(MSG91_SEND_OTP_URL, method='POST', headers=headers, body=payload, timeout=10)
 
