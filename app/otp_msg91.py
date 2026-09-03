@@ -2,7 +2,10 @@
 import os
 import re
 import time
-import requests
+import json
+import urllib.request
+import urllib.parse
+import urllib.error
 
 MSG91_SEND_OTP_URL = "https://control.msg91.com/api/v5/otp"
 MSG91_VERIFY_OTP_URL = "https://control.msg91.com/api/v5/otp/verify"
@@ -35,6 +38,37 @@ def normalize_indian_phone(raw_phone):
     
     return None, None
 
+def _http_request(url, method='GET', headers=None, body=None, params=None, timeout=12):
+    if params:
+        query_string = urllib.parse.urlencode(params)
+        url = f"{url}?{query_string}" if '?' not in url else f"{url}&{query_string}"
+
+    req_headers = headers or {}
+    data = None
+    if body is not None:
+        data = json.dumps(body).encode('utf-8')
+        req_headers['Content-Type'] = 'application/json'
+
+    req = urllib.request.Request(url, data=data, headers=req_headers, method=method)
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as response:
+            status_code = response.getcode()
+            content = response.read().decode('utf-8')
+            try:
+                parsed_json = json.loads(content)
+            except Exception:
+                parsed_json = {"raw": content}
+            return status_code, parsed_json
+    except urllib.error.HTTPError as e:
+        error_content = e.read().decode('utf-8') if e.fp else ''
+        try:
+            parsed_json = json.loads(error_content)
+        except Exception:
+            parsed_json = {"error": error_content or str(e)}
+        return e.code, parsed_json
+    except Exception as e:
+        return 500, {"error": str(e)}
+
 def send_msg91_otp(raw_phone):
     """
     Dispatches production SMS OTP via MSG91 official Send OTP v5 API.
@@ -59,7 +93,7 @@ def send_msg91_otp(raw_phone):
 
     auth_key = os.environ.get('MSG91_AUTH_KEY', '').strip()
     template_id = os.environ.get('MSG91_TEMPLATE_ID', '').strip()
-    otp_expiry = os.environ.get('MSG91_OTP_EXPIRY', '5').strip() # minutes (or seconds per MSG91 config)
+    otp_expiry = os.environ.get('MSG91_OTP_EXPIRY', '5').strip()
     otp_length = os.environ.get('MSG91_OTP_LENGTH', '6').strip()
 
     if not auth_key or not template_id:
@@ -70,8 +104,7 @@ def send_msg91_otp(raw_phone):
         }, 503
 
     headers = {
-        "authkey": auth_key,
-        "Content-Type": "application/json"
+        "authkey": auth_key
     }
     
     payload = {
@@ -81,36 +114,22 @@ def send_msg91_otp(raw_phone):
         "otp_length": int(otp_length) if otp_length.isdigit() else 6
     }
 
-    try:
-        response = requests.post(MSG91_SEND_OTP_URL, json=payload, headers=headers, timeout=10)
-        data = response.json() if response.content else {}
-        
-        # Check MSG91 response status
-        if response.status_code == 200 and (data.get('type') == 'success' or 'successfully' in data.get('message', '').lower()):
-            _rate_limits[msg91] = now
-            # Reset attempts
-            _attempt_tracker[msg91] = 0
-            return {
-                "success": True,
-                "message": f"OTP sent successfully via SMS to {e164}.",
-                "phone": e164
-            }, 200
-        else:
-            err_msg = data.get('message') or data.get('error') or f"MSG91 error code {response.status_code}"
-            return {
-                "success": False,
-                "message": f"Failed to deliver SMS: {err_msg}"
-            }, 400
-    except requests.exceptions.Timeout:
+    status_code, data = _http_request(MSG91_SEND_OTP_URL, method='POST', headers=headers, body=payload, timeout=10)
+
+    if status_code == 200 and (data.get('type') == 'success' or 'successfully' in data.get('message', '').lower()):
+        _rate_limits[msg91] = now
+        _attempt_tracker[msg91] = 0
+        return {
+            "success": True,
+            "message": f"OTP sent successfully via SMS to {e164}.",
+            "phone": e164
+        }, 200
+    else:
+        err_msg = data.get('message') or data.get('error') or f"MSG91 error code {status_code}"
         return {
             "success": False,
-            "message": "SMS provider timed out while attempting to dispatch SMS. Please try again."
-        }, 504
-    except Exception as e:
-        return {
-            "success": False,
-            "message": f"SMS provider request failed: {str(e)}"
-        }, 502
+            "message": f"Failed to deliver SMS: {err_msg}"
+        }, 400
 
 def verify_msg91_otp(raw_phone, otp_code):
     """
@@ -130,7 +149,6 @@ def verify_msg91_otp(raw_phone, otp_code):
             "message": "Please enter the complete 6-digit OTP code."
         }, 400
 
-    # Rate limiting on failed verification attempts
     attempts = _attempt_tracker.get(msg91, 0)
     if attempts >= 5:
         return {
@@ -147,41 +165,30 @@ def verify_msg91_otp(raw_phone, otp_code):
 
     params = {
         "mobile": msg91,
-        "otp": otp,
+        "otp": otp
+    }
+    headers = {
         "authkey": auth_key
     }
 
-    try:
-        response = requests.get(MSG91_VERIFY_OTP_URL, params=params, timeout=10)
-        data = response.json() if response.content else {}
+    status_code, data = _http_request(MSG91_VERIFY_OTP_URL, method='GET', headers=headers, params=params, timeout=10)
 
-        if response.status_code == 200 and (data.get('type') == 'success' or 'success' in data.get('message', '').lower()):
-            # Verification successful
-            _attempt_tracker.pop(msg91, None)
-            return {
-                "success": True,
-                "message": "OTP verified successfully.",
-                "phone": e164,
-                "msg91_phone": msg91
-            }, 200
-        else:
-            _attempt_tracker[msg91] = attempts + 1
-            remaining = 5 - (attempts + 1)
-            err_msg = data.get('message', 'Incorrect OTP code. Please check your SMS and try again.')
-            return {
-                "success": False,
-                "message": f"{err_msg} ({remaining} attempts remaining)."
-            }, 400
-    except requests.exceptions.Timeout:
+    if status_code == 200 and (data.get('type') == 'success' or 'success' in data.get('message', '').lower()):
+        _attempt_tracker.pop(msg91, None)
+        return {
+            "success": True,
+            "message": "OTP verified successfully.",
+            "phone": e164,
+            "msg91_phone": msg91
+        }, 200
+    else:
+        _attempt_tracker[msg91] = attempts + 1
+        remaining = 5 - (attempts + 1)
+        err_msg = data.get('message', 'Incorrect OTP code. Please check your SMS and try again.')
         return {
             "success": False,
-            "message": "SMS provider timed out during verification. Please check your connection."
-        }, 504
-    except Exception as e:
-        return {
-            "success": False,
-            "message": f"Verification failed: {str(e)}"
-        }, 502
+            "message": f"{err_msg} ({remaining} attempts remaining)."
+        }, 400
 
 def retry_msg91_otp(raw_phone):
     """
@@ -213,27 +220,22 @@ def retry_msg91_otp(raw_phone):
 
     params = {
         "mobile": msg91,
-        "retrytype": "text",
+        "retrytype": "text"
+    }
+    headers = {
         "authkey": auth_key
     }
 
-    try:
-        response = requests.get(MSG91_RETRY_OTP_URL, params=params, timeout=10)
-        data = response.json() if response.content else {}
+    status_code, data = _http_request(MSG91_RETRY_OTP_URL, method='GET', headers=headers, params=params, timeout=10)
 
-        if response.status_code == 200 and (data.get('type') == 'success' or 'successfully' in data.get('message', '').lower()):
-            _rate_limits[msg91] = now
-            return {
-                "success": True,
-                "message": f"New OTP sent successfully to {e164}."
-            }, 200
-        else:
-            return {
-                "success": False,
-                "message": data.get('message', 'Failed to resend OTP via MSG91.')
-            }, 400
-    except Exception as e:
+    if status_code == 200 and (data.get('type') == 'success' or 'successfully' in data.get('message', '').lower()):
+        _rate_limits[msg91] = now
+        return {
+            "success": True,
+            "message": f"New OTP sent successfully to {e164}."
+        }, 200
+    else:
         return {
             "success": False,
-            "message": f"Resend request failed: {str(e)}"
-        }, 502
+            "message": data.get('message', 'Failed to resend OTP via MSG91.')
+        }, 400

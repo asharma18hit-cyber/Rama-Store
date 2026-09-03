@@ -1,6 +1,9 @@
 .env
 .env.local
 *.pyc
+*.db
+*.sqlite
+*.sqlite3
 __pycache__/
 app/__pycache__/
 .dart_tool/
