@@ -50,13 +50,17 @@
 
     window.initMsg91Widget = function(widgetId, tokenAuth, identifier) {
       if (typeof window.initSendOTP !== 'function') {
-        console.warn("[MSG91 Widget] initSendOTP script is still loading...");
+        return false;
+      }
+      if (!tokenAuth) {
+        // Without a public widget tokenAuth, initSendOTP throws 'Token is missing!'.
+        // Backend handles SMS dispatch directly with MSG91_AUTH_KEY on the server.
         return false;
       }
       try {
         var config = {
           widgetId: widgetId || "SecureOTPWidgetS29G",
-          tokenAuth: tokenAuth || "",
+          tokenAuth: tokenAuth,
           identifier: identifier || "",
           exposeMethods: true,
           success: function(data) {
@@ -144,20 +148,6 @@
       }
       return false;
     };
-
-    // Auto-initialize widget once SDK is loaded
-    (function() {
-      var attempts = 0;
-      var interval = setInterval(function() {
-        attempts++;
-        if (typeof window.initSendOTP === 'function') {
-          clearInterval(interval);
-          window.initMsg91Widget("SecureOTPWidgetS29G");
-        } else if (attempts > 30) {
-          clearInterval(interval);
-        }
-      }, 300);
-    })();
   </script>
 </head>
 <body>

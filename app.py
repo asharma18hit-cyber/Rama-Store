@@ -22,9 +22,19 @@ from database import (
 )
 from otp_msg91 import send_msg91_otp, verify_msg91_otp, retry_msg91_otp, normalize_indian_phone, verify_msg91_access_token
 
+try:
+    from flask_cors import CORS
+    has_flask_cors = True
+except ImportError:
+    has_flask_cors = False
+
 app = Flask(__name__)
 # Secure key for encrypting Flask session cookies
 app.secret_key = os.environ.get('SECRET_KEY', 'rama_store_super_secure_key_123')
+
+if has_flask_cors:
+    CORS(app, supports_credentials=True, origins=["https://rama-store-1.onrender.com", "http://localhost:3000", "http://127.0.0.1:5000", "*"])
+
 
 # Configure local SQLite database path
 DB_PATH = os.environ.get('DATABASE_PATH', os.path.join(BASE_DIR, 'rama_store.db'))
