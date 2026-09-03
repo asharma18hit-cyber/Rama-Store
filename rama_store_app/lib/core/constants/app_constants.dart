@@ -3,7 +3,7 @@ class AppConstants {
   static const String appTagline = 'Curated Essentials for Your Daily Lifestyle';
   
   // Default Base API URL (Overrideable via --dart-define=BASE_URL=http://...)
-  static const String defaultBaseUrl = 'https://rama-store-3u49.onrender.com';
+  static const String defaultBaseUrl = 'https://rama-store-api.onrender.com';
   
   // Free delivery threshold in Indian Rupees
   static const double freeDeliveryThreshold = 500.0;

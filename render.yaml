@@ -7,7 +7,7 @@ services:
     routes:
       - type: rewrite
         source: /api/*
-        destination: https://rama-store-3u49.onrender.com/api/*
+        destination: https://rama-store-api.onrender.com/api/*
       - type: rewrite
         source: /downloads/rama-store-app.apksvg
         destination: /downloads/rama-store-app.apk
