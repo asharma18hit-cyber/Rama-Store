@@ -22,7 +22,7 @@ class Msg91WidgetService {
     );
   }
 
-  /// Dispatches OTP via the MSG91 Web SDK Widget or Backend
+  /// Dispatches OTP via the official MSG91 Web SDK Widget
   static Future<OtpSendResult> sendOtp(
     String identifier, {
     required ApiClient apiClient,
@@ -30,20 +30,15 @@ class Msg91WidgetService {
     final cleanPhone = OtpService.formatPhoneNumber(identifier);
 
     if (kIsWeb) {
-      final res = await msg91_impl.sendMsg91Otp(cleanPhone);
-      if (res.isSuccess) {
-        return res;
-      }
-      if (res.errorMessage != 'Widget not initialized' && res.errorMessage != 'Non-web platform') {
-        return res;
-      }
+      // Authoritative Web flow: 100% MSG91 Web SDK
+      return msg91_impl.sendMsg91Otp(cleanPhone);
     }
 
-    // Direct backend dispatch
+    // Native platform flow
     return OtpService.sendOtp(cleanPhone, apiClient: apiClient);
   }
 
-  /// Verifies OTP via the MSG91 Web SDK Widget or Backend
+  /// Verifies OTP via the official MSG91 Web SDK Widget and exchanges JWT Access Token
   static Future<OtpVerificationResult> verifyOtp(
     String identifier,
     String enteredCode, {
@@ -52,18 +47,22 @@ class Msg91WidgetService {
     final cleanPhone = OtpService.formatPhoneNumber(identifier);
 
     if (kIsWeb) {
+      // Authoritative Web flow: MSG91 widget verifyOtp -> JWT token -> Backend verifyAccessToken
       final tokenResult = await msg91_impl.verifyMsg91Otp(enteredCode);
       if (tokenResult != null && tokenResult.isNotEmpty) {
-        // Exchange MSG91 access token with backend
         return verifyToken(tokenResult, apiClient: apiClient);
       }
+      return const OtpVerificationResult(
+        isValid: false,
+        error: 'Incorrect OTP code or expired session. Please check your SMS and try again.',
+      );
     }
 
-    // Direct backend verification
+    // Native platform flow
     return OtpService.verifyOtp(cleanPhone, enteredCode, apiClient: apiClient);
   }
 
-  /// Retries/Resends OTP via MSG91 Web SDK Widget or Backend
+  /// Retries/Resends OTP via MSG91 Web SDK Widget
   static Future<OtpSendResult> resendOtp(
     String identifier, {
     required ApiClient apiClient,
@@ -71,10 +70,7 @@ class Msg91WidgetService {
     final cleanPhone = OtpService.formatPhoneNumber(identifier);
 
     if (kIsWeb) {
-      final res = await msg91_impl.retryMsg91Otp();
-      if (res.isSuccess) {
-        return res;
-      }
+      return msg91_impl.retryMsg91Otp();
     }
 
     return OtpService.resendOtp(cleanPhone, apiClient: apiClient);

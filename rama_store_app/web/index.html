@@ -144,6 +144,20 @@
       }
       return false;
     };
+
+    // Auto-initialize widget once SDK is loaded
+    (function() {
+      var attempts = 0;
+      var interval = setInterval(function() {
+        attempts++;
+        if (typeof window.initSendOTP === 'function') {
+          clearInterval(interval);
+          window.initMsg91Widget("SecureOTPWidgetS29G");
+        } else if (attempts > 30) {
+          clearInterval(interval);
+        }
+      }, 300);
+    })();
   </script>
 </head>
 <body>
