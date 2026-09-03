@@ -37,8 +37,114 @@
 
   <title>RAMA STORE | Elite High-Performance Fashion & Essentials</title>
   <link rel="manifest" href="manifest.json">
-  <!-- MSG91 OTP Widget SDK -->
-  <script type="text/javascript" src="https://control.msg91.com/app/assets/otp-provider/otp-provider.js"></script>
+
+  <!-- MSG91 Official OTP Widget SDK -->
+  <script type="text/javascript" src="https://verify.msg91.com/otp-provider.js"></script>
+  <script type="text/javascript">
+    window.msg91WidgetState = {
+      isReady: false,
+      lastAccessToken: null,
+      lastError: null,
+      reqId: null
+    };
+
+    window.initMsg91Widget = function(widgetId, tokenAuth, identifier) {
+      if (typeof window.initSendOTP !== 'function') {
+        console.warn("[MSG91 Widget] initSendOTP script is still loading...");
+        return false;
+      }
+      try {
+        var config = {
+          widgetId: widgetId || "SecureOTPWidgetS29G",
+          tokenAuth: tokenAuth || "",
+          identifier: identifier || "",
+          exposeMethods: true,
+          success: function(data) {
+            console.log("[MSG91 Widget] Global success callback:", data);
+            var token = (data && data.message) ? data.message : ((data && data['access-token']) ? data['access-token'] : (typeof data === 'string' ? data : JSON.stringify(data)));
+            window.msg91WidgetState.lastAccessToken = token;
+            if (window.onMsg91TokenReceived) {
+              window.onMsg91TokenReceived(token);
+            }
+          },
+          failure: function(err) {
+            console.error("[MSG91 Widget] Global failure callback:", err);
+            window.msg91WidgetState.lastError = err ? (err.message || JSON.stringify(err)) : "Widget error";
+            if (window.onMsg91ErrorReceived) {
+              window.onMsg91ErrorReceived(window.msg91WidgetState.lastError);
+            }
+          }
+        };
+        window.initSendOTP(config);
+        window.msg91WidgetState.isReady = true;
+        console.log("[MSG91 Widget] Initialized successfully with widgetId:", config.widgetId);
+        return true;
+      } catch (e) {
+        console.error("[MSG91 Widget] Initialization error:", e);
+        return false;
+      }
+    };
+
+    window.msg91SendOtp = function(identifier, callbackName, errorCallbackName) {
+      if (typeof window.sendOtp === 'function') {
+        window.sendOtp(
+          identifier,
+          function(data) {
+            console.log("[MSG91 Widget] sendOtp success:", data);
+            if (data && data.reqId) window.msg91WidgetState.reqId = data.reqId;
+            if (window[callbackName]) window[callbackName](JSON.stringify(data));
+          },
+          function(err) {
+            console.error("[MSG91 Widget] sendOtp failure:", err);
+            var msg = err && err.message ? err.message : (typeof err === 'string' ? err : JSON.stringify(err));
+            if (window[errorCallbackName]) window[errorCallbackName](msg);
+          }
+        );
+        return true;
+      }
+      return false;
+    };
+
+    window.msg91VerifyOtp = function(otp, callbackName, errorCallbackName) {
+      if (typeof window.verifyOtp === 'function') {
+        window.verifyOtp(
+          otp,
+          function(data) {
+            console.log("[MSG91 Widget] verifyOtp success:", data);
+            var token = (data && data.message) ? data.message : ((data && data['access-token']) ? data['access-token'] : (typeof data === 'string' ? data : JSON.stringify(data)));
+            if (window[callbackName]) window[callbackName](token);
+          },
+          function(err) {
+            console.error("[MSG91 Widget] verifyOtp failure:", err);
+            var msg = err && err.message ? err.message : (typeof err === 'string' ? err : JSON.stringify(err));
+            if (window[errorCallbackName]) window[errorCallbackName](msg);
+          },
+          window.msg91WidgetState.reqId
+        );
+        return true;
+      }
+      return false;
+    };
+
+    window.msg91RetryOtp = function(callbackName, errorCallbackName) {
+      if (typeof window.retryOtp === 'function') {
+        window.retryOtp(
+          'text',
+          function(data) {
+            console.log("[MSG91 Widget] retryOtp success:", data);
+            if (window[callbackName]) window[callbackName](JSON.stringify(data));
+          },
+          function(err) {
+            console.error("[MSG91 Widget] retryOtp failure:", err);
+            var msg = err && err.message ? err.message : (typeof err === 'string' ? err : JSON.stringify(err));
+            if (window[errorCallbackName]) window[errorCallbackName](msg);
+          }
+        );
+        return true;
+      }
+      return false;
+    };
+  </script>
 </head>
 <body>
   <script>

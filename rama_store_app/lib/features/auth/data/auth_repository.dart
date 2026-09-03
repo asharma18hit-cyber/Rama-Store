@@ -2,6 +2,7 @@ import '../../../core/network/api_client.dart';
 import '../../../core/storage/local_storage_service.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/services/otp_service.dart';
+import '../../../core/services/msg91_widget_service.dart';
 import 'auth_model.dart';
 
 abstract class AuthRepository {
@@ -126,8 +127,8 @@ class ApiAuthRepository implements AuthRepository {
     final cleanInput = emailOrPhone.trim();
 
     if (!cleanInput.contains('@')) {
-      // Real Phone OTP via Backend MSG91
-      final result = await OtpService.sendOtp(cleanInput, apiClient: apiClient);
+      // Real Phone OTP via MSG91 Widget / Backend Gateway
+      final result = await Msg91WidgetService.sendOtp(cleanInput, apiClient: apiClient);
       if (!result.isSuccess) {
         throw Exception(result.errorMessage ?? 'Failed to send SMS OTP.');
       }
@@ -150,8 +151,8 @@ class ApiAuthRepository implements AuthRepository {
     final cleanOtp = otp.trim();
 
     if (!cleanInput.contains('@')) {
-      // Real Phone OTP verification via Backend MSG91
-      final result = await OtpService.verifyOtp(cleanInput, cleanOtp, apiClient: apiClient);
+      // Real Phone OTP verification via MSG91 Widget / Backend Gateway
+      final result = await Msg91WidgetService.verifyOtp(cleanInput, cleanOtp, apiClient: apiClient);
       if (!result.isValid) {
         throw Exception(result.error ?? 'Invalid SMS code. Please try again.');
       }
