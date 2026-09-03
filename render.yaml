@@ -24,3 +24,20 @@ services:
       - path: /downloads/*.apk
         name: Content-Disposition
         value: attachment; filename="rama-store-app.apk"
+
+  - type: web
+    name: rama-store-api
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: MSG91_AUTH_KEY
+        sync: false
+      - key: MSG91_TEMPLATE_ID
+        sync: false
+      - key: MSG91_OTP_EXPIRY
+        value: "5"
+      - key: MSG91_OTP_LENGTH
+        value: "6"
