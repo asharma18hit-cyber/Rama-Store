@@ -101,9 +101,9 @@ void main() {
     });
 
     test('Phone Number formatting and validation integrity', () {
-      expect(OtpService.formatPhoneNumber('9876543210'), '+919876543210');
-      expect(OtpService.formatPhoneNumber('919876543210'), '+919876543210');
-      expect(OtpService.formatPhoneNumber('+919876543210'), '+919876543210');
+      expect(OtpService.formatPhoneNumber('9876543210'), '919876543210');
+      expect(OtpService.formatPhoneNumber('09876543210'), '919876543210');
+      expect(OtpService.formatPhoneNumber('919876543210'), '919876543210');
       expect(OtpService.maskPhoneNumber('9876543210'), '+91 98*** **210');
     });
 

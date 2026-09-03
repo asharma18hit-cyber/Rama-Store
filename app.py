@@ -56,6 +56,30 @@ def admin_required(f):
     return decorated_function
 
 # ==========================================
+# CORS & PREFLIGHT REQUEST HANDLER
+# ==========================================
+
+@app.before_request
+def handle_preflight_and_cors():
+    if request.method == "OPTIONS":
+        response = make_response()
+        origin = request.headers.get('Origin', '*')
+        response.headers["Access-Control-Allow-Origin"] = origin
+        response.headers["Access-Control-Allow-Headers"] = "Content-Type,Authorization,X-Requested-With,Accept,Origin,Cookie"
+        response.headers["Access-Control-Allow-Methods"] = "GET,POST,PUT,DELETE,OPTIONS,PATCH"
+        response.headers["Access-Control-Allow-Credentials"] = "true"
+        return response
+
+@app.after_request
+def add_cors_headers(response):
+    origin = request.headers.get('Origin', '*')
+    response.headers["Access-Control-Allow-Origin"] = origin
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type,Authorization,X-Requested-With,Accept,Origin,Cookie"
+    response.headers["Access-Control-Allow-Methods"] = "GET,POST,PUT,DELETE,OPTIONS,PATCH"
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+    return response
+
+# ==========================================
 # PAGE ROUTING (HTML RENDER)
 # ==========================================
 
@@ -170,7 +194,9 @@ def api_auth_otp_send():
     if not phone:
         return jsonify({"success": False, "message": "Mobile number is required."}), 400
 
+    print(f"[MSG91-AUTH] OTP send request received for phone ending in ...{phone[-4:] if len(phone)>=4 else '****'}")
     result, status_code = send_msg91_otp(phone)
+    print(f"[MSG91-AUTH] OTP send outcome status={status_code} success={result.get('success')}")
     return jsonify(result), status_code
 
 @app.route('/api/auth/otp/verify', methods=['POST'])
@@ -186,7 +212,9 @@ def api_auth_otp_verify():
     if not phone or not otp:
         return jsonify({"success": False, "message": "Mobile number and 6-digit OTP code are required."}), 400
 
+    print(f"[MSG91-AUTH] OTP verify attempt for phone ending in ...{phone[-4:] if len(phone)>=4 else '****'}")
     result, status_code = verify_msg91_otp(phone, otp)
+    print(f"[MSG91-AUTH] OTP verify outcome status={status_code} success={result.get('success')}")
     if not result.get('success'):
         return jsonify(result), status_code
 
@@ -249,6 +277,7 @@ def api_auth_otp_retry():
     if not phone:
         return jsonify({"success": False, "message": "Mobile number is required."}), 400
 
+    print(f"[MSG91-AUTH] OTP retry request for phone ending in ...{phone[-4:] if len(phone)>=4 else '****'}")
     result, status_code = retry_msg91_otp(phone)
     return jsonify(result), status_code
 
@@ -267,7 +296,9 @@ def api_auth_msg91_verify_token():
     if not token:
         return jsonify({"success": False, "message": "access-token is required."}), 400
 
+    print("[MSG91-WIDGET] Server-side verifyAccessToken request received")
     result, status_code = verify_msg91_access_token(token)
+    print(f"[MSG91-WIDGET] MSG91 verifyAccessToken outcome status={status_code} success={result.get('success')}")
     if not result.get('success'):
         return jsonify(result), status_code
 

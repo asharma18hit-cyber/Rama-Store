@@ -31,34 +31,31 @@ class OtpVerificationResult {
 class OtpService {
   static final Map<String, DateTime> _lastSentTimestamps = {};
 
-  /// Normalizes any Indian mobile input into standard E.164 (+91XXXXXXXXXX)
+  /// Normalizes any Indian mobile input into standard MSG91 format (91XXXXXXXXXX)
   static String formatPhoneNumber(String rawPhone) {
     final digits = rawPhone.replaceAll(RegExp(r'\D'), '');
     if (digits.length == 10) {
-      return '+91$digits';
+      return '91$digits';
     }
     if (digits.length == 11 && digits.startsWith('0')) {
-      return '+91${digits.substring(1)}';
+      return '91${digits.substring(1)}';
     }
     if (digits.length == 12 && digits.startsWith('91')) {
-      return '+$digits';
+      return digits;
     }
-    if (rawPhone.startsWith('+')) {
-      return rawPhone;
-    }
-    return '+91$digits';
+    return digits;
   }
 
   /// Masks phone number for secure UI display (e.g. +91 98*** **210)
   static String maskPhoneNumber(String rawPhone) {
-    final formatted = formatPhoneNumber(rawPhone);
-    final digits = formatted.replaceAll(RegExp(r'\D'), '');
+    final digits = rawPhone.replaceAll(RegExp(r'\D'), '');
     if (digits.length >= 10) {
-      final last3 = digits.substring(digits.length - 3);
-      final first2 = digits.length > 10 ? digits.substring(2, 4) : digits.substring(0, 2);
+      final tenDigits = digits.length >= 10 ? digits.substring(digits.length - 10) : digits;
+      final first2 = tenDigits.substring(0, 2);
+      final last3 = tenDigits.substring(7);
       return '+91 $first2*** **$last3';
     }
-    return formatted;
+    return rawPhone;
   }
 
   /// Sends real SMS OTP via Secure Backend -> MSG91 Gateway
@@ -99,7 +96,7 @@ class OtpService {
       try {
         final res = await apiClient.post('/api/auth/otp/send', data: {
           'phone': formattedPhone,
-        }).timeout(const Duration(seconds: 12));
+        }).timeout(const Duration(seconds: 15));
 
         if (res != null && res['success'] == true) {
           _lastSentTimestamps[cleanId] = now;
@@ -149,7 +146,7 @@ class OtpService {
         final res = await apiClient.post('/api/auth/otp/verify', data: {
           'phone': formattedPhone,
           'otp': code,
-        }).timeout(const Duration(seconds: 12));
+        }).timeout(const Duration(seconds: 15));
 
         if (res != null && res['success'] == true) {
           _lastSentTimestamps.remove(cleanId);
@@ -191,7 +188,7 @@ class OtpService {
     try {
       final res = await apiClient.post('/api/auth/otp/retry', data: {
         'phone': formattedPhone,
-      }).timeout(const Duration(seconds: 12));
+      }).timeout(const Duration(seconds: 15));
 
       if (res != null && res['success'] == true) {
         _lastSentTimestamps[cleanId] = DateTime.now();
@@ -226,7 +223,7 @@ class OtpService {
     try {
       final res = await apiClient.post('/api/auth/msg91/verify-token', data: {
         'access_token': token,
-      }).timeout(const Duration(seconds: 12));
+      }).timeout(const Duration(seconds: 15));
 
       if (res != null && res['success'] == true) {
         final userJson = res['user'];
