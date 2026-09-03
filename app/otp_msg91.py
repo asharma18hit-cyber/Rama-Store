@@ -10,6 +10,7 @@ import urllib.error
 MSG91_SEND_OTP_URL = "https://control.msg91.com/api/v5/otp"
 MSG91_VERIFY_OTP_URL = "https://control.msg91.com/api/v5/otp/verify"
 MSG91_RETRY_OTP_URL = "https://control.msg91.com/api/v5/otp/retry"
+MSG91_VERIFY_ACCESS_TOKEN_URL = "https://control.msg91.com/api/v5/widget/verifyAccessToken"
 
 # In-memory rate limiting and attempt tracking
 _rate_limits = {}
@@ -68,6 +69,55 @@ def _http_request(url, method='GET', headers=None, body=None, params=None, timeo
         return e.code, parsed_json
     except Exception as e:
         return 500, {"error": str(e)}
+
+def verify_msg91_access_token(access_token):
+    """
+    Verifies MSG91 Widget JWT Access Token server-side via MSG91 official endpoint.
+    POST https://control.msg91.com/api/v5/widget/verifyAccessToken
+    Payload: { "authkey": "<MSG91_AUTHKEY>", "access-token": "<access_token>" }
+    """
+    token = str(access_token or '').strip()
+    if not token:
+        return {
+            "success": False,
+            "message": "Access token is required."
+        }, 400
+
+    auth_key = os.environ.get('MSG91_AUTH_KEY', '').strip()
+    if not auth_key:
+        return {
+            "success": False,
+            "message": "MSG91 SMS provider is not configured on the production server (Missing MSG91_AUTH_KEY)."
+        }, 503
+
+    payload = {
+        "authkey": auth_key,
+        "access-token": token
+    }
+    headers = {
+        "Content-Type": "application/json"
+    }
+
+    status_code, data = _http_request(MSG91_VERIFY_ACCESS_TOKEN_URL, method='POST', headers=headers, body=payload, timeout=12)
+
+    if status_code == 200 and (data.get('type') == 'success' or 'success' in data.get('message', '').lower()):
+        token_data = data.get('data') or data
+        mobile = token_data.get('mobile') or token_data.get('mobile_number') or token_data.get('phone') or data.get('mobile')
+        
+        normalized_msg91, e164 = normalize_indian_phone(mobile) if mobile else (None, None)
+        
+        return {
+            "success": True,
+            "message": "MSG91 access token verified successfully.",
+            "phone": e164 or mobile,
+            "data": token_data
+        }, 200
+    else:
+        err_msg = data.get('message') or data.get('error') or "Invalid or expired MSG91 access token."
+        return {
+            "success": False,
+            "message": f"MSG91 token verification failed: {err_msg}"
+        }, 401
 
 def send_msg91_otp(raw_phone):
     """

@@ -212,4 +212,40 @@ class OtpService {
       );
     }
   }
+
+  /// Verifies MSG91 OTP Widget JWT Access Token server-side
+  static Future<OtpVerificationResult> verifyWidgetAccessToken(String accessToken, {required ApiClient apiClient}) async {
+    final token = accessToken.trim();
+    if (token.isEmpty) {
+      return const OtpVerificationResult(
+        isValid: false,
+        error: 'Access token is required for verification.',
+      );
+    }
+
+    try {
+      final res = await apiClient.post('/api/auth/msg91/verify-token', data: {
+        'access_token': token,
+      }).timeout(const Duration(seconds: 12));
+
+      if (res != null && res['success'] == true) {
+        final userJson = res['user'];
+        final user = userJson != null ? AuthUser.fromJson(userJson) : null;
+        return OtpVerificationResult(
+          isValid: true,
+          user: user,
+        );
+      } else {
+        return OtpVerificationResult(
+          isValid: false,
+          error: res?['message'] ?? 'Invalid or expired MSG91 access token.',
+        );
+      }
+    } catch (e) {
+      return OtpVerificationResult(
+        isValid: false,
+        error: e.toString().replaceAll('Exception: ', ''),
+      );
+    }
+  }
 }

@@ -20,7 +20,7 @@ from database import (
     add_category, create_checkout_session, update_order_payment_status,
     update_user_password, InsufficientStockError, DuplicateSKUError, DuplicateUserError
 )
-from otp_msg91 import send_msg91_otp, verify_msg91_otp, retry_msg91_otp, normalize_indian_phone
+from otp_msg91 import send_msg91_otp, verify_msg91_otp, retry_msg91_otp, normalize_indian_phone, verify_msg91_access_token
 
 app = Flask(__name__)
 # Secure key for encrypting Flask session cookies
@@ -251,6 +251,64 @@ def api_auth_otp_retry():
 
     result, status_code = retry_msg91_otp(phone)
     return jsonify(result), status_code
+
+@app.route('/api/auth/msg91/verify-token', methods=['POST'])
+@app.route('/api/auth/otp/verify-widget', methods=['POST'])
+def api_auth_msg91_verify_token():
+    """
+    Server-side verification of MSG91 OTP Widget JWT Access Token.
+    Validates token directly against MSG91:
+    POST https://control.msg91.com/api/v5/widget/verifyAccessToken
+    Payload: { "authkey": "<MSG91_AUTH_KEY>", "access-token": "<access_token>" }
+    """
+    data = request.get_json() or {}
+    token = data.get('access_token') or data.get('access-token') or data.get('token')
+    
+    if not token:
+        return jsonify({"success": False, "message": "access-token is required."}), 400
+
+    result, status_code = verify_msg91_access_token(token)
+    if not result.get('success'):
+        return jsonify(result), status_code
+
+    phone = result.get('phone')
+    if not phone:
+        phone = data.get('phone', 'Customer')
+
+    try:
+        user = get_user_by_identifier(DB_PATH, phone)
+        if not user:
+            user_id = create_user(
+                DB_PATH,
+                username=phone,
+                email=f"{phone}@customer.ramastore.com",
+                password_hash=generate_password_hash(f"MSG91-WIDGET-{phone}"),
+                role="customer"
+            )
+            user = {
+                "id": user_id,
+                "email": phone,
+                "username": phone,
+                "role": "customer"
+            }
+
+        session['user_id'] = user['id']
+        session['email_or_phone'] = user['email']
+        session['fullname'] = user['username']
+        session['role'] = user['role']
+
+        return jsonify({
+            "success": True,
+            "message": "Authentication successful.",
+            "user": {
+                "id": user['id'],
+                "email_or_phone": user['email'],
+                "fullname": user['username'],
+                "role": user['role']
+            }
+        }), 200
+    except Exception as e:
+        return jsonify({"success": False, "message": f"User session creation failed: {str(e)}"}), 500
 
 # ==========================================
 # USER AUTHENTICATION API ENDPOINTS
