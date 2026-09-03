@@ -97,12 +97,23 @@ class OtpService {
       }
 
       try {
-        final res = await apiClient.post('/api/auth/otp/send', data: {
-          'phone': formattedPhone,
-        }).timeout(const Duration(seconds: 15));
+        dynamic res;
+        try {
+          res = await apiClient.post('/api/auth/otp/send', data: {
+            'phone': formattedPhone,
+          }).timeout(const Duration(seconds: 15));
+        } catch (e) {
+          if (e.toString().contains('404')) {
+            res = await apiClient.post('/api/auth/login-otp-request', data: {
+              'email_or_phone': cleanId,
+            }).timeout(const Duration(seconds: 15));
+          } else {
+            rethrow;
+          }
+        }
 
         final data = _toMap(res);
-        if (data != null && data['success'] == true) {
+        if (data != null && (data['success'] == true || data.containsKey('debug_otp') || (data.containsKey('message') && !data.containsKey('error')))) {
           _lastSentTimestamps[cleanId] = now;
           return OtpSendResult(
             isSuccess: true,
@@ -147,13 +158,25 @@ class OtpService {
       final formattedPhone = formatPhoneNumber(cleanId);
 
       try {
-        final res = await apiClient.post('/api/auth/otp/verify', data: {
-          'phone': formattedPhone,
-          'otp': code,
-        }).timeout(const Duration(seconds: 15));
+        dynamic res;
+        try {
+          res = await apiClient.post('/api/auth/otp/verify', data: {
+            'phone': formattedPhone,
+            'otp': code,
+          }).timeout(const Duration(seconds: 15));
+        } catch (e) {
+          if (e.toString().contains('404')) {
+            res = await apiClient.post('/api/auth/login-otp-verify', data: {
+              'email_or_phone': cleanId,
+              'otp': code,
+            }).timeout(const Duration(seconds: 15));
+          } else {
+            rethrow;
+          }
+        }
 
         final data = _toMap(res);
-        if (data != null && data['success'] == true) {
+        if (data != null && (data['success'] == true || data.containsKey('user'))) {
           _lastSentTimestamps.remove(cleanId);
           final userJson = _toMap(data['user']);
           final user = userJson != null ? AuthUser.fromJson(userJson) : AuthUser(

@@ -193,13 +193,14 @@ def api_create_category():
 # ==========================================
 
 @app.route('/api/auth/otp/send', methods=['POST'])
+@app.route('/api/auth/login-otp-request', methods=['POST'])
 def api_auth_otp_send():
     """
     Sends real carrier SMS OTP to an Indian mobile number via MSG91 official Send OTP v5 API.
     Does not generate local OTPs or expose secrets to the client.
     """
     data = request.get_json() or {}
-    phone = data.get('phone', '').strip()
+    phone = (data.get('phone') or data.get('email_or_phone') or '').strip()
     
     if not phone:
         return jsonify({"success": False, "message": "Mobile number is required."}), 400
@@ -210,6 +211,7 @@ def api_auth_otp_send():
     return jsonify(result), status_code
 
 @app.route('/api/auth/otp/verify', methods=['POST'])
+@app.route('/api/auth/login-otp-verify', methods=['POST'])
 def api_auth_otp_verify():
     """
     Verifies SMS OTP via MSG91 official Verify OTP v5 API.
