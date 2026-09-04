@@ -13,19 +13,23 @@ class OrderItem {
 
   factory OrderItem.fromJson(Map<String, dynamic> json) {
     return OrderItem(
-      productId: json['product_id'] ?? 0,
-      name: json['name'] ?? 'Product',
-      quantity: json['quantity'] ?? 1,
-      priceAtPurchase: (json['price_at_purchase'] as num?)?.toDouble() ?? 0.0,
+      productId: (json['product_id'] ?? json['productId']) is int
+          ? (json['product_id'] ?? json['productId'])
+          : int.tryParse((json['product_id'] ?? json['productId'] ?? 0).toString()) ?? 0,
+      name: json['name']?.toString() ?? 'Product',
+      quantity: (json['quantity'] as num?)?.toInt() ?? 1,
+      priceAtPurchase: (json['price_at_purchase'] ?? json['priceAtPurchase'] as num?)?.toDouble() ?? 0.0,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'product_id': productId,
+      'productId': productId,
       'name': name,
       'quantity': quantity,
       'price_at_purchase': priceAtPurchase,
+      'priceAtPurchase': priceAtPurchase,
     };
   }
 }
@@ -88,25 +92,28 @@ class OrderModel {
         .map((i) => OrderItem.fromJson(i is Map<String, dynamic> ? i : Map<String, dynamic>.from(i)))
         .toList();
 
-    final rawStatus = json['order_status'] ?? json['status'] ?? 'Confirmed';
-    final rawPaymentStatus = json['payment_status'] ?? (json['payment_method']?.toString().toUpperCase() == 'COD' ? 'Pending' : 'Paid');
-    final rawPaymentMethod = json['payment_method'] ?? 'Card';
+    final rawStatus = json['order_status'] ?? json['orderStatus'] ?? json['status'] ?? 'Confirmed';
+    final rawPaymentStatus = json['payment_status'] ?? json['paymentStatus'] ?? (json['payment_method']?.toString().toUpperCase() == 'COD' ? 'Pending' : 'Paid');
+    final rawPaymentMethod = json['payment_method'] ?? json['paymentMethod'] ?? 'Card';
+    final rawCreatedAt = json['created_at'] ?? json['createdAt'] ?? '';
 
     return OrderModel(
-      id: json['id'] ?? 0,
-      trackingNumber: json['tracking_number'] ?? '',
-      totalAmount: (json['total_amount'] as num?)?.toDouble() ?? 0.0,
-      taxAmount: (json['tax_amount'] as num?)?.toDouble() ?? 0.0,
-      shippingAddress: json['shipping_address'],
-      orderStatus: rawStatus,
-      paymentStatus: rawPaymentStatus,
-      paymentMethod: rawPaymentMethod,
-      createdAt: json['created_at'] ?? '',
-      cancellationReason: json['cancellation_reason'],
-      cancellationReasonDetail: json['cancellation_reason_detail'],
-      cancelledAt: json['cancelled_at'],
-      paidAt: json['paid_at'],
-      refundStatus: json['refund_status'],
+      id: (json['id'] ?? json['orderId']) is int
+          ? (json['id'] ?? json['orderId'])
+          : int.tryParse((json['id'] ?? 0).toString()) ?? DateTime.now().millisecondsSinceEpoch % 1000000,
+      trackingNumber: json['tracking_number'] ?? json['trackingNumber'] ?? '',
+      totalAmount: (json['total_amount'] ?? json['totalAmount'] as num?)?.toDouble() ?? 0.0,
+      taxAmount: (json['tax_amount'] ?? json['taxAmount'] as num?)?.toDouble() ?? 0.0,
+      shippingAddress: json['shipping_address'] ?? json['shippingAddress'],
+      orderStatus: rawStatus.toString(),
+      paymentStatus: rawPaymentStatus.toString(),
+      paymentMethod: rawPaymentMethod.toString(),
+      createdAt: rawCreatedAt.toString(),
+      cancellationReason: json['cancellation_reason'] ?? json['cancellationReason'],
+      cancellationReasonDetail: json['cancellation_reason_detail'] ?? json['cancellationReasonDetail'],
+      cancelledAt: json['cancelled_at']?.toString() ?? json['cancelledAt']?.toString(),
+      paidAt: json['paid_at']?.toString() ?? json['paidAt']?.toString(),
+      refundStatus: json['refund_status'] ?? json['refundStatus'],
       items: list,
     );
   }

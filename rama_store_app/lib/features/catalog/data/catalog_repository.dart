@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/storage/local_storage_service.dart';
 import '../../../core/constants/app_constants.dart';
@@ -24,6 +25,7 @@ class ApiCatalogRepository implements CatalogRepository {
   final ApiClient apiClient;
   final LocalStorageService storage;
   final bool useMocks;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   static const String keyPersistentProducts = 'persistent_store_products_v3';
   static const String keyPersistentCategories = 'persistent_store_categories_v3';
@@ -61,58 +63,46 @@ class ApiCatalogRepository implements CatalogRepository {
       Product(
         id: 103,
         sku: 'GRO-001',
-        name: 'Organic Honey & Whole Wheat',
+        name: 'Organic Honey 500g',
         categoryId: 2,
-        categoryName: 'Groceries',
-        sellingPrice: 250.0,
+        categoryName: 'Grocery',
+        sellingPrice: 350.0,
         stock: 40,
         status: 'published',
-        imageUrl: 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=400',
+        imageUrl: 'https://images.unsplash.com/photo-1587049352847-4a222e784d38?w=400',
       ),
       Product(
         id: 104,
         sku: 'MED-001',
-        name: 'First Aid Medical Kit Premium',
+        name: 'Multivitamin Supplements 60s',
         categoryId: 3,
         categoryName: 'Medicine',
-        sellingPrice: 799.0,
-        stock: 15,
+        sellingPrice: 650.0,
+        stock: 18,
         status: 'published',
-        imageUrl: 'https://images.unsplash.com/photo-1603398938378-e54eab446dde?w=400',
+        imageUrl: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400',
       ),
       Product(
         id: 105,
-        sku: 'SPO-001',
-        name: 'Pro Graphite Badminton Racket',
-        categoryId: 6,
-        categoryName: 'Sports Gear',
+        sku: 'SPT-001',
+        name: 'Pro Badminton Racket',
+        categoryId: 5,
+        categoryName: 'Sports',
         sellingPrice: 1499.0,
         stock: 8,
         status: 'published',
         imageUrl: 'https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=400',
       ),
-      Product(
-        id: 106,
-        sku: 'STA-001',
-        name: 'Executive Leather Notebook',
-        categoryId: 5,
-        categoryName: 'Stationery',
-        sellingPrice: 349.0,
-        stock: 30,
-        status: 'published',
-        imageUrl: 'https://images.unsplash.com/photo-1531346878377-a5be20888e57?w=400',
-      ),
-      Product(
-        id: 107,
-        sku: 'TECH-001',
-        name: 'Noise-Cancelling Wireless Earbuds',
-        categoryId: 7,
-        categoryName: 'Tech & Electronics',
-        sellingPrice: 2499.0,
-        stock: 18,
-        status: 'published',
-        imageUrl: 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=400',
-      ),
+    ];
+  }
+
+  List<Category> _getInitialDefaultCategories() {
+    return [
+      Category(id: 1, name: 'Bakery'),
+      Category(id: 2, name: 'Grocery'),
+      Category(id: 3, name: 'Medicine'),
+      Category(id: 4, name: 'Books'),
+      Category(id: 5, name: 'Sports'),
     ];
   }
 
@@ -121,17 +111,35 @@ class ApiCatalogRepository implements CatalogRepository {
     if (raw != null && raw.isNotEmpty) {
       try {
         final decoded = jsonDecode(raw) as List;
-        return decoded.map((item) => Product.fromJson(item as Map<String, dynamic>)).toList();
+        return decoded.map((e) => Product.fromJson(Map<String, dynamic>.from(e))).toList();
       } catch (_) {}
     }
-    final defaults = _getInitialDefaultProducts();
-    _saveStoredProducts(defaults);
-    return defaults;
+    final initial = _getInitialDefaultProducts();
+    _saveStoredProducts(initial);
+    return initial;
   }
 
   Future<void> _saveStoredProducts(List<Product> products) async {
-    final jsonList = products.map((p) => p.toJson()).toList();
-    await storage.setString(keyPersistentProducts, jsonEncode(jsonList));
+    final raw = jsonEncode(products.map((p) => p.toJson()).toList());
+    await storage.setString(keyPersistentProducts, raw);
+  }
+
+  List<Category> _loadStoredCategories() {
+    final raw = storage.getString(keyPersistentCategories);
+    if (raw != null && raw.isNotEmpty) {
+      try {
+        final decoded = jsonDecode(raw) as List;
+        return decoded.map((e) => Category.fromJson(Map<String, dynamic>.from(e))).toList();
+      } catch (_) {}
+    }
+    final initial = _getInitialDefaultCategories();
+    _saveStoredCategories(initial);
+    return initial;
+  }
+
+  Future<void> _saveStoredCategories(List<Category> categories) async {
+    final raw = jsonEncode(categories.map((c) => c.toJson()).toList());
+    await storage.setString(keyPersistentCategories, raw);
   }
 
   @override
@@ -142,7 +150,47 @@ class ApiCatalogRepository implements CatalogRepository {
     int? categoryId,
     double? maxPrice,
   }) async {
-    // 1. Load from Persistent Storage
+    // 1. Try Cloud Firestore first
+    try {
+      final snap = await _firestore
+          .collection('products')
+          .where('status', isEqualTo: 'published')
+          .get();
+
+      if (snap.docs.isNotEmpty) {
+        final fsProducts = snap.docs.map((doc) {
+          final data = doc.data();
+          data['id'] = data['id'] ?? doc.id;
+          return Product.fromJson(data);
+        }).toList();
+
+        var filtered = List<Product>.from(fsProducts);
+        if (search.isNotEmpty) {
+          final q = search.toLowerCase();
+          filtered = filtered.where((p) =>
+            p.name.toLowerCase().contains(q) ||
+            p.sku.toLowerCase().contains(q) ||
+            (p.categoryName?.toLowerCase().contains(q) ?? false)
+          ).toList();
+        }
+        if (categoryId != null) {
+          filtered = filtered.where((p) => p.categoryId == categoryId).toList();
+        }
+        if (maxPrice != null) {
+          filtered = filtered.where((p) => p.sellingPrice <= maxPrice).toList();
+        }
+
+        return ProductResponse(
+          products: filtered,
+          page: page,
+          perPage: perPage,
+          totalCount: filtered.length,
+          totalPages: 1,
+        );
+      }
+    } catch (_) {}
+
+    // 2. Fallback to Local Storage
     final allProducts = _loadStoredProducts();
 
     var filtered = List<Product>.from(allProducts);
@@ -174,15 +222,44 @@ class ApiCatalogRepository implements CatalogRepository {
   }
 
   @override
+  Future<List<Category>> getCategories() async {
+    // 1. Try Cloud Firestore first
+    try {
+      final snap = await _firestore.collection('categories').get();
+      if (snap.docs.isNotEmpty) {
+        return snap.docs.map((doc) {
+          final data = doc.data();
+          data['id'] = data['id'] ?? doc.id;
+          return Category.fromJson(data);
+        }).toList();
+      }
+    } catch (_) {}
+
+    return _loadStoredCategories();
+  }
+
+  @override
+  Future<Announcement> getAnnouncements() async {
+    return Announcement(
+      stockStatus: 'Fresh bakery items updated daily',
+      loyaltyOffer: 'Get 10% Instant Loyalty Cash-Back on all grocery & bakery orders over ₹500!',
+      homeDelivery: 'Free 2-hour express delivery for gold members',
+    );
+  }
+
+  @override
   Future<void> saveProduct(Product product) async {
     final products = _loadStoredProducts();
     products.removeWhere((p) => p.id == product.id || p.sku == product.sku);
     products.insert(0, product);
     await _saveStoredProducts(products);
 
-    // Also sync to backend API if available
+    // Sync to Cloud Firestore
     try {
-      await apiClient.post('/api/admin/products', data: product.toJson());
+      await _firestore.collection('products').doc(product.id.toString()).set(
+        product.toJson(),
+        SetOptions(merge: true),
+      );
     } catch (_) {}
   }
 
@@ -193,69 +270,27 @@ class ApiCatalogRepository implements CatalogRepository {
     await _saveStoredProducts(products);
 
     try {
-      await apiClient.delete('/api/admin/products/$productId');
+      await _firestore.collection('products').doc(productId.toString()).delete();
     } catch (_) {}
   }
 
   @override
   Future<void> updateProduct(Product product) async {
-    final products = _loadStoredProducts();
-    final idx = products.indexWhere((p) => p.id == product.id);
-    if (idx != -1) {
-      products[idx] = product;
-    } else {
-      products.add(product);
-    }
-    await _saveStoredProducts(products);
-
-    try {
-      await apiClient.put('/api/admin/products/${product.id}', data: product.toJson());
-    } catch (_) {}
-  }
-
-  @override
-  Future<List<Category>> getCategories() async {
-    final raw = storage.getString(keyPersistentCategories);
-    if (raw != null && raw.isNotEmpty) {
-      try {
-        final decoded = jsonDecode(raw) as List;
-        return decoded.map((i) => Category.fromJson(i)).toList();
-      } catch (_) {}
-    }
-
-    final defaultCats = [
-      Category(id: 1, name: 'Bakery'),
-      Category(id: 2, name: 'Groceries'),
-      Category(id: 3, name: 'Medicine'),
-      Category(id: 4, name: 'Books'),
-      Category(id: 5, name: 'Stationery'),
-      Category(id: 6, name: 'Sports Gear'),
-      Category(id: 7, name: 'Tech & Electronics'),
-    ];
-
-    await saveCategoriesList(defaultCats);
-    return defaultCats;
-  }
-
-  Future<void> saveCategoriesList(List<Category> categories) async {
-    final jsonList = categories.map((c) => c.toJson()).toList();
-    await storage.setString(keyPersistentCategories, jsonEncode(jsonList));
+    await saveProduct(product);
   }
 
   @override
   Future<void> saveCategory(Category category) async {
-    final current = await getCategories();
-    current.removeWhere((c) => c.id == category.id || c.name.toLowerCase() == category.name.toLowerCase());
-    current.add(category);
-    await saveCategoriesList(current);
-  }
+    final categories = _loadStoredCategories();
+    categories.removeWhere((c) => c.id == category.id);
+    categories.insert(0, category);
+    await _saveStoredCategories(categories);
 
-  @override
-  Future<Announcement> getAnnouncements() async {
-    return Announcement(
-      stockStatus: 'Store Operational',
-      loyaltyOffer: '10% Loyalty Cash-Back Active',
-      homeDelivery: 'Free Delivery above ₹500',
-    );
+    try {
+      await _firestore.collection('categories').doc(category.id.toString()).set(
+        category.toJson(),
+        SetOptions(merge: true),
+      );
+    } catch (_) {}
   }
 }
