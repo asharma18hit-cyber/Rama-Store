@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../network/api_client.dart';
 import '../../features/auth/data/auth_model.dart';
+import 'firebase_auth_service.dart';
 
 class OtpSendResult {
   final bool isSuccess;
@@ -31,7 +33,7 @@ class OtpVerificationResult {
 class OtpService {
   static final Map<String, DateTime> _lastSentTimestamps = {};
 
-  /// Normalizes any Indian mobile input into standard MSG91 format (91XXXXXXXXXX)
+  /// Normalizes any Indian mobile input into standard 91XXXXXXXXXX format
   static String formatPhoneNumber(String rawPhone) {
     final digits = rawPhone.replaceAll(RegExp(r'\D'), '');
     if (digits.length == 10) {
@@ -58,20 +60,13 @@ class OtpService {
     return rawPhone;
   }
 
-  static Map<String, dynamic>? _toMap(dynamic data) {
-    if (data == null) return null;
-    if (data is Map<String, dynamic>) return data;
-    if (data is Map) return Map<String, dynamic>.from(data);
-    return null;
-  }
-
-  /// Dispatches SMS OTP via Secure Backend Gateway using MSG91
-  static Future<OtpSendResult> sendOtp(String identifier, {required ApiClient apiClient}) async {
+  /// Dispatches Firebase Phone SMS OTP
+  static Future<OtpSendResult> sendOtp(String identifier, {ApiClient? apiClient}) async {
     final cleanId = identifier.trim();
     if (cleanId.isEmpty) {
       return const OtpSendResult(
         isSuccess: false,
-        errorMessage: 'Please enter a valid mobile number or email.',
+        errorMessage: 'Please enter a valid mobile number.',
       );
     }
 
@@ -86,194 +81,52 @@ class OtpService {
       );
     }
 
-    if (!cleanId.contains('@')) {
-      final formattedPhone = formatPhoneNumber(cleanId);
-      final digits = formattedPhone.replaceAll(RegExp(r'\D'), '');
-      if (digits.length < 12) {
-        return const OtpSendResult(
-          isSuccess: false,
-          errorMessage: 'Please enter a valid 10-digit Indian mobile number.',
-        );
-      }
-
-      try {
-        dynamic res;
-        try {
-          res = await apiClient.post('/api/auth/otp/send', data: {
-            'phone': formattedPhone,
-          }).timeout(const Duration(seconds: 15));
-        } catch (e) {
-          if (e.toString().contains('404')) {
-            res = await apiClient.post('/api/auth/login-otp-request', data: {
-              'email_or_phone': cleanId,
-            }).timeout(const Duration(seconds: 15));
-          } else {
-            rethrow;
-          }
-        }
-
-        final data = _toMap(res);
-        if (data != null && (data['success'] == true || data.containsKey('debug_otp') || (data.containsKey('message') && !data.containsKey('error')))) {
-          _lastSentTimestamps[cleanId] = now;
-          return OtpSendResult(
-            isSuccess: true,
-            message: data['message']?.toString() ?? 'OTP sent via SMS.',
-          );
-        } else {
-          return OtpSendResult(
-            isSuccess: false,
-            errorMessage: data?['message']?.toString() ?? data?['error']?.toString() ?? 'Failed to send SMS OTP.',
-          );
-        }
-      } catch (e) {
-        final msg = e.toString().replaceAll('Exception: ', '');
-        return OtpSendResult(
-          isSuccess: false,
-          errorMessage: msg.contains('503') || msg.contains('unconfigured')
-              ? 'SMS provider is currently being configured on the server. Please sign in with password.'
-              : msg,
-        );
-      }
-    }
-
-    return const OtpSendResult(
-      isSuccess: false,
-      errorMessage: 'Email OTP is not supported on this endpoint. Please enter your mobile number.',
-    );
-  }
-
-  /// Verifies SMS OTP with MSG91 via Secure Backend
-  static Future<OtpVerificationResult> verifyOtp(String identifier, String enteredCode, {required ApiClient apiClient}) async {
-    final cleanId = identifier.trim();
-    final code = enteredCode.trim();
-
-    if (code.isEmpty || code.length != 6) {
-      return const OtpVerificationResult(
-        isValid: false,
-        error: 'Please enter a valid 6-digit verification code.',
+    final phoneResult = await FirebaseAuthService.sendPhoneOtp(cleanId);
+    if (phoneResult.isSuccess) {
+      _lastSentTimestamps[cleanId] = now;
+      return OtpSendResult(
+        isSuccess: true,
+        message: phoneResult.message ?? 'SMS verification code sent.',
       );
-    }
-
-    if (!cleanId.contains('@')) {
-      final formattedPhone = formatPhoneNumber(cleanId);
-
-      try {
-        dynamic res;
-        try {
-          res = await apiClient.post('/api/auth/otp/verify', data: {
-            'phone': formattedPhone,
-            'otp': code,
-          }).timeout(const Duration(seconds: 15));
-        } catch (e) {
-          if (e.toString().contains('404')) {
-            res = await apiClient.post('/api/auth/login-otp-verify', data: {
-              'email_or_phone': cleanId,
-              'otp': code,
-            }).timeout(const Duration(seconds: 15));
-          } else {
-            rethrow;
-          }
-        }
-
-        final data = _toMap(res);
-        final userJson = _toMap(data?['user']);
-        if (data != null && (data['success'] == true || userJson != null)) {
-          _lastSentTimestamps.remove(cleanId);
-          if (userJson != null) {
-            final user = AuthUser.fromJson(userJson);
-            return OtpVerificationResult(
-              isValid: true,
-              user: user,
-            );
-          } else if (data['success'] == true) {
-            return const OtpVerificationResult(
-              isValid: true,
-            );
-          }
-        }
-        return OtpVerificationResult(
-          isValid: false,
-          error: data?['message']?.toString() ?? data?['error']?.toString() ?? 'Incorrect OTP. Please check SMS and try again.',
-        );
-      } catch (e) {
-        return OtpVerificationResult(
-          isValid: false,
-          error: e.toString().replaceAll('Exception: ', ''),
-        );
-      }
-    }
-
-    return const OtpVerificationResult(
-      isValid: false,
-      error: 'Invalid identifier for OTP verification.',
-    );
-  }
-
-  /// Resends SMS OTP via MSG91 Retry API
-  static Future<OtpSendResult> resendOtp(String identifier, {required ApiClient apiClient}) async {
-    final cleanId = identifier.trim();
-    final formattedPhone = formatPhoneNumber(cleanId);
-
-    try {
-      final res = await apiClient.post('/api/auth/otp/retry', data: {
-        'phone': formattedPhone,
-      }).timeout(const Duration(seconds: 15));
-
-      final data = _toMap(res);
-      if (data != null && data['success'] == true) {
-        _lastSentTimestamps[cleanId] = DateTime.now();
-        return OtpSendResult(
-          isSuccess: true,
-          message: data['message']?.toString() ?? 'New OTP sent via SMS.',
-        );
-      } else {
-        return OtpSendResult(
-          isSuccess: false,
-          errorMessage: data?['message']?.toString() ?? 'Failed to resend OTP.',
-        );
-      }
-    } catch (e) {
+    } else {
       return OtpSendResult(
         isSuccess: false,
-        errorMessage: e.toString().replaceAll('Exception: ', ''),
+        errorMessage: phoneResult.errorMessage ?? 'Failed to send SMS OTP.',
       );
     }
   }
 
-  /// Verifies MSG91 OTP Widget JWT Access Token server-side
-  static Future<OtpVerificationResult> verifyWidgetAccessToken(String accessToken, {required ApiClient apiClient}) async {
-    final token = accessToken.trim();
-    if (token.isEmpty) {
-      return const OtpVerificationResult(
-        isValid: false,
-        error: 'Access token is required for verification.',
-      );
-    }
-
+  /// Verifies 6-digit SMS OTP using Firebase Auth
+  static Future<OtpVerificationResult> verifyOtp(String identifier, String enteredCode, {ApiClient? apiClient}) async {
     try {
-      final res = await apiClient.post('/api/auth/msg91/verify-token', data: {
-        'access_token': token,
-      }).timeout(const Duration(seconds: 15));
-
-      final data = _toMap(res);
-      if (data != null && data['success'] == true) {
-        final userJson = _toMap(data['user']);
-        final user = userJson != null ? AuthUser.fromJson(userJson) : null;
+      final userCred = await FirebaseAuthService.verifySmsCode(enteredCode);
+      final fbUser = userCred.user;
+      if (fbUser != null) {
+        final phone = fbUser.phoneNumber ?? FirebaseAuthService.formatPhoneNumber(identifier);
+        final user = AuthUser(
+          emailOrPhone: phone,
+          fullname: fbUser.displayName ?? 'Customer',
+          role: 'customer',
+        );
         return OtpVerificationResult(
           isValid: true,
           user: user,
         );
-      } else {
-        return OtpVerificationResult(
-          isValid: false,
-          error: data?['message']?.toString() ?? 'Invalid or expired MSG91 access token.',
-        );
       }
+      return const OtpVerificationResult(
+        isValid: false,
+        error: 'Authentication failed. Please try again.',
+      );
     } catch (e) {
       return OtpVerificationResult(
         isValid: false,
         error: e.toString().replaceAll('Exception: ', ''),
       );
     }
+  }
+
+  /// Resends SMS OTP via Firebase Auth
+  static Future<OtpSendResult> resendOtp(String identifier, {ApiClient? apiClient}) async {
+    return sendOtp(identifier, apiClient: apiClient);
   }
 }

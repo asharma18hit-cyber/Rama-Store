@@ -32,9 +32,12 @@ dependencies:
   intl: ^0.20.2
   url_launcher: ^6.2.5
   image_picker: ^1.1.2
-  # Firebase Phone Auth (10,000 Free SMS / Month)
+  # Firebase Core, Auth, Firestore, Storage & App Check
   firebase_core: ^3.1.0
   firebase_auth: ^5.1.0
+  cloud_firestore: ^5.0.0
+  firebase_storage: ^12.0.0
+  firebase_app_check: ^0.3.0
 
   cupertino_icons: ^1.0.6
 

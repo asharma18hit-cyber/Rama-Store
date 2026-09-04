@@ -3,7 +3,6 @@ import '../../../core/network/api_client.dart';
 import '../../../core/storage/local_storage_service.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/services/otp_service.dart';
-import '../../../core/services/msg91_widget_service.dart';
 import 'auth_model.dart';
 
 abstract class AuthRepository {
@@ -145,34 +144,15 @@ class ApiAuthRepository implements AuthRepository {
     final cleanInput = emailOrPhone.trim();
 
     if (!cleanInput.contains('@')) {
-      // 1. Try MSG91 Widget / Direct Gateway
-      try {
-        final result = await Msg91WidgetService.sendOtp(cleanInput, apiClient: apiClient);
-        if (result.isSuccess) {
-          return {
-            'success': true,
-            'message': result.message ?? 'OTP sent via SMS.',
-          };
-        }
-      } catch (_) {}
-
-      // 2. Direct server fallback to /api/auth/login-otp-request
-      try {
-        final res = await apiClient.post('/api/auth/login-otp-request', data: {
-          'email_or_phone': cleanInput,
-        });
-        final map = _toMap(res);
+      final result = await OtpService.sendOtp(cleanInput, apiClient: apiClient);
+      if (result.isSuccess) {
         return {
           'success': true,
-          'message': map['message']?.toString() ?? 'OTP sent via SMS.',
+          'message': result.message ?? 'SMS OTP sent successfully.',
         };
-      } catch (e) {
-        throw Exception(e.toString().replaceAll('Exception: ', ''));
       }
-
-      throw Exception('Failed to send SMS OTP.');
+      throw Exception(result.errorMessage ?? 'Failed to send SMS OTP.');
     } else {
-      // Backend email request
       final res = await apiClient.post('/api/auth/login-otp-request', data: {
         'email_or_phone': cleanInput.toLowerCase(),
       });
@@ -187,34 +167,12 @@ class ApiAuthRepository implements AuthRepository {
     final cleanOtp = otp.trim();
 
     if (!cleanInput.contains('@')) {
-      // 1. Try MSG91 Widget / Direct Gateway verify
-      try {
-        final result = await Msg91WidgetService.verifyOtp(cleanInput, cleanOtp, apiClient: apiClient);
-        if (result.isValid && result.user != null) {
-          await _saveUserLocal(result.user!);
-          return result.user!;
-        }
-      } catch (_) {}
-
-      // 2. Direct server fallback to /api/auth/login-otp-verify
-      try {
-        final res = await apiClient.post('/api/auth/login-otp-verify', data: {
-          'email_or_phone': cleanInput,
-          'otp': cleanOtp,
-        });
-        final map = _toMap(res);
-        final userJson = map['user'] is Map ? Map<String, dynamic>.from(map['user']) : null;
-        if (userJson != null) {
-          final user = AuthUser.fromJson(userJson);
-          await _saveUserLocal(user);
-          return user;
-        }
-        throw Exception(map['error']?.toString() ?? map['message']?.toString() ?? 'Invalid verification code. Please check your SMS and try again.');
-      } catch (e) {
-        throw Exception(e.toString().replaceAll('Exception: ', ''));
+      final result = await OtpService.verifyOtp(cleanInput, cleanOtp, apiClient: apiClient);
+      if (result.isValid && result.user != null) {
+        await _saveUserLocal(result.user!);
+        return result.user!;
       }
-
-      throw Exception('Invalid SMS code. Please try again.');
+      throw Exception(result.error ?? 'Invalid verification code. Please check SMS and try again.');
     } else {
       final res = await apiClient.post('/api/auth/login-otp-verify', data: {
         'email_or_phone': cleanInput.toLowerCase(),

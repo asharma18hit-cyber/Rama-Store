@@ -1,0 +1,104 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions for security validation
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && (request.auth.token.admin == true || request.auth.token.role == 'admin');
+    }
+
+    // Default deny all access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // User profiles collection
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) && (!request.resource.data.keys().hasAny(['role']) || request.resource.data.role == 'customer');
+      allow update: if isOwner(userId) && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role']) || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // Categories (Public catalog read, Admin write)
+    match /categories/{categoryId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Products (Public published read, Admin full access)
+    match /products/{productId} {
+      allow read: if resource.data.status == 'published' || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // Shopping Carts (User isolation)
+    match /carts/{userId} {
+      allow read, write: if isOwner(userId) || isAdmin();
+    }
+
+    // User Wishlists (User isolation)
+    match /wishlists/{userId} {
+      allow read, write: if isOwner(userId) || isAdmin();
+    }
+
+    // Customer Delivery Addresses
+    match /addresses/{userId}/user_addresses/{addressId} {
+      allow read, write: if isOwner(userId) || isAdmin();
+    }
+
+    // Orders (Customer access isolated to own orders, restricted updates)
+    match /orders/{orderId} {
+      allow read: if isAuthenticated() && (resource.data.customerId == request.auth.uid || isAdmin());
+      
+      // Customer order creation (Must start as PENDING payment and Pending status)
+      allow create: if isAuthenticated() 
+        && request.resource.data.customerId == request.auth.uid
+        && request.resource.data.paymentStatus == 'PENDING'
+        && request.resource.data.orderStatus == 'Pending';
+
+      // Customer cancellation or Admin status management
+      allow update: if isAdmin() || (
+        isAuthenticated() 
+        && resource.data.customerId == request.auth.uid
+        && request.resource.data.orderStatus == 'Cancelled'
+        && resource.data.orderStatus in ['Pending', 'Processing']
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['paymentStatus', 'totalAmount', 'customerId'])
+      );
+
+      allow delete: if isAdmin();
+    }
+
+    // Order Items (Subcollection or linked items)
+    match /order_items/{itemId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // Discount Coupons (Read allowed, Admin write)
+    match /coupons/{couponId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // Product Reviews
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
+    }
+
+    // Notifications (User isolation)
+    match /notifications/{userId}/user_notifications/{notificationId} {
+      allow read, write: if isOwner(userId) || isAdmin();
+    }
+  }
+}
