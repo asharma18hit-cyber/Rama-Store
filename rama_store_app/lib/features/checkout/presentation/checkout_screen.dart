@@ -48,9 +48,18 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     final cartNotifier = ref.read(cartNotifierProvider.notifier);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: const Color(0xFFF8F9FF),
       appBar: AppBar(
-        title: const Text('Checkout & Payment'),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_rounded, color: Color(0xFF3525CD)),
+          onPressed: () => context.pop(),
+        ),
+        title: const Text(
+          'CHECKOUT & PAYMENT',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, letterSpacing: 0.8, color: Color(0xFF3525CD)),
+        ),
       ),
       body: cartState.items.isEmpty
           ? Center(
@@ -62,20 +71,20 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                     Container(
                       padding: const EdgeInsets.all(28),
                       decoration: const BoxDecoration(
-                        color: Color(0xFF1E293B),
+                        color: Color(0xFFEFF4FF),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.shopping_bag_outlined, size: 64, color: AppColors.textMuted),
+                      child: const Icon(Icons.shopping_bag_outlined, size: 64, color: Color(0xFF3525CD)),
                     ),
                     const SizedBox(height: 24),
                     const Text(
-                      'YOUR BAG IS EMPTY',
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, letterSpacing: 1.2, color: AppColors.textPrimary),
+                      'YOUR CART IS EMPTY',
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, letterSpacing: 1.2, color: Color(0xFF0B1C30)),
                     ),
                     const SizedBox(height: 8),
                     const Text(
                       'Please add items to your shopping bag before proceeding to checkout.',
-                      style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
+                      style: TextStyle(fontSize: 14, color: Color(0xFF464555)),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 28),
@@ -98,34 +107,42 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: AppColors.surface,
+                      color: Colors.white,
                       borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: const Color(0xFFC7C4D8), width: 1),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.03),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text('${cartState.totalItemCount} Items in Order',
-                            style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                            style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF0B1C30))),
                         Text(Formatters.formatCurrency(cartState.grandTotal),
-                            style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primaryGoldLight, fontSize: 18)),
+                            style: const TextStyle(fontWeight: FontWeight.w900, color: Color(0xFF3525CD), fontSize: 18)),
                       ],
                     ),
                   ),
                   const SizedBox(height: 20),
 
                   // Delivery Address
-                  const Text('Delivery Address', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textPrimary)),
+                  const Text('Delivery Address', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF0B1C30))),
                   const SizedBox(height: 12),
                   AppTextField(
                     controller: _addressController,
                     label: 'Shipping Address',
                     hint: 'House/Flat No., Street, Landmark, City, PIN',
-                    prefixIcon: const Icon(Icons.location_on_outlined, color: AppColors.textSecondary),
+                    prefixIcon: const Icon(Icons.location_on_outlined, color: Color(0xFF777587)),
                   ),
                   const SizedBox(height: 24),
 
                   // Payment Methods Tabs
-                  const Text('Select Payment Method', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textPrimary)),
+                  const Text('Select Payment Method', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF0B1C30))),
                   const SizedBox(height: 12),
                   Row(
                     children: [

@@ -52,23 +52,29 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
         .toList();
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: const Color(0xFFF8F9FF),
       appBar: AppBar(
-        title: const Text('ELITE COLLECTION'),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: false,
+        title: const Text(
+          'ELITE COLLECTION',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: Color(0xFF3525CD), letterSpacing: 0.8),
+        ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.tune_rounded, color: AppColors.secondaryFixedDim),
+            icon: const Icon(Icons.tune_rounded, color: Color(0xFF3525CD)),
             onPressed: () {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text('Filter Active: Filter by Category, Material & Price Range'),
-                  backgroundColor: AppColors.primary,
+                  backgroundColor: Color(0xFF3525CD),
                 ),
               );
             },
           ),
           IconButton(
-            icon: const Icon(Icons.favorite_border, color: AppColors.secondaryFixedDim),
+            icon: const Icon(Icons.favorite_border_rounded, color: Color(0xFF3525CD)),
             onPressed: () => context.push('/wishlist'),
           ),
         ],
@@ -80,20 +86,20 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
           // Store Inventory Status Banner Pill
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
-            color: AppColors.surface,
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+            color: const Color(0xFFEFF4FF),
             child: Row(
               children: [
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
-                    color: AppColors.secondaryFixedDim,
+                    color: const Color(0xFF3525CD),
                     borderRadius: BorderRadius.circular(4),
                   ),
-                  child: const Text('VERIFIED INVENTORY', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Color(0xFF005236))),
+                  child: const Text('VERIFIED INVENTORY', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.white)),
                 ),
                 const SizedBox(width: 8),
-                const Text('Precision Curated Fashion & Daily Essentials', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                const Text('Precision Curated Fashion & Daily Essentials', style: TextStyle(fontSize: 11, color: Color(0xFF464555))),
               ],
             ),
           ),
@@ -108,13 +114,29 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
                   ref.read(catalogNotifierProvider.notifier).setSearchQuery(val.trim());
                 });
               },
-              style: const TextStyle(color: AppColors.textPrimary),
+              style: const TextStyle(color: Color(0xFF0B1C30)),
               decoration: InputDecoration(
                 hintText: 'Search products by title, author, brand...',
-                prefixIcon: const Icon(Icons.search, color: AppColors.textSecondary),
+                hintStyle: const TextStyle(color: Color(0xFF777587), fontSize: 13),
+                filled: true,
+                fillColor: Colors.white,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Color(0xFFC7C4D8), width: 1),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Color(0xFFC7C4D8), width: 1),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Color(0xFF3525CD), width: 1.5),
+                ),
+                prefixIcon: const Icon(Icons.search, color: Color(0xFF777587)),
                 suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
-                        icon: const Icon(Icons.clear, color: AppColors.textMuted),
+                        icon: const Icon(Icons.clear, color: Color(0xFF777587)),
                         onPressed: () {
                           _searchController.clear();
                           ref.read(catalogNotifierProvider.notifier).setSearchQuery('');
@@ -167,9 +189,9 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: const [
-                            Icon(Icons.search_off, size: 64, color: AppColors.textMuted),
+                            Icon(Icons.search_off_rounded, size: 64, color: Color(0xFF777587)),
                             SizedBox(height: 12),
-                            Text('No matching products found', style: TextStyle(color: AppColors.textSecondary)),
+                            Text('No matching products found', style: TextStyle(color: Color(0xFF464555), fontSize: 14)),
                           ],
                         ),
                       )
@@ -213,11 +235,15 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
         label: Text(label),
         selected: isSelected,
         onSelected: (_) => onTap(),
-        selectedColor: AppColors.secondaryFixedDim,
-        backgroundColor: const Color(0xFF1E293B),
-        checkmarkColor: const Color(0xFF005236),
+        selectedColor: const Color(0xFF3525CD),
+        backgroundColor: Colors.white,
+        side: BorderSide(
+          color: isSelected ? const Color(0xFF3525CD) : const Color(0xFFC7C4D8),
+          width: 1,
+        ),
+        checkmarkColor: Colors.white,
         labelStyle: TextStyle(
-          color: isSelected ? const Color(0xFF005236) : AppColors.textSecondary,
+          color: isSelected ? Colors.white : const Color(0xFF464555),
           fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
           fontSize: 12,
         ),

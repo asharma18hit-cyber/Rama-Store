@@ -31,10 +31,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final isTablet = MediaQuery.of(context).size.width >= 600 && MediaQuery.of(context).size.width < 1024;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0B0F19),
+      backgroundColor: const Color(0xFFF8F9FF),
       body: RefreshIndicator(
-        color: AppColors.secondaryFixedDim,
-        backgroundColor: const Color(0xFF0F172A),
+        color: const Color(0xFF3525CD),
+        backgroundColor: Colors.white,
         onRefresh: () => ref.read(catalogNotifierProvider.notifier).initCatalog(),
         child: CustomScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
@@ -44,7 +44,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   child: _buildTopAnnouncementRibbon(catalogState),
                 ),
 
-            // 2. Header Navigation
+            // 2. Header Navigation (Stitch Light Theme)
             SliverToBoxAdapter(
               child: _buildHeader(context, isDesktop),
             ),
@@ -192,123 +192,115 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  // --- 2. HEADER NAVIGATION ---
+  // --- 2. HEADER NAVIGATION (Stitch Spec) ---
   Widget _buildHeader(BuildContext context, bool isDesktop) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: const BoxDecoration(
-        color: Color(0xFF0F172A),
-        border: Border(bottom: BorderSide(color: Color(0x1AFFFFFF), width: 1)),
+        color: Colors.white,
+        border: Border(bottom: BorderSide(color: Color(0xFFC7C4D8), width: 0.8)),
       ),
       child: SafeArea(
         bottom: false,
-        child: Row(
+        child: Column(
           children: [
-            // Brand Logo & Elite Monogram
-            GestureDetector(
-              onTap: () => context.go('/home'),
+            // Top Bar Row
+            Container(
+              height: 64,
+              padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Row(
-                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: AppColors.secondaryFixedDim,
-                      borderRadius: BorderRadius.circular(10),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.secondaryFixedDim.withValues(alpha: 0.3),
-                          blurRadius: 10,
-                          offset: const Offset(0, 2),
+                  // Left: Search Button Trigger
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: IconButton(
+                        icon: const Icon(Icons.search_rounded, size: 24, color: Color(0xFF464555)),
+                        onPressed: () => context.go('/catalog'),
+                      ),
+                    ),
+                  ),
+
+                  // Center: Brand Logo in Primary Indigo
+                  GestureDetector(
+                    onTap: () => context.go('/home'),
+                    child: const Text(
+                      'Rama Store',
+                      style: TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.8,
+                        color: Color(0xFF3525CD),
+                      ),
+                    ),
+                  ),
+
+                  // Right: Account & Cart Actions
+                  Expanded(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.person_outline_rounded, size: 24, color: Color(0xFF464555)),
+                          tooltip: 'Account',
+                          onPressed: () => context.go('/profile'),
+                        ),
+                        const SizedBox(width: 8),
+                        IconButton(
+                          icon: const Icon(Icons.shopping_bag_outlined, size: 24, color: Color(0xFF464555)),
+                          tooltip: 'Cart',
+                          onPressed: () => context.go('/cart'),
                         ),
                       ],
                     ),
-                    child: const Icon(Icons.shopping_bag_rounded, size: 20, color: Color(0xFF005236)),
-                  ),
-                  const SizedBox(width: 10),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: const [
-                      Text(
-                        'RAMA STORE',
-                        style: TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 1.4,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      Text(
-                        'HIGH-PERFORMANCE COMMERCE',
-                        style: TextStyle(
-                          fontSize: 8,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1.2,
-                          color: AppColors.secondaryFixedDim,
-                        ),
-                      ),
-                    ],
                   ),
                 ],
               ),
             ),
-            const SizedBox(width: 16),
 
-            // Search Bar Trigger
-            Expanded(
-              child: GestureDetector(
-                onTap: () => context.go('/catalog'),
-                child: Container(
-                  height: 42,
-                  padding: const EdgeInsets.symmetric(horizontal: 14),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF1E293B),
-                    borderRadius: BorderRadius.circular(22),
-                    border: Border.all(color: const Color(0xFF334155)),
-                  ),
-                  child: Row(
-                    children: const [
-                      Icon(Icons.search_rounded, size: 18, color: AppColors.secondaryFixedDim),
-                      SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          'Search fashion, groceries, books, medicine, sports...',
-                          style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ),
+            // Bottom Navigation Tier (Desktop Link Bar)
+            if (isDesktop)
+              Container(
+                height: 40,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFFFFFFF),
+                  border: Border(top: BorderSide(color: Color(0xFFE1E3E4), width: 0.8)),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _buildTopNavLink(context, 'Shop', '/catalog', isSelected: true),
+                    const SizedBox(width: 32),
+                    _buildTopNavLink(context, 'Collections', '/catalog'),
+                    const SizedBox(width: 32),
+                    _buildTopNavLink(context, 'New Arrivals', '/catalog'),
+                    const SizedBox(width: 32),
+                    _buildTopNavLink(context, 'Brands', '/catalog'),
+                  ],
                 ),
               ),
-            ),
-            const SizedBox(width: 10),
-
-            // Loyalty Rewards Button
-            IconButton(
-              icon: const Icon(Icons.loyalty_rounded, size: 22),
-              color: AppColors.accentAmber,
-              tooltip: '10% Loyalty Cash-Back',
-              onPressed: () => context.push('/loyalty'),
-            ),
-
-            // Wishlist Button
-            IconButton(
-              icon: const Icon(Icons.favorite_border_rounded, size: 22),
-              color: AppColors.textPrimary,
-              tooltip: 'Wishlist',
-              onPressed: () => context.push('/wishlist'),
-            ),
-
-            // Cart Button
-            IconButton(
-              icon: const Icon(Icons.shopping_bag_outlined, size: 22),
-              color: AppColors.textPrimary,
-              tooltip: 'Cart',
-              onPressed: () => context.go('/cart'),
-            ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTopNavLink(BuildContext context, String label, String route, {bool isSelected = false}) {
+    return InkWell(
+      onTap: () => context.go(route),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        decoration: isSelected
+            ? const BoxDecoration(
+                border: Border(bottom: BorderSide(color: Color(0xFF3525CD), width: 2)),
+              )
+            : null,
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+            color: isSelected ? const Color(0xFF3525CD) : const Color(0xFF464555),
+          ),
         ),
       ),
     );
@@ -329,8 +321,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Container(
       height: 48,
       decoration: const BoxDecoration(
-        color: Color(0xFF0D1322),
-        border: Border(bottom: BorderSide(color: Color(0x14FFFFFF), width: 1)),
+        color: Color(0xFFEFF4FF),
+        border: Border(bottom: BorderSide(color: Color(0xFFE1E3E4), width: 0.8)),
       ),
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
@@ -357,10 +349,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                 decoration: BoxDecoration(
-                  color: isSelected ? AppColors.secondaryFixedDim : const Color(0xFF1E293B),
+                  color: isSelected ? const Color(0xFF3525CD) : Colors.white,
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                    color: isSelected ? AppColors.secondaryFixedDim : const Color(0xFF334155),
+                    color: isSelected ? const Color(0xFF3525CD) : const Color(0xFFC7C4D8),
                   ),
                 ),
                 child: Center(
@@ -368,8 +360,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     tab['label'] as String,
                     style: TextStyle(
                       fontSize: 11,
-                      fontWeight: isSelected ? FontWeight.w900 : FontWeight.w600,
-                      color: isSelected ? const Color(0xFF005236) : AppColors.textPrimary,
+                      fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                      color: isSelected ? Colors.white : const Color(0xFF0B1C30),
                     ),
                   ),
                 ),
@@ -381,153 +373,83 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  // --- 4. HERO SECTION ---
+  // --- 4. HERO SECTION (Exact Stitch Spec) ---
   Widget _buildHeroSection(BuildContext context, bool isDesktop, bool isTablet) {
     return Container(
+      height: isDesktop ? 600 : (isTablet ? 480 : 420),
+      width: double.infinity,
       margin: const EdgeInsets.symmetric(horizontal: 16),
-      child: HoverCard(
-        glowColor: const Color(0xFF3525CD),
-        child: Container(
-          width: double.infinity,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(24),
-            gradient: const LinearGradient(
-              colors: [Color(0xFF1E1B4B), Color(0xFF3525CD), Color(0xFF0F172A)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: Stack(
+          children: [
+            // Background Image
+            Positioned.fill(
+              child: CachedNetworkImage(
+                imageUrl:
+                    'https://lh3.googleusercontent.com/aida-public/AB6AXuBT_wnjFgL5Xp01ccSxfgiRcjTYsvPdt8XLqcOJCpCJhB8E0T2HDGL9mJnfNynIrBGxzFUzHXUwcGaKOLMpaEQYhhS_cFZQ9uHPGXJyKYlsFdSOYfa2-Jt3MPzfxh5gZbtvUQNII-y5ubhEgAmDev5I2jYTxfnTOEzVd89t0JyfsgEDqRlEO2C0b5h9EkZyNLluRl5eZfvlShB3-DAoY18L2uFDuTPV_Q6ydNg7mTKiTFVK-eVYScNF',
+                fit: BoxFit.cover,
+                errorWidget: (_, __, ___) => Container(color: const Color(0xFF0B1C30)),
+              ),
             ),
-            border: Border.all(color: const Color(0xFF4EDEAE).withValues(alpha: 0.4), width: 1.5),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF3525CD).withValues(alpha: 0.35),
-                blurRadius: 30,
-                offset: const Offset(0, 10),
-              ),
-            ],
-          ),
-          child: Stack(
-            children: [
-              Positioned(
-                right: -30,
-                bottom: -30,
-                child: Icon(Icons.flash_on_rounded, size: isDesktop ? 280 : 180, color: Colors.white.withValues(alpha: 0.05)),
-              ),
-              Padding(
-                padding: EdgeInsets.all(isDesktop ? 40.0 : (isTablet ? 28.0 : 20.0)),
+
+            // Black/40 Dark Overlay
+            Positioned.fill(
+              child: Container(color: Colors.black.withValues(alpha: 0.45)),
+            ),
+
+            // Hero Text & Call-To-Action Content
+            Align(
+              alignment: Alignment.center,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Edition Badges
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: AppColors.secondaryFixedDim,
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: const Text(
-                            '⚡ LIMITED RELEASE // AUTUMN 2026',
-                            style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: Color(0xFF005236)),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFD97706),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: const Text(
-                            '10% CASH-BACK',
-                            style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.white),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Main Headline
                     Text(
-                      'Precision Fashion & Curated Daily Essentials.',
+                      'ENGINEERED FOR EXCELLENCE',
+                      textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: isDesktop ? 32 : (isTablet ? 24 : 20),
-                        fontWeight: FontWeight.w900,
+                        fontSize: isDesktop ? 44 : (isTablet ? 32 : 24),
+                        fontWeight: FontWeight.w800,
                         color: Colors.white,
-                        letterSpacing: -0.6,
-                        height: 1.2,
+                        letterSpacing: -0.8,
+                        height: 1.1,
                       ),
                     ),
-                    const SizedBox(height: 8),
-
-                    // Subtitle
-                    Text(
-                      'Hyper-local 30-min express fulfillment for artisanal bakery, medical prescriptions, organic groceries & literature.',
-                      style: TextStyle(
-                        fontSize: isDesktop ? 14 : 12,
-                        color: Colors.white70,
-                        height: 1.4,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-
-                    // Dual CTAs
-                    Wrap(
-                      spacing: 12,
-                      runSpacing: 10,
-                      children: [
-                        ElevatedButton.icon(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.secondaryFixedDim,
-                            foregroundColor: const Color(0xFF005236),
-                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                            elevation: 4,
-                          ),
-                          icon: const Icon(Icons.arrow_forward_rounded, size: 16),
-                          label: const Text('Shop Complete Catalog →', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                          onPressed: () => context.go('/catalog'),
+                    const SizedBox(height: 14),
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 600),
+                      child: Text(
+                        'Discover the intersection of high-performance engineering and industrial luxury. Precision-crafted gear for the modern elite.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: isDesktop ? 16 : 13,
+                          color: Colors.white.withValues(alpha: 0.9),
+                          height: 1.5,
                         ),
-                        OutlinedButton.icon(
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: Colors.white,
-                            side: const BorderSide(color: Colors.white38),
-                            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                          ),
-                          icon: const Icon(Icons.download_rounded, size: 16, color: AppColors.secondaryFixedDim),
-                          label: const Text('Download Native App APK', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                          onPressed: () => context.push('/downloads'),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 18),
-
-                    // Live Delivery Indicator Pill
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.4),
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: Colors.white12),
                       ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: const [
-                          Icon(Icons.bolt_rounded, size: 16, color: AppColors.secondaryFixedDim),
-                          SizedBox(width: 8),
-                          Text(
-                            '📍 Hyper-Local Express Delivery Active • Free on orders above ₹500',
-                            style: TextStyle(fontSize: 11, color: Colors.white, fontWeight: FontWeight.w600),
-                          ),
-                        ],
+                    ),
+                    const SizedBox(height: 24),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF3525CD),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        elevation: 4,
+                      ),
+                      onPressed: () => context.go('/catalog'),
+                      child: const Text(
+                        'Explore the Elite Series',
+                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
                       ),
                     ),
                   ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -607,9 +529,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             child: Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: const Color(0xFF1E293B),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0xFF334155)),
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFFC7C4D8), width: 0.8),
+                boxShadow: const [
+                  BoxShadow(color: Color(0x080F172A), blurRadius: 8, offset: Offset(0, 2)),
+                ],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -618,8 +543,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: color.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(10),
+                      color: color.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(dept['icon'] as IconData, color: color, size: 24),
                   ),
@@ -630,14 +555,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         dept['name'] as String,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF0B1C30)),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         dept['desc'] as String,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 10, color: AppColors.textSecondary),
+                        style: const TextStyle(fontSize: 10, color: Color(0xFF464555)),
                       ),
                     ],
                   ),
@@ -650,154 +575,153 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  // --- 6. CURATED BENTO SHOWCASE ---
+  // --- 6. CURATED BENTO SHOWCASE (Exact Stitch HTML Layout) ---
   Widget _buildBentoShowcase(BuildContext context, bool isDesktop) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: isDesktop
-          ? Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Large Bento Card
-                Expanded(
-                  flex: 3,
-                  child: _buildBentoCard(
-                    context,
-                    title: 'URBAN OVERDRIVE',
-                    subtitle: 'Master the streets with reinforced technical fabrics & instant delivery.',
-                    tag: 'NEW DROP',
-                    tagColor: AppColors.secondaryFixedDim,
-                    gradient: const [Color(0xFF1E1B4B), Color(0xFF3525CD), Color(0xFF0F172A)],
-                    height: 220,
-                  ),
-                ),
-                const SizedBox(width: 14),
-                // Small Bento Column
-                Expanded(
-                  flex: 2,
-                  child: Column(
-                    children: [
-                      _buildBentoCard(
-                        context,
-                        title: 'ARTISANAL BAKERY',
-                        subtitle: 'Fresh morning sourdough & gourmet pastries.',
-                        tag: 'FRESH BATCH',
-                        tagColor: const Color(0xFFD97706),
-                        gradient: const [Color(0xFF2E1065), Color(0xFF1E293B)],
-                        height: 103,
-                      ),
-                      const SizedBox(height: 14),
-                      _buildBentoCard(
-                        context,
-                        title: 'DAILY GEAR+',
-                        subtitle: 'Titanium-grade everyday carry tools.',
-                        tag: 'BESTSELLER',
-                        tagColor: const Color(0xFF10B981),
-                        gradient: const [Color(0xFF064E3B), Color(0xFF0F172A)],
-                        height: 103,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            )
-          : Column(
-              children: [
-                _buildBentoCard(
+      child: Column(
+        children: [
+          Row(
+            children: [
+              // Footwear (8-col)
+              Expanded(
+                flex: isDesktop ? 8 : 1,
+                child: _buildBentoImageCard(
                   context,
-                  title: 'URBAN OVERDRIVE',
-                  subtitle: 'Master the streets with reinforced technical fabrics & instant delivery.',
-                  tag: 'NEW DROP',
-                  tagColor: AppColors.secondaryFixedDim,
-                  gradient: const [Color(0xFF1E1B4B), Color(0xFF3525CD), Color(0xFF0F172A)],
-                  height: 170,
+                  title: 'Footwear',
+                  subtitle: 'Precision traction and dynamic response.',
+                  imageUrl:
+                      'https://lh3.googleusercontent.com/aida-public/AB6AXuCxLNFETdk0vc8tl9bCc8DjPLHUGE_9Vtp8kRoCpTkm3PIpkFkRjjM6KlkmU22eZH49jKvIxFsPtVpVmW4PXTVJ4u3RkDpBTKAqfyX777FpX66E3J3PXBWLW3Nm407u4UMbYW48iqdxwWUPhWcICjSpzfkMohkoGIZtLWk02BB09Aa6-Mdo8s4u8Hm-An7GdDnxhbLY2X_ioUT61bddRHlLmaa8BGhM-2HjmfoxxeLnv6Zx6oxD06UX',
+                  height: 260,
                 ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildBentoCard(
-                        context,
-                        title: 'ARTISANAL BAKERY',
-                        subtitle: 'Fresh sourdough & pastries.',
-                        tag: 'FRESH BATCH',
-                        tagColor: const Color(0xFFD97706),
-                        gradient: const [Color(0xFF2E1065), Color(0xFF1E293B)],
-                        height: 120,
-                      ),
+              ),
+              if (isDesktop) const SizedBox(width: 16),
+              if (isDesktop)
+                // Accessories (4-col)
+                Expanded(
+                  flex: 4,
+                  child: Container(
+                    height: 260,
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE5EEFF),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: const Color(0xFFC7C4D8), width: 0.8),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _buildBentoCard(
-                        context,
-                        title: 'DAILY GEAR+',
-                        subtitle: 'Titanium tools.',
-                        tag: 'BESTSELLER',
-                        tagColor: const Color(0xFF10B981),
-                        gradient: const [Color(0xFF064E3B), Color(0xFF0F172A)],
-                        height: 120,
-                      ),
+                    child: Stack(
+                      children: [
+                        const Center(
+                          child: Icon(Icons.watch_rounded, size: 100, color: Color(0x333525CD)),
+                        ),
+                        Align(
+                          alignment: Alignment.bottomLeft,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text('Accessories', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: Color(0xFF0B1C30))),
+                              const SizedBox(height: 4),
+                              Row(
+                                children: const [
+                                  Text('Shop Now', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF3525CD))),
+                                  SizedBox(width: 4),
+                                  Icon(Icons.arrow_forward_rounded, size: 14, color: Color(0xFF3525CD)),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
-              ],
-            ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              // Apparel (4-col)
+              Expanded(
+                flex: isDesktop ? 4 : 1,
+                child: _buildBentoImageCard(
+                  context,
+                  title: 'Apparel',
+                  subtitle: 'Engineered performance clothing.',
+                  imageUrl:
+                      'https://lh3.googleusercontent.com/aida-public/AB6AXuDBkTG9HuXuwsoakC986CqU4KWLlEos1USaNBznXY6rUF0Vx_Od--RwshpBIspT4_rn5UAQBP4H7LY6ZUOom658sGHXVAouYIA8j17-gAvQ4JCaBt2J2LYb1dbD3ivzGYj5GyOEHBZpcG0QDxFT4aXG0vZpZ9P9NKs7aeKhobaXmmLRNEyZXXJrOIvIcTeuEBnzkq1Hzrm-S4eKxoN4NB1Lia7oubJHzkOBqSIZaCi_QgzFYRYkK0oZ',
+                  height: 240,
+                ),
+              ),
+              if (isDesktop) const SizedBox(width: 16),
+              if (isDesktop)
+                // Tech Gear (8-col)
+                Expanded(
+                  flex: 8,
+                  child: _buildBentoImageCard(
+                    context,
+                    title: 'Tech Gear',
+                    subtitle: 'Seamless integration for optimal performance.',
+                    imageUrl:
+                        'https://lh3.googleusercontent.com/aida-public/AB6AXuCEEm8VGdFDLhW5Kb2RICN9WcsWW1OW7xGfVag5mdtRTdlVMr62UZn7hSedr66rn1fKE_DxC321xDuVxmwXe_FIz7um6MZy4xvsAwtmRqrnqwV4DCUBItUheBrCrUM7ihrvJCUMDilPmBECeA2oS2OvSXLwtnBIh2ynv8m79jUbuj5B8OPdh7XMMdCAm7-frjO9xlYKM6hcSKXzvu4EIxC397uFVILtZFuTQnqRfgZTMqtTTjphPZ-O',
+                    height: 240,
+                  ),
+                ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildBentoCard(
+  Widget _buildBentoImageCard(
     BuildContext context, {
     required String title,
     required String subtitle,
-    required String tag,
-    required Color tagColor,
-    required List<Color> gradient,
+    required String imageUrl,
     required double height,
   }) {
-    return HoverCard(
-      glowColor: gradient.first,
+    return GestureDetector(
       onTap: () => context.go('/catalog'),
-      child: Container(
-        height: height,
-        width: double.infinity,
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(18),
-          gradient: LinearGradient(
-            colors: gradient,
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: SizedBox(
+          height: height,
+          width: double.infinity,
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: CachedNetworkImage(
+                  imageUrl: imageUrl,
+                  fit: BoxFit.cover,
+                  errorWidget: (_, __, ___) => Container(color: const Color(0xFFE5EEFF)),
+                ),
+              ),
+              Positioned.fill(
+                child: Container(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Colors.black54, Colors.transparent],
+                      begin: Alignment.bottomCenter,
+                      end: Alignment.topCenter,
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 20,
+                bottom: 20,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(title, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: Colors.white)),
+                    const SizedBox(height: 4),
+                    Text(subtitle, style: TextStyle(fontSize: 13, color: Colors.white.withValues(alpha: 0.8))),
+                  ],
+                ),
+              ),
+            ],
           ),
-          border: Border.all(color: tagColor.withValues(alpha: 0.3)),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-              decoration: BoxDecoration(
-                color: tagColor,
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Text(
-                tag,
-                style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w900, color: Color(0xFF003924)),
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              title,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: Colors.white),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              subtitle,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 10, color: Colors.white70),
-            ),
-          ],
         ),
       ),
     );
@@ -817,17 +741,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         margin: const EdgeInsets.symmetric(horizontal: 16),
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: const Color(0xFF1E293B),
-          borderRadius: BorderRadius.circular(14),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFFC7C4D8)),
         ),
         child: const Center(
-          child: Text('No products currently available.', style: TextStyle(color: AppColors.textSecondary)),
+          child: Text('No products currently available.', style: TextStyle(color: Color(0xFF464555))),
         ),
       );
     }
 
     return SizedBox(
-      height: 260,
+      height: 270,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -845,15 +770,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final originalMrp = product.sellingPrice * 1.25;
 
     return HoverCard(
-      glowColor: AppColors.primaryContainer,
+      glowColor: const Color(0xFF3525CD),
       onTap: () => context.push('/product/${product.id}', extra: product),
       child: Container(
-        width: 175,
+        width: 180,
         margin: const EdgeInsets.only(right: 14),
         decoration: BoxDecoration(
-          color: const Color(0xFF1E293B),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFF334155)),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFFC7C4D8), width: 0.8),
+          boxShadow: const [
+            BoxShadow(color: Color(0x0A0F172A), blurRadius: 8, offset: Offset(0, 2)),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -863,9 +791,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               children: [
                 ProductImageView(
                   imageUrl: product.imageUrl,
-                  height: 115,
+                  height: 125,
                   width: double.infinity,
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
                 ),
                 Positioned(
                   top: 8,
@@ -873,7 +801,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFEF4444),
+                      color: const Color(0xFFBA1A1A),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: const Text(
@@ -888,17 +816,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   child: GestureDetector(
                     onTap: () {
                       ref.read(wishlistNotifierProvider.notifier).toggleFavorite(product.id);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Updated wishlist for ${product.name}'), duration: const Duration(seconds: 1)),
-                      );
                     },
                     child: Container(
                       padding: const EdgeInsets.all(5),
-                      decoration: const BoxDecoration(color: Colors.black54, shape: BoxShape.circle),
+                      decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
                       child: Icon(
                         isFav ? Icons.favorite_rounded : Icons.favorite_border_rounded,
                         size: 14,
-                        color: isFav ? const Color(0xFFEF4444) : Colors.white,
+                        color: isFav ? const Color(0xFFBA1A1A) : const Color(0xFF464555),
                       ),
                     ),
                   ),
@@ -916,12 +841,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     product.name,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF0B1C30)),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     product.categoryName ?? 'Essential',
-                    style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                    style: const TextStyle(fontSize: 11, color: Color(0xFF464555)),
                   ),
                   const SizedBox(height: 10),
 
@@ -934,11 +859,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         children: [
                           Text(
                             Formatters.formatCurrency(product.sellingPrice),
-                            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: AppColors.secondaryFixedDim),
+                            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: Color(0xFF3525CD)),
                           ),
                           Text(
                             Formatters.formatCurrency(originalMrp),
-                            style: const TextStyle(fontSize: 9, color: AppColors.textMuted, decoration: TextDecoration.lineThrough),
+                            style: const TextStyle(fontSize: 9, color: Color(0xFF777587), decoration: TextDecoration.lineThrough),
                           ),
                         ],
                       ),
@@ -947,8 +872,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           ref.read(cartNotifierProvider.notifier).addItem(product);
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text('🛍️ Added ${product.name} to cart!'),
-                              backgroundColor: const Color(0xFF0F172A),
+                              content: Text('Added ${product.name} to cart!'),
+                              backgroundColor: const Color(0xFF3525CD),
                               duration: const Duration(seconds: 1),
                             ),
                           );
@@ -956,10 +881,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         child: Container(
                           padding: const EdgeInsets.all(7),
                           decoration: const BoxDecoration(
-                            color: AppColors.secondaryFixedDim,
+                            color: Color(0xFF3525CD),
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(Icons.add_shopping_cart_rounded, size: 15, color: Color(0xFF005236)),
+                          child: const Icon(Icons.add_shopping_cart_rounded, size: 15, color: Colors.white),
                         ),
                       ),
                     ],
@@ -979,19 +904,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
-        color: const Color(0xFF0B291E),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.secondaryFixedDim.withValues(alpha: 0.5), width: 1.5),
+        color: const Color(0xFFEFF4FF),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFC7C4D8), width: 1),
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: AppColors.secondaryFixedDim.withValues(alpha: 0.2),
+            decoration: const BoxDecoration(
+              color: Color(0xFF3525CD),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.loyalty_rounded, size: 30, color: AppColors.secondaryFixedDim),
+            child: const Icon(Icons.loyalty_rounded, size: 28, color: Colors.white),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -1000,17 +925,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               children: const [
                 Text(
                   '10% CASH-BACK REWARD PROGRAM',
-                  style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1.2, color: AppColors.secondaryFixedDim),
+                  style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1.2, color: Color(0xFF3525CD)),
                 ),
                 SizedBox(height: 4),
                 Text(
                   'Earn on Every Confirmed Purchase',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF0B1C30)),
                 ),
                 SizedBox(height: 4),
                 Text(
                   'Cashback balances credit automatically to your wallet upon order delivery.',
-                  style: TextStyle(fontSize: 11, color: Colors.white70),
+                  style: TextStyle(fontSize: 11, color: Color(0xFF464555)),
                 ),
               ],
             ),
@@ -1025,7 +950,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final pillars = [
       {'icon': Icons.local_shipping_outlined, 'title': 'Hyper-Local Delivery', 'desc': 'Within 30 mins • Free > ₹500'},
       {'icon': Icons.card_giftcard_rounded, 'title': '10% Loyalty Cash-Back', 'desc': 'Credited instantly on delivery'},
-      {'icon': Icons.verified_user_outlined, 'title': '100% Secure Checkout', 'desc': 'Bank-grade encrypted sandbox'},
+      {'icon': Icons.verified_user_outlined, 'title': '100% Secure Checkout', 'desc': 'Bank-grade encrypted payment'},
       {'icon': Icons.replay_rounded, 'title': 'Zero-Friction Returns', 'desc': '7-day replacement guarantee'},
     ];
 
@@ -1046,19 +971,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           return Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: const Color(0xFF1E293B),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: const Color(0xFF334155)),
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: const Color(0xFFC7C4D8), width: 1),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.03),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(p['icon'] as IconData, color: AppColors.secondaryFixedDim, size: 24),
+                Icon(p['icon'] as IconData, color: const Color(0xFF3525CD), size: 24),
                 const SizedBox(height: 8),
-                Text(p['title'] as String, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                Text(p['title'] as String, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF0B1C30))),
                 const SizedBox(height: 2),
-                Text(p['desc'] as String, style: const TextStyle(fontSize: 10, color: AppColors.textSecondary)),
+                Text(p['desc'] as String, style: const TextStyle(fontSize: 10, color: Color(0xFF464555))),
               ],
             ),
           );
@@ -1077,11 +1009,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-      color: const Color(0xFF0F172A),
+      color: const Color(0xFFEFF4FF),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Verified Customer Reviews', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+          const Text('Verified Customer Reviews', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF0B1C30))),
           const SizedBox(height: 14),
           SizedBox(
             height: 125,
@@ -1095,9 +1027,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   margin: const EdgeInsets.only(right: 12),
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1E293B),
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: const Color(0xFF334155)),
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: const Color(0xFFC7C4D8), width: 1),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.03),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -1105,14 +1044,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(r['name'] as String, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.textPrimary)),
+                          Text(r['name'] as String, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF0B1C30))),
                           RatingStars(rating: r['rating'] as double),
                         ],
                       ),
                       const SizedBox(height: 8),
                       Text(
                         r['review'] as String,
-                        style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                        style: const TextStyle(fontSize: 11, color: Color(0xFF464555)),
                         maxLines: 3,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -1132,8 +1071,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Container(
       padding: const EdgeInsets.all(28),
       decoration: const BoxDecoration(
-        color: Color(0xFF050811),
-        border: Border(top: BorderSide(color: Color(0x1FFFFFFF), width: 1)),
+        color: Colors.white,
+        border: Border(top: BorderSide(color: Color(0xFFC7C4D8), width: 1)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1143,36 +1082,36 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: AppColors.secondaryFixedDim,
+                  color: const Color(0xFF3525CD),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Icon(Icons.shopping_bag_rounded, size: 18, color: Color(0xFF005236)),
+                child: const Icon(Icons.shopping_bag_rounded, size: 18, color: Colors.white),
               ),
               const SizedBox(width: 10),
-              const Text('RAMA STORE', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16, color: AppColors.textPrimary)),
+              const Text('RAMA STORE', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16, color: Color(0xFF3525CD), letterSpacing: 1.0)),
             ],
           ),
           const SizedBox(height: 12),
           const Text(
             'Elite High-Performance Fashion, Bakery, Books, Groceries & Medicine with 10% Loyalty Cash-Back rewards.',
-            style: TextStyle(fontSize: 11, color: AppColors.textSecondary, height: 1.4),
+            style: TextStyle(fontSize: 11, color: Color(0xFF464555), height: 1.4),
           ),
           const SizedBox(height: 20),
           Wrap(
             spacing: 20,
             runSpacing: 10,
             children: [
-              TextButton(onPressed: () => context.go('/catalog'), child: const Text('Catalog', style: TextStyle(color: AppColors.textSecondary, fontSize: 12))),
-              TextButton(onPressed: () => context.push('/loyalty'), child: const Text('Loyalty Program', style: TextStyle(color: AppColors.textSecondary, fontSize: 12))),
-              TextButton(onPressed: () => context.push('/downloads'), child: const Text('Android App APK', style: TextStyle(color: AppColors.secondaryFixedDim, fontSize: 12))),
+              TextButton(onPressed: () => context.go('/catalog'), child: const Text('Catalog', style: TextStyle(color: Color(0xFF464555), fontSize: 12))),
+              TextButton(onPressed: () => context.push('/loyalty'), child: const Text('Loyalty Program', style: TextStyle(color: Color(0xFF464555), fontSize: 12))),
+              TextButton(onPressed: () => context.push('/downloads'), child: const Text('Android App APK', style: TextStyle(color: Color(0xFF3525CD), fontSize: 12, fontWeight: FontWeight.bold))),
             ],
           ),
-          const Divider(color: Color(0x1FFFFFFF), height: 32),
+          const Divider(color: Color(0xFFC7C4D8), height: 32),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: const [
-              Text('© 2026 Rama Store Inc. All Rights Reserved.', style: TextStyle(fontSize: 10, color: AppColors.textMuted)),
-              Text('Authentic Quality Guaranteed', style: TextStyle(fontSize: 10, color: AppColors.textMuted)),
+              Text('© 2026 Rama Store Inc. All Rights Reserved.', style: TextStyle(fontSize: 10, color: Color(0xFF777587))),
+              Text('Authentic Quality Guaranteed', style: TextStyle(fontSize: 10, color: Color(0xFF777587))),
             ],
           ),
         ],

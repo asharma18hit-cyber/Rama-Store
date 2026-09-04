@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/constants/app_colors.dart';
@@ -26,9 +27,18 @@ class OrdersScreen extends ConsumerWidget {
     final ordersAsync = ref.watch(ordersFutureProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: const Color(0xFFF8F9FF),
       appBar: AppBar(
-        title: const Text('My Orders & History'),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_rounded, color: Color(0xFF3525CD)),
+          onPressed: () => context.pop(),
+        ),
+        title: const Text(
+          'MY ORDERS & TRACKING',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, letterSpacing: 0.8, color: Color(0xFF3525CD)),
+        ),
       ),
       body: ordersAsync.when(
         loading: () => const Padding(
@@ -36,7 +46,7 @@ class OrdersScreen extends ConsumerWidget {
           child: ProductCardShimmer(),
         ),
         error: (err, stack) => Center(
-          child: Text('Error loading orders: $err', style: const TextStyle(color: AppColors.error)),
+          child: Text('Error loading orders: $err', style: const TextStyle(color: Color(0xFFBA1A1A))),
         ),
         data: (orders) {
           if (orders.isEmpty) {
@@ -44,9 +54,9 @@ class OrdersScreen extends ConsumerWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: const [
-                  Icon(Icons.history_outlined, size: 80, color: AppColors.textMuted),
+                  Icon(Icons.history_outlined, size: 80, color: Color(0xFF777587)),
                   SizedBox(height: 16),
-                  Text('No past orders found', style: TextStyle(fontSize: 18, color: AppColors.textSecondary)),
+                  Text('No past orders found', style: TextStyle(fontSize: 18, color: Color(0xFF464555))),
                 ],
               ),
             );
@@ -76,25 +86,25 @@ class OrdersScreen extends ConsumerWidget {
 
     Color orderStatusColor;
     if (isCancelled) {
-      orderStatusColor = AppColors.error;
+      orderStatusColor = const Color(0xFFBA1A1A);
     } else if (order.orderStatus == 'Delivered') {
-      orderStatusColor = AppColors.success;
+      orderStatusColor = const Color(0xFF006C49);
     } else if (order.orderStatus == 'Dispatched' || order.orderStatus == 'Shipped') {
-      orderStatusColor = AppColors.info;
+      orderStatusColor = const Color(0xFF3525CD);
     } else {
-      orderStatusColor = AppColors.secondaryFixedDim;
+      orderStatusColor = const Color(0xFF3525CD);
     }
 
     Color paymentStatusColor;
     String paymentBadgeText;
     if (isCancelled) {
-      paymentStatusColor = AppColors.textMuted;
+      paymentStatusColor = const Color(0xFF777587);
       paymentBadgeText = isPaid ? 'Refund Pending' : 'Not Paid';
     } else if (isPaid) {
-      paymentStatusColor = AppColors.success;
+      paymentStatusColor = const Color(0xFF006C49);
       paymentBadgeText = 'Paid';
     } else {
-      paymentStatusColor = AppColors.accentAmber;
+      paymentStatusColor = const Color(0xFFD97706);
       paymentBadgeText = 'Payment Pending';
     }
 
@@ -103,61 +113,71 @@ class OrdersScreen extends ConsumerWidget {
     if (order.orderStatus == 'Dispatched' || order.orderStatus == 'Shipped' || order.orderStatus == 'In Transit') currentStep = 3;
     if (order.orderStatus == 'Delivered') currentStep = 4;
 
-    return HoverCard(
-      child: FrostedGlassContainer(
-        padding: const EdgeInsets.all(18),
-        borderRadius: BorderRadius.circular(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Top Row: Tracking & Status Badges
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    const Icon(Icons.receipt_rounded, size: 18, color: AppColors.secondaryFixedDim),
-                    const SizedBox(width: 6),
-                    Text(
-                      'Tracking: ${order.trackingNumber}',
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.textPrimary),
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFC7C4D8), width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Top Row: Tracking & Status Badges
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.receipt_rounded, size: 18, color: Color(0xFF3525CD)),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Tracking: ${order.trackingNumber}',
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF0B1C30)),
+                  ),
+                ],
+              ),
+              Wrap(
+                spacing: 6,
+                children: [
+                  // Order Status Badge
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: orderStatusColor.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: orderStatusColor),
                     ),
-                  ],
-                ),
-                Wrap(
-                  spacing: 6,
-                  children: [
-                    // Order Status Badge
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: orderStatusColor.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: orderStatusColor.withValues(alpha: 0.4)),
-                      ),
-                      child: Text(
-                        order.orderStatus,
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: orderStatusColor),
-                      ),
+                    child: Text(
+                      order.orderStatus,
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: orderStatusColor),
                     ),
-                    // Payment Method Badge
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: AppColors.surfaceLight,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        order.paymentMethod,
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: AppColors.textPrimary),
-                      ),
+                  ),
+                  // Payment Method Badge
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFEFF4FF),
+                      borderRadius: BorderRadius.circular(20),
                     ),
-                  ],
-                ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Text(Formatters.formatDate(order.createdAt), style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
+                    child: Text(
+                      order.paymentMethod,
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: Color(0xFF3525CD)),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(Formatters.formatDate(order.createdAt), style: const TextStyle(fontSize: 11, color: Color(0xFF777587))),
             const SizedBox(height: 16),
 
             // Stepper / Cancelled Banner
@@ -338,8 +358,7 @@ class OrdersScreen extends ConsumerWidget {
             ),
           ],
         ),
-      ),
-    );
+      );
   }
 
   void _openPayNowModal(BuildContext context, OrderModel order, WidgetRef ref) {

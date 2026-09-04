@@ -249,34 +249,45 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> wit
 
     if (!isAdmin) {
       return Scaffold(
-        backgroundColor: const Color(0xFF0B0F19),
+        backgroundColor: const Color(0xFFF8F9FF),
         body: Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
-            child: FrostedGlassContainer(
+            child: Container(
               padding: const EdgeInsets.all(32),
-              borderRadius: BorderRadius.circular(24),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: const Color(0xFFC7C4D8), width: 1),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.03),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: AppColors.error.withValues(alpha: 0.15),
+                      color: const Color(0xFFBA1A1A).withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.lock_rounded, size: 48, color: AppColors.error),
+                    child: const Icon(Icons.lock_rounded, size: 48, color: Color(0xFFBA1A1A)),
                   ),
                   const SizedBox(height: 20),
                   const Text(
                     '403 Forbidden Access',
-                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF0B1C30)),
                   ),
                   const SizedBox(height: 8),
                   const Text(
                     'You must be signed in with an Administrator account to view this portal.',
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                    style: TextStyle(fontSize: 13, color: Color(0xFF464555)),
                   ),
                   const SizedBox(height: 24),
                   AppButton(
@@ -286,8 +297,8 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> wit
                   ),
                   const SizedBox(height: 12),
                   TextButton.icon(
-                    icon: const Icon(Icons.storefront_rounded, size: 16, color: AppColors.textSecondary),
-                    label: const Text('Back to Storefront', style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+                    icon: const Icon(Icons.storefront_rounded, size: 16, color: Color(0xFF464555)),
+                    label: const Text('Back to Storefront', style: TextStyle(color: Color(0xFF464555), fontSize: 13)),
                     onPressed: () => context.go('/home'),
                   ),
                 ],
@@ -304,39 +315,40 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> wit
     final isDesktop = MediaQuery.of(context).size.width >= 900;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0B0F19),
+      backgroundColor: const Color(0xFFF8F9FF),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0F172A),
+        backgroundColor: Colors.white,
+        elevation: 0,
         title: Row(
           children: [
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
-                color: AppColors.secondaryFixedDim,
+                color: const Color(0xFF3525CD),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: const Text(
                 'ADMIN CONSOLE',
-                style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: Color(0xFF005236), letterSpacing: 0.5),
+                style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 0.5),
               ),
             ),
             const SizedBox(width: 10),
-            const Text('Rama Store Master Center', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+            const Text('Rama Store Master Center', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF0B1C30))),
           ],
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.add_circle_outline_rounded, color: AppColors.secondaryFixedDim),
+            icon: const Icon(Icons.add_circle_outline_rounded, color: Color(0xFF3525CD)),
             tooltip: 'Publish Product',
             onPressed: _showPublishProductDialog,
           ),
           IconButton(
-            icon: const Icon(Icons.storefront_rounded),
+            icon: const Icon(Icons.storefront_rounded, color: Color(0xFF464555)),
             tooltip: 'View Live Storefront',
             onPressed: () => context.go('/home'),
           ),
           IconButton(
-            icon: const Icon(Icons.logout_rounded, color: AppColors.error),
+            icon: const Icon(Icons.logout_rounded, color: Color(0xFFBA1A1A)),
             tooltip: 'Logout Admin',
             onPressed: () {
               ref.read(authNotifierProvider.notifier).logout();
@@ -347,9 +359,9 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> wit
         bottom: TabBar(
           controller: _tabController,
           isScrollable: !isDesktop,
-          indicatorColor: AppColors.secondaryFixedDim,
-          labelColor: AppColors.secondaryFixedDim,
-          unselectedLabelColor: AppColors.textMuted,
+          indicatorColor: const Color(0xFF3525CD),
+          labelColor: const Color(0xFF3525CD),
+          unselectedLabelColor: const Color(0xFF464555),
           labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
           tabs: const [
             Tab(icon: Icon(Icons.dashboard_rounded), text: 'Dashboard'),

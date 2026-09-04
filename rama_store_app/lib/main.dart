@@ -20,6 +20,7 @@ import 'features/catalog/presentation/catalog_notifier.dart';
 import 'features/catalog/presentation/home_screen.dart';
 import 'features/catalog/presentation/catalog_screen.dart';
 import 'features/catalog/presentation/product_detail_screen.dart';
+import 'features/catalog/presentation/help_legal_screens.dart';
 
 import 'features/cart/data/cart_repository.dart';
 import 'features/cart/presentation/cart_notifier.dart';
@@ -269,6 +270,24 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/download',
         builder: (context, state) => const DownloadScreen(),
+      ),
+      GoRoute(
+        path: '/help',
+        builder: (context, state) => const HelpCenterScreen(),
+      ),
+      GoRoute(
+        path: '/privacy',
+        builder: (context, state) => const LegalScreen(
+          title: 'Privacy Policy',
+          content: 'At Rama Store, we prioritize customer privacy and security. All user authentication and account credentials are managed via Firebase Authentication with multi-factor verification. Personal information, delivery addresses, and order histories are encrypted and never shared with third parties.',
+        ),
+      ),
+      GoRoute(
+        path: '/terms',
+        builder: (context, state) => const LegalScreen(
+          title: 'Terms of Service',
+          content: 'By using Rama Store, you agree to our service terms. Products are dispatched within 30 minutes for local deliveries. Returns and cancellations are supported within 7 days of order receipt. Cashback rewards are credited automatically to your account upon order delivery.',
+        ),
       ),
     ],
   );

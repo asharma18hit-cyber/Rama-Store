@@ -17,17 +17,17 @@ class ProfileScreen extends ConsumerWidget {
     final isDesktop = MediaQuery.of(context).size.width >= 1024;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0B0F19),
+      backgroundColor: const Color(0xFFF8F9FF),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0B0F19),
+        backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: AppColors.textPrimary),
+          icon: const Icon(Icons.arrow_back_rounded, color: Color(0xFF3525CD)),
           onPressed: () => context.pop(),
         ),
         title: const Text(
-          'ACCOUNT & PROFILE',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, letterSpacing: 1, color: AppColors.textPrimary),
+          'MY ACCOUNT & PROFILE',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, letterSpacing: 0.8, color: Color(0xFF3525CD)),
         ),
       ),
       body: SingleChildScrollView(
@@ -42,9 +42,16 @@ class ProfileScreen extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1E293B),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: const Color(0xFF334155)),
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: const Color(0xFFC7C4D8), width: 1),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.03),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                   ),
                   child: Row(
                     children: [
@@ -52,11 +59,11 @@ class ProfileScreen extends ConsumerWidget {
                         width: 64,
                         height: 64,
                         decoration: BoxDecoration(
-                          color: AppColors.secondaryFixedDim,
+                          color: const Color(0xFF3525CD),
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                              color: AppColors.secondaryFixedDim.withValues(alpha: 0.3),
+                              color: const Color(0xFF3525CD).withValues(alpha: 0.2),
                               blurRadius: 16,
                               spreadRadius: 2,
                             ),
@@ -65,7 +72,7 @@ class ProfileScreen extends ConsumerWidget {
                         child: Center(
                           child: Text(
                             user != null && user.fullname.isNotEmpty ? user.fullname[0].toUpperCase() : 'R',
-                            style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w900, color: Color(0xFF005236)),
+                            style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w900, color: Colors.white),
                           ),
                         ),
                       ),
@@ -76,24 +83,24 @@ class ProfileScreen extends ConsumerWidget {
                           children: [
                             Text(
                               user?.fullname.isNotEmpty == true ? user!.fullname : 'Rama Store Member',
-                              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: AppColors.textPrimary),
+                              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Color(0xFF0B1C30)),
                             ),
                             const SizedBox(height: 4),
                             Text(
                               user?.emailOrPhone.isNotEmpty == true ? user!.emailOrPhone : 'Guest Session',
-                              style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                              style: const TextStyle(fontSize: 13, color: Color(0xFF464555)),
                             ),
                             const SizedBox(height: 8),
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF3525CD).withValues(alpha: 0.25),
+                                color: const Color(0xFFEFF4FF),
                                 borderRadius: BorderRadius.circular(6),
                                 border: Border.all(color: const Color(0xFF3525CD)),
                               ),
                               child: Text(
                                 user?.isAdmin == true ? '👑 STORE OWNER / ADMINISTRATOR' : '⚡ EMERALD TIER MEMBER',
-                                style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 0.8, color: AppColors.primaryFixedDim),
+                                style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 0.8, color: Color(0xFF3525CD)),
                               ),
                             ),
                           ],

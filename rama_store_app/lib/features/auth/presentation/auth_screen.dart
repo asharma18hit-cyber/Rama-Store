@@ -109,15 +109,22 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
     });
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: const Color(0xFFF8F9FF),
       appBar: AppBar(
-        title: const Text('Rama Store Security & Auth'),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: false,
+        title: const Text(
+          'ACCOUNT & SECURITY',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: Color(0xFF3525CD), letterSpacing: 0.8),
+        ),
         bottom: TabBar(
           controller: _tabController,
-          indicatorColor: AppColors.primaryGold,
-          labelColor: AppColors.primaryGoldLight,
-          unselectedLabelColor: AppColors.textSecondary,
+          indicatorColor: const Color(0xFF3525CD),
+          labelColor: const Color(0xFF3525CD),
+          unselectedLabelColor: const Color(0xFF464555),
           isScrollable: true,
+          labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
           tabs: const [
             Tab(text: 'Credentials + MFA'),
             Tab(text: 'Passwordless Phone OTP'),
@@ -134,9 +141,16 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppColors.surface,
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.primaryGold.withValues(alpha: 0.3)),
+                border: Border.all(color: const Color(0xFFC7C4D8), width: 1),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.03),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
               child: Row(
                 children: [

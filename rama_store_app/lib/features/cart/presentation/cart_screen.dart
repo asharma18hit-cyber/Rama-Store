@@ -69,23 +69,23 @@ class _CartScreenState extends ConsumerState<CartScreen> {
     final isDesktop = MediaQuery.of(context).size.width >= 1024;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0B0F19),
+      backgroundColor: const Color(0xFFF8F9FF),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0B0F19),
+        backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: AppColors.textPrimary),
+          icon: const Icon(Icons.arrow_back_rounded, color: Color(0xFF3525CD)),
           onPressed: () => context.pop(),
         ),
         title: Text(
-          'BAG (${cartState.totalItemCount} ITEMS)',
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, letterSpacing: 1, color: AppColors.textPrimary),
+          'YOUR CART (${cartState.totalItemCount} ITEMS)',
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, letterSpacing: 0.8, color: Color(0xFF3525CD)),
         ),
         actions: [
           if (cartState.items.isNotEmpty)
             TextButton(
               onPressed: () => ref.read(cartNotifierProvider.notifier).clearCart(),
-              child: const Text('Clear All', style: TextStyle(color: Color(0xFFEF4444), fontSize: 13, fontWeight: FontWeight.bold)),
+              child: const Text('Clear All', style: TextStyle(color: Color(0xFFBA1A1A), fontSize: 13, fontWeight: FontWeight.bold)),
             ),
         ],
       ),
@@ -99,20 +99,20 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                     Container(
                       padding: const EdgeInsets.all(28),
                       decoration: const BoxDecoration(
-                        color: Color(0xFF1E293B),
+                        color: Color(0xFFEFF4FF),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.shopping_bag_outlined, size: 64, color: AppColors.textMuted),
+                      child: const Icon(Icons.shopping_bag_outlined, size: 64, color: Color(0xFF3525CD)),
                     ),
                     const SizedBox(height: 24),
                     const Text(
-                      'YOUR BAG IS EMPTY',
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, letterSpacing: 1.2, color: AppColors.textPrimary),
+                      'YOUR CART IS EMPTY',
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, letterSpacing: 1.2, color: Color(0xFF0B1C30)),
                     ),
                     const SizedBox(height: 8),
                     const Text(
                       'Explore our hyper-local catalog and daily essentials.',
-                      style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
+                      style: TextStyle(fontSize: 14, color: Color(0xFF464555)),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 28),
@@ -173,9 +173,16 @@ class _CartScreenState extends ConsumerState<CartScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1E293B),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFF334155)),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFC7C4D8), width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         children: [
