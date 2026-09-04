@@ -48,19 +48,22 @@
       reqId: null
     };
 
+    window.MSG91_CONFIG = {
+      widgetId: "3669636c744c363534343239",
+      tokenAuth: "567029TpHNnH5qfd6a99668eP1"
+    };
+
     window.initMsg91Widget = function(widgetId, tokenAuth, identifier) {
       if (typeof window.initSendOTP !== 'function') {
+        console.warn("[MSG91 Widget] initSendOTP function not yet loaded from verify.msg91.com");
         return false;
       }
-      if (!tokenAuth) {
-        // Without a public widget tokenAuth, initSendOTP throws 'Token is missing!'.
-        // Backend handles SMS dispatch directly with MSG91_AUTH_KEY on the server.
-        return false;
-      }
+      var targetWidgetId = widgetId || window.MSG91_CONFIG.widgetId;
+      var targetTokenAuth = tokenAuth || window.MSG91_CONFIG.tokenAuth;
       try {
         var config = {
-          widgetId: widgetId || "SecureOTPWidgetS29G",
-          tokenAuth: tokenAuth,
+          widgetId: targetWidgetId,
+          tokenAuth: targetTokenAuth,
           identifier: identifier || "",
           exposeMethods: true,
           success: function(data) {
@@ -88,6 +91,22 @@
         return false;
       }
     };
+
+    // Auto-initialize when window loads or script completes
+    window.addEventListener('DOMContentLoaded', function() {
+      setTimeout(function() {
+        if (typeof window.initSendOTP === 'function') {
+          window.initMsg91Widget();
+        }
+      }, 500);
+    });
+    window.addEventListener('load', function() {
+      setTimeout(function() {
+        if (!window.msg91WidgetState.isReady && typeof window.initSendOTP === 'function') {
+          window.initMsg91Widget();
+        }
+      }, 800);
+    });
 
     window.msg91SendOtp = function(identifier, callbackName, errorCallbackName) {
       if (typeof window.sendOtp === 'function') {

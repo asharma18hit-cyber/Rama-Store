@@ -7,12 +7,13 @@ import 'msg91_stub.dart'
     if (dart.library.js) 'msg91_web.dart' as msg91_impl;
 
 class Msg91WidgetService {
-  static const String defaultWidgetId = 'SecureOTPWidgetS29G';
+  static const String defaultWidgetId = '3669636c744c363534343239';
+  static const String defaultTokenAuth = '567029TpHNnH5qfd6a99668eP1';
 
   /// Initializes the MSG91 Web SDK Widget
   static Future<bool> initWidget({
     String widgetId = defaultWidgetId,
-    String tokenAuth = '',
+    String tokenAuth = defaultTokenAuth,
     String identifier = '',
   }) async {
     return msg91_impl.initMsg91Widget(
