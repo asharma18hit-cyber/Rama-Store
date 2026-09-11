@@ -45,27 +45,29 @@ class _HoverCardState extends State<HoverCard> with SingleTickerProviderStateMix
           HapticFeedback.lightImpact();
           widget.onTap?.call();
         },
-        child: AnimatedScale(
-          scale: _isPressed ? 0.98 : (_isHovered ? widget.scale : 1.0),
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.easeOutCubic,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
+        child: RepaintBoundary(
+          child: AnimatedScale(
+            scale: _isPressed ? 0.98 : (_isHovered ? widget.scale : 1.0),
+            duration: const Duration(milliseconds: 150),
             curve: Curves.easeOutCubic,
-            decoration: BoxDecoration(
-              borderRadius: effectiveRadius,
-              boxShadow: _isHovered && widget.enableGlow
-                  ? [
-                      BoxShadow(
-                        color: glow.withValues(alpha: 0.35),
-                        blurRadius: 20,
-                        spreadRadius: 1,
-                        offset: const Offset(0, 4),
-                      ),
-                    ]
-                  : null,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 150),
+              curve: Curves.easeOutCubic,
+              decoration: BoxDecoration(
+                borderRadius: effectiveRadius,
+                boxShadow: _isHovered && widget.enableGlow
+                    ? [
+                        BoxShadow(
+                          color: glow.withValues(alpha: 0.25),
+                          blurRadius: 14,
+                          spreadRadius: 1,
+                          offset: const Offset(0, 4),
+                        ),
+                      ]
+                    : null,
+              ),
+              child: widget.child,
             ),
-            child: widget.child,
           ),
         ),
       ),

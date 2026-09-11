@@ -49,6 +49,7 @@ class MainScaffold extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final cartState = ref.watch(cartNotifierProvider);
     final itemCount = cartState.totalItemCount;
+    final isDesktop = MediaQuery.of(context).size.width >= 900;
 
     return Scaffold(
       body: Column(
@@ -57,7 +58,9 @@ class MainScaffold extends ConsumerWidget {
           Expanded(child: child),
         ],
       ),
-      bottomNavigationBar: FrostedGlassContainer(
+      bottomNavigationBar: isDesktop
+          ? null
+          : FrostedGlassContainer(
         borderRadius: BorderRadius.zero,
         blur: 24.0,
         opacity: 0.85,

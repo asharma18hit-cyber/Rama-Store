@@ -205,53 +205,113 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           children: [
             // Top Bar Row
             Container(
-              height: 64,
-              padding: const EdgeInsets.symmetric(horizontal: 24),
+              height: 68,
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Row(
                 children: [
-                  // Left: Search Button Trigger
-                  Expanded(
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: IconButton(
-                        icon: const Icon(Icons.search_rounded, size: 24, color: Color(0xFF464555)),
-                        onPressed: () => context.go('/catalog'),
-                      ),
-                    ),
-                  ),
-
-                  // Center: Brand Logo in Primary Indigo
+                  // Left: Brand Logo & Title
                   GestureDetector(
                     onTap: () => context.go('/home'),
-                    child: const Text(
-                      'Samaur Mart',
-                      style: TextStyle(
-                        fontSize: 26,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -0.8,
-                        color: Color(0xFF3525CD),
-                      ),
-                    ),
-                  ),
-
-                  // Right: Account & Cart Actions
-                  Expanded(
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        IconButton(
-                          icon: const Icon(Icons.person_outline_rounded, size: 24, color: Color(0xFF464555)),
-                          tooltip: 'Account',
-                          onPressed: () => context.go('/profile'),
+                        Container(
+                          padding: const EdgeInsets.all(7),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF3525CD),
+                            borderRadius: BorderRadius.circular(10),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFF3525CD).withValues(alpha: 0.25),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: const Icon(Icons.shopping_bag_rounded, size: 20, color: Colors.white),
                         ),
-                        const SizedBox(width: 8),
-                        IconButton(
-                          icon: const Icon(Icons.shopping_bag_outlined, size: 24, color: Color(0xFF464555)),
-                          tooltip: 'Cart',
-                          onPressed: () => context.go('/cart'),
+                        const SizedBox(width: 10),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: const [
+                            Text(
+                              'Samaur Mart',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: -0.5,
+                                color: Color(0xFF1E1B4B),
+                              ),
+                            ),
+                            Text(
+                              'HIGH-PERFORMANCE COMMERCE',
+                              style: TextStyle(
+                                fontSize: 8,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 1.2,
+                                color: Color(0xFF3525CD),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
+                  ),
+
+                  const SizedBox(width: 24),
+
+                  // Center: Search Bar (Desktop/Tablet) or Expandable Trigger
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => context.go('/catalog'),
+                      child: Container(
+                        height: 42,
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF1F5F9),
+                          borderRadius: BorderRadius.circular(24),
+                          border: Border.all(color: const Color(0xFFE2E8F0)),
+                        ),
+                        child: Row(
+                          children: const [
+                            Icon(Icons.search_rounded, size: 18, color: Color(0xFF64748B)),
+                            SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                'Search fashion, groceries, books, medicine, sports...',
+                                style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(width: 16),
+
+                  // Right: Account, Wishlist & Cart Actions
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.favorite_border_rounded, size: 22, color: Color(0xFF334155)),
+                        tooltip: 'Wishlist',
+                        onPressed: () => context.push('/wishlist'),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.person_outline_rounded, size: 22, color: Color(0xFF334155)),
+                        tooltip: 'Account',
+                        onPressed: () => context.go('/profile'),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.shopping_bag_outlined, size: 22, color: Color(0xFF3525CD)),
+                        tooltip: 'Cart',
+                        onPressed: () => context.go('/cart'),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -376,7 +436,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   // --- 4. HERO SECTION (Exact Stitch Spec) ---
   Widget _buildHeroSection(BuildContext context, bool isDesktop, bool isTablet) {
     return Container(
-      height: isDesktop ? 600 : (isTablet ? 480 : 420),
+      height: isDesktop ? 420 : (isTablet ? 380 : 340),
       width: double.infinity,
       margin: const EdgeInsets.symmetric(horizontal: 16),
       child: ClipRRect(
