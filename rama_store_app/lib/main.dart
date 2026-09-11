@@ -273,6 +273,14 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const DownloadScreen(),
       ),
       GoRoute(
+        path: '/download-app',
+        builder: (context, state) => const DownloadScreen(),
+      ),
+      GoRoute(
+        path: '/app',
+        builder: (context, state) => const DownloadScreen(),
+      ),
+      GoRoute(
         path: '/help',
         builder: (context, state) => const HelpCenterScreen(),
       ),
