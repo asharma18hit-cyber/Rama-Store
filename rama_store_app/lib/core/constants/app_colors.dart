@@ -22,22 +22,29 @@ class AppColors {
   static const Color accentAmber = Color(0xFFFBBF24);     // Star rating & badges
 
   // Backgrounds & Surfaces
-  static const Color background = Color(0xFF0B0F19);      // Deep charcoal navy
-  static const Color surface = Color(0xFF1E293B);         // Soft slate card surface
-  static const Color surfaceLight = Color(0xFF334155);    // Interactive hover card surface
-  static const Color inputBackground = Color(0xFF0F172A); // Dark input fill
+  static const Color background = Color(0xFFF8F9FF);      // Crisp clean backdrop
+  static const Color surface = Color(0xFFFFFFFF);         // Pure white card surface
+  static const Color surfaceLight = Color(0xFFF1F5F9);    // Subtle slate tint
+  static const Color inputBackground = Color(0xFFF8FAFC); // Clean input fill
+  static const Color cardBorder = Color(0xFFE2E8F0);      // Modern subtle border
 
-  // Light Mode Colors
-  static const Color lightBackground = Color(0xFFF8F9FA); // Clean Surface Bright
-  static const Color lightSurface = Color(0xFFFFFFFF);    // Pure White Card
-  static const Color lightSurfaceContainerLow = Color(0xFFF3F4F5);
-  static const Color lightTextPrimary = Color(0xFF191C1D);
-  static const Color lightTextSecondary = Color(0xFF464555);
+  // Light Mode Explicit
+  static const Color lightBackground = Color(0xFFF8F9FF);
+  static const Color lightSurface = Color(0xFFFFFFFF);
+  static const Color lightSurfaceContainerLow = Color(0xFFF1F5F9);
+  static const Color lightTextPrimary = Color(0xFF0F172A);
+  static const Color lightTextSecondary = Color(0xFF475569);
 
-  // Text Colors
-  static const Color textPrimary = Color(0xFFF8FAFC);     // Warm off-white
-  static const Color textSecondary = Color(0xFF94A3B8);   // Muted slate gray
-  static const Color textMuted = Color(0xFF64748B);       // Subtle helper text
+  // Text Colors (High Contrast)
+  static const Color textPrimary = Color(0xFF0F172A);     // Deep midnight slate
+  static const Color textSecondary = Color(0xFF475569);   // Elegant muted slate
+  static const Color textMuted = Color(0xFF94A3B8);       // Subtle helper text
+
+  // Dark Variant Tokens
+  static const Color darkBackground = Color(0xFF0B0F19);
+  static const Color darkSurface = Color(0xFF1E293B);
+  static const Color darkTextPrimary = Color(0xFFF8FAFC);
+  static const Color darkTextSecondary = Color(0xFF94A3B8);
 
   // Feedback & Status
   static const Color success = Color(0xFF10B981);         // Mint green
@@ -45,3 +52,4 @@ class AppColors {
   static const Color error = Color(0xFFBA1A1A);           // Red Error
   static const Color info = Color(0xFF3525CD);            // Indigo info
 }
+

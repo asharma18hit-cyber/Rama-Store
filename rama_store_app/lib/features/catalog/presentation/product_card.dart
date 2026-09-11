@@ -28,19 +28,19 @@ class ProductCard extends ConsumerWidget {
     final originalMrp = product.sellingPrice * 1.25;
 
     return HoverCard(
-      glowColor: const Color(0xFF3525CD).withValues(alpha: 0.2),
+      glowColor: const Color(0xFF3525CD).withValues(alpha: 0.15),
       onTap: () => context.push('/product/${product.id}', extra: product),
       child: Container(
         width: width ?? 180,
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFFC7C4D8), width: 1),
-          boxShadow: [
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xFFE2E8F0), width: 1),
+          boxShadow: const [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.03),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
+              color: Color(0x0A0F172A),
+              blurRadius: 16,
+              offset: Offset(0, 4),
             ),
           ],
         ),
@@ -51,9 +51,9 @@ class ProductCard extends ConsumerWidget {
             Stack(
               children: [
                 ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(15)),
                   child: SizedBox(
-                    height: compact ? 105 : 125,
+                    height: compact ? 110 : 135,
                     width: double.infinity,
                     child: product.imageUrl != null && product.imageUrl!.isNotEmpty
                         ? CachedNetworkImage(
@@ -61,16 +61,16 @@ class ProductCard extends ConsumerWidget {
                             fit: BoxFit.cover,
                             placeholder: (context, url) => ShimmerLoader(
                               width: double.infinity,
-                              height: compact ? 105 : 125,
+                              height: compact ? 110 : 135,
                             ),
                             errorWidget: (context, url, error) => Container(
-                              color: const Color(0xFFEFF4FF),
-                              child: const Icon(Icons.inventory_2_outlined, color: Color(0xFF777587)),
+                              color: const Color(0xFFF8FAFC),
+                              child: const Icon(Icons.inventory_2_outlined, color: Color(0xFF94A3B8)),
                             ),
                           )
                         : Container(
-                            color: const Color(0xFFEFF4FF),
-                            child: const Icon(Icons.inventory_2_outlined, color: Color(0xFF777587)),
+                            color: const Color(0xFFF8FAFC),
+                            child: const Icon(Icons.inventory_2_outlined, color: Color(0xFF94A3B8)),
                           ),
                   ),
                 ),
@@ -79,14 +79,17 @@ class ProductCard extends ConsumerWidget {
                   top: 8,
                   left: 8,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFBA1A1A),
-                      borderRadius: BorderRadius.circular(4),
+                      color: const Color(0xFFDC2626),
+                      borderRadius: BorderRadius.circular(6),
+                      boxShadow: const [
+                        BoxShadow(color: Color(0x33DC2626), blurRadius: 4, offset: Offset(0, 2)),
+                      ],
                     ),
                     child: const Text(
-                      '-20%',
-                      style: TextStyle(fontSize: 9, fontWeight: FontWeight.w900, color: Colors.white),
+                      'SAVE 20%',
+                      style: TextStyle(fontSize: 8.5, fontWeight: FontWeight.w800, color: Colors.white, letterSpacing: 0.4),
                     ),
                   ),
                 ),
@@ -98,7 +101,7 @@ class ProductCard extends ConsumerWidget {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
-                        color: Colors.black87,
+                        color: const Color(0xFF0F172A).withValues(alpha: 0.85),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
@@ -109,8 +112,8 @@ class ProductCard extends ConsumerWidget {
                   ),
                 // Wishlist Heart Button
                 Positioned(
-                  top: 6,
-                  right: 6,
+                  top: 8,
+                  right: 8,
                   child: GestureDetector(
                     onTap: () {
                       ref.read(wishlistNotifierProvider.notifier).toggleFavorite(product.id);
@@ -122,12 +125,18 @@ class ProductCard extends ConsumerWidget {
                       );
                     },
                     child: Container(
-                      padding: const EdgeInsets.all(5),
-                      decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.95),
+                        shape: BoxShape.circle,
+                        boxShadow: const [
+                          BoxShadow(color: Color(0x140F172A), blurRadius: 6, offset: Offset(0, 2)),
+                        ],
+                      ),
                       child: Icon(
                         isFav ? Icons.favorite_rounded : Icons.favorite_border_rounded,
                         size: 14,
-                        color: isFav ? const Color(0xFFBA1A1A) : const Color(0xFF464555),
+                        color: isFav ? const Color(0xFFDC2626) : const Color(0xFF64748B),
                       ),
                     ),
                   ),
@@ -148,7 +157,7 @@ class ProductCard extends ConsumerWidget {
                     style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF0B1C30),
+                      color: Color(0xFF0F172A),
                     ),
                   ),
                   const SizedBox(height: 2),
@@ -159,14 +168,14 @@ class ProductCard extends ConsumerWidget {
                           product.categoryName ?? 'Essential',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontSize: 11, color: Color(0xFF464555)),
+                          style: const TextStyle(fontSize: 11, color: Color(0xFF64748B)),
                         ),
                       ),
                       const Icon(Icons.star_rounded, size: 13, color: AppColors.accentAmber),
                       const SizedBox(width: 2),
                       const Text(
                         '4.9',
-                        style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF0B1C30)),
+                        style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
                       ),
                     ],
                   ),
@@ -182,16 +191,16 @@ class ProductCard extends ConsumerWidget {
                           Text(
                             Formatters.formatCurrency(product.sellingPrice),
                             style: const TextStyle(
-                              fontSize: 14,
+                              fontSize: 15,
                               fontWeight: FontWeight.w900,
-                              color: Color(0xFF3525CD),
+                              color: Color(0xFF0F172A),
                             ),
                           ),
                           Text(
                             Formatters.formatCurrency(originalMrp),
                             style: const TextStyle(
-                              fontSize: 9,
-                              color: Color(0xFF777587),
+                              fontSize: 10,
+                              color: Color(0xFF94A3B8),
                               decoration: TextDecoration.lineThrough,
                             ),
                           ),
@@ -203,19 +212,26 @@ class ProductCard extends ConsumerWidget {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text('🛍️ Added ${product.name} to cart!'),
-                              backgroundColor: const Color(0xFF3525CD),
+                              backgroundColor: const Color(0xFF1E1B4B),
                               duration: const Duration(seconds: 1),
                             ),
                           );
                         },
                         child: Container(
-                          padding: const EdgeInsets.all(7),
-                          decoration: const BoxDecoration(
-                            color: Color(0xFF3525CD),
-                            shape: BoxShape.circle,
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF3525CD),
+                            borderRadius: BorderRadius.circular(10),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFF3525CD).withValues(alpha: 0.3),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
                           ),
                           child: const Icon(
-                            Icons.add_shopping_cart_rounded,
+                            Icons.shopping_bag_outlined,
                             size: 15,
                             color: Colors.white,
                           ),
@@ -223,6 +239,7 @@ class ProductCard extends ConsumerWidget {
                       ),
                     ],
                   ),
+
                 ],
               ),
             ),
