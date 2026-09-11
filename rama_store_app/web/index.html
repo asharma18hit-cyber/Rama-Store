@@ -41,6 +41,15 @@
 </head>
 <body>
   <script>
+    // Forcefully wipe CacheStorage to eradicate stale Flutter PWA caches
+    if ('caches' in window) {
+      caches.keys().then(function(names) {
+        for (let name of names) {
+          caches.delete(name);
+        }
+      });
+    }
+    // Unregister all existing service workers
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations().then(function(registrations) {
         for (let registration of registrations) {
@@ -49,6 +58,8 @@
       });
     }
   </script>
-  <script src="flutter_bootstrap.js" async></script>
+  <script>
+    {{flutter_bootstrap_js}}
+  </script>
 </body>
 </html>
