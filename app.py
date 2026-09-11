@@ -10,7 +10,7 @@ from functools import wraps
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 sys.path.insert(0, os.path.join(BASE_DIR, 'app'))
 
-from flask import Flask, request, jsonify, render_template, session, make_response, redirect, url_for
+from flask import Flask, request, jsonify, render_template, session, make_response, redirect, url_for, send_from_directory
 from werkzeug.security import generate_password_hash, check_password_hash
 from database import (
     init_db, add_product, get_products, update_product, delete_product,
@@ -123,6 +123,32 @@ def admin_portal():
     response.headers['Pragma'] = 'no-cache'
     response.headers['Expires'] = '0'
     return response
+
+@app.route('/downloads/<path:filename>', methods=['GET'])
+def download_app_file(filename):
+    """Direct high-speed download for Samaur Mart Android APK release."""
+    downloads_dir = os.path.join(BASE_DIR, 'rama_store_app', 'web', 'downloads')
+    target_file = 'rama-store-app.apk'
+    if os.path.exists(os.path.join(downloads_dir, filename)):
+        target_file = filename
+    elif os.path.exists(os.path.join(downloads_dir, 'rama-store-app.apk')):
+        target_file = 'rama-store-app.apk'
+
+    response = send_from_directory(
+        downloads_dir,
+        target_file,
+        as_attachment=True,
+        download_name='samaur-mart-app.apk',
+        mimetype='application/vnd.android.package-archive'
+    )
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Cache-Control'] = 'public, max-age=86400'
+    return response
+
+@app.route('/download-apk', methods=['GET'])
+def download_apk_alias():
+    """Friendly shortcut route to download Android APK."""
+    return download_app_file('samaur-mart-app.apk')
 
 # ==========================================
 # PUBLIC RETAIL API ENDPOINTS

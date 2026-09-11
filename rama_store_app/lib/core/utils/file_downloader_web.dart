@@ -2,14 +2,20 @@
 import 'dart:html' as html;
 
 void downloadFileFromUrl(String url, {String? filename}) {
-  final anchor = html.AnchorElement(href: url);
-  if (filename != null && filename.isNotEmpty) {
-    anchor.setAttribute('download', filename);
-  } else {
-    anchor.setAttribute('download', 'samaur-mart-app.apk');
+  final targetName = filename ?? 'samaur-mart-app.apk';
+  final resolvedUrl = url.startsWith('http') ? url : '${html.window.location.origin}$url';
+
+  try {
+    final anchor = html.AnchorElement(href: resolvedUrl)
+      ..setAttribute('download', targetName)
+      ..setAttribute('target', '_self')
+      ..setAttribute('rel', 'noopener noreferrer')
+      ..style.display = 'none';
+
+    html.document.body?.append(anchor);
+    anchor.click();
+    anchor.remove();
+  } catch (_) {
+    html.window.open(resolvedUrl, '_blank');
   }
-  anchor.style.display = 'none';
-  html.document.body?.append(anchor);
-  anchor.click();
-  anchor.remove();
 }

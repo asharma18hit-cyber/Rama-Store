@@ -168,10 +168,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
+      padding: const EdgeInsets.symmetric(vertical: 7, horizontal: 20),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [Color(0xFF3525CD), Color(0xFF006C49)],
+          colors: [Color(0xFF1E1B4B), Color(0xFF3525CD)],
         ),
       ),
       child: Row(
@@ -182,9 +182,31 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           Flexible(
             child: Text(
               text,
-              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white),
+              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.white),
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
+            ),
+          ),
+          const SizedBox(width: 14),
+          InkWell(
+            onTap: () => context.push('/download-app'),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: const [
+                Icon(Icons.phone_android_rounded, size: 13, color: AppColors.secondaryFixedDim),
+                SizedBox(width: 4),
+                Text(
+                  'Download Android App',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.secondaryFixedDim,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
+                SizedBox(width: 2),
+                Icon(Icons.arrow_forward_rounded, size: 11, color: AppColors.secondaryFixedDim),
+              ],
             ),
           ),
         ],
@@ -296,6 +318,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      if (isDesktop) ...[
+                        OutlinedButton.icon(
+                          onPressed: () => context.push('/download-app'),
+                          icon: const Icon(Icons.phone_android_rounded, size: 15, color: Color(0xFF3525CD)),
+                          label: const Text(
+                            'Get App',
+                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF3525CD)),
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(color: Color(0xFF3525CD), width: 1.2),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                            minimumSize: const Size(0, 34),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                      ],
                       IconButton(
                         icon: const Icon(Icons.favorite_border_rounded, size: 22, color: Color(0xFF334155)),
                         tooltip: 'Wishlist',
@@ -348,18 +387,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return InkWell(
       onTap: () => context.go(route),
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 8),
+        height: 40,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         decoration: isSelected
             ? const BoxDecoration(
-                border: Border(bottom: BorderSide(color: Color(0xFF3525CD), width: 2)),
+                border: Border(
+                  bottom: BorderSide(color: Color(0xFF3525CD), width: 2.5),
+                ),
               )
             : null,
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-            color: isSelected ? const Color(0xFF3525CD) : const Color(0xFF464555),
+        child: Center(
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+              color: isSelected ? const Color(0xFF3525CD) : const Color(0xFF464555),
+            ),
           ),
         ),
       ),
@@ -381,8 +425,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Container(
       height: 48,
       decoration: const BoxDecoration(
-        color: Color(0xFFEFF4FF),
-        border: Border(bottom: BorderSide(color: Color(0xFFE1E3E4), width: 0.8)),
+        color: Colors.white,
+        border: Border(bottom: BorderSide(color: Color(0xFFE2E8F0), width: 0.8)),
       ),
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
@@ -409,10 +453,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                 decoration: BoxDecoration(
-                  color: isSelected ? const Color(0xFF3525CD) : Colors.white,
+                  color: isSelected ? const Color(0xFF3525CD) : const Color(0xFFF8FAFC),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                    color: isSelected ? const Color(0xFF3525CD) : const Color(0xFFC7C4D8),
+                    color: isSelected ? const Color(0xFF3525CD) : const Color(0xFFE2E8F0),
                   ),
                 ),
                 child: Center(

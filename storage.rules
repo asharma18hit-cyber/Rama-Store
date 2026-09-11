@@ -31,6 +31,12 @@ service firebase.storage {
       allow write: if isAdmin();
     }
 
+    // App Downloads & APKs (Public read)
+    match /downloads/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
     // User Uploads (Avatars / Order verification receipts)
     match /users/{userId}/{allPaths=**} {
       allow read: if isOwner(userId) || isAdmin();

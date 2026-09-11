@@ -50,11 +50,12 @@ class MainScaffold extends ConsumerWidget {
     final cartState = ref.watch(cartNotifierProvider);
     final itemCount = cartState.totalItemCount;
     final isDesktop = MediaQuery.of(context).size.width >= 900;
+    final showTopAppBanner = !isDesktop && !location.startsWith('/home');
 
     return Scaffold(
       body: Column(
         children: [
-          const AppDownloadBanner(),
+          if (showTopAppBanner) const AppDownloadBanner(),
           Expanded(child: child),
         ],
       ),

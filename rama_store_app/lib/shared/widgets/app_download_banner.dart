@@ -72,9 +72,9 @@ class _AppDownloadBannerState extends State<AppDownloadBanner> {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 ),
                 icon: const Icon(Icons.download_rounded, color: Colors.white),
-                label: const Text('Download APK Directly (53 MB)', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                label: const Text('Download APK (53 MB)', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                 onPressed: () {
-                  downloadFileFromUrl('/downloads/rama-store-app.apk', filename: 'samaur-mart-app.apk');
+                  downloadFileFromUrl('https://raw.githubusercontent.com/asharma18hit-cyber/Rama-Store/main/rama_store_app/web/downloads/rama-store-app.apk', filename: 'samaur-mart-app.apk');
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
@@ -83,13 +83,22 @@ class _AppDownloadBannerState extends State<AppDownloadBanner> {
                           Icon(Icons.download_done_rounded, color: AppColors.secondaryFixedDim),
                           SizedBox(width: 10),
                           Expanded(
-                            child: Text('🚀 Download started! Check your browser downloads for samaur-mart-app.apk'),
+                            child: Text('🚀 Download started! Check your downloads for samaur-mart-app.apk'),
                           ),
                         ],
                       ),
-                      backgroundColor: AppColors.surface,
+                      backgroundColor: Color(0xFF0F172A),
                     ),
                   );
+                },
+              ),
+              const SizedBox(height: 8),
+              TextButton.icon(
+                icon: const Icon(Icons.cloud_download_outlined, size: 16, color: AppColors.primaryContainer),
+                label: const Text('Server Mirror (Alternative)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.primaryContainer)),
+                onPressed: () {
+                  downloadFileFromUrl('https://rama-store-api.onrender.com/downloads/samaur-mart-app.apk', filename: 'samaur-mart-app.apk');
+                  Navigator.pop(context);
                 },
               ),
             ],
@@ -162,8 +171,28 @@ class _AppDownloadBannerState extends State<AppDownloadBanner> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
             ),
             icon: const Icon(Icons.download_rounded, size: 16, color: AppColors.secondaryFixedDim),
-            label: Text(isSmallScreen ? 'Get App' : 'Download APK / Scan QR', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white)),
-            onPressed: () => _showQrCodeModal(context),
+            label: Text(isSmallScreen ? 'Install App' : 'Download APK / Scan QR', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white)),
+            onPressed: () {
+              if (isSmallScreen) {
+                downloadFileFromUrl('https://raw.githubusercontent.com/asharma18hit-cyber/Rama-Store/main/rama_store_app/web/downloads/rama-store-app.apk', filename: 'samaur-mart-app.apk');
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Row(
+                      children: [
+                        Icon(Icons.download_done_rounded, color: AppColors.secondaryFixedDim),
+                        SizedBox(width: 10),
+                        Expanded(
+                          child: Text('🚀 Downloading Samaur Mart APK... Check notification drawer!'),
+                        ),
+                      ],
+                    ),
+                    backgroundColor: Color(0xFF0F172A),
+                  ),
+                );
+              } else {
+                _showQrCodeModal(context);
+              }
+            },
           ),
           const SizedBox(width: 4),
           IconButton(

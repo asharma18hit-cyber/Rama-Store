@@ -27,6 +27,23 @@
     ],
     "headers": [
       {
+        "source": "/downloads/**",
+        "headers": [
+          {
+            "key": "Content-Disposition",
+            "value": "attachment"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/vnd.android.package-archive"
+          },
+          {
+            "key": "Cache-Control",
+            "value": "public, max-age=3600"
+          }
+        ]
+      },
+      {
         "source": "**",
         "headers": [
           {
@@ -40,10 +57,6 @@
           {
             "key": "Expires",
             "value": "0"
-          },
-          {
-            "key": "Clear-Site-Data",
-            "value": "\"cache\", \"storage\""
           }
         ]
       }

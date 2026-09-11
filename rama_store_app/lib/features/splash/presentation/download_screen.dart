@@ -116,7 +116,7 @@ class DownloadScreen extends StatelessWidget {
                     text: 'Download Android APK (53.4 MB)',
                     icon: Icons.download_rounded,
                     onPressed: () {
-                      downloadFileFromUrl('/downloads/rama-store-app.apk', filename: 'samaur-mart-app.apk');
+                      downloadFileFromUrl('https://raw.githubusercontent.com/asharma18hit-cyber/Rama-Store/main/rama_store_app/web/downloads/rama-store-app.apk', filename: 'samaur-mart-app.apk');
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Row(
@@ -128,12 +128,23 @@ class DownloadScreen extends StatelessWidget {
                               ),
                             ],
                           ),
-                          backgroundColor: AppColors.surface,
+                          backgroundColor: Color(0xFF0F172A),
                         ),
                       );
                     },
                   ),
-                  const SizedBox(height: 28),
+                  const SizedBox(height: 10),
+                  TextButton.icon(
+                    icon: const Icon(Icons.cloud_download_outlined, size: 16, color: AppColors.primaryContainer),
+                    label: const Text(
+                      'Alternative Server Download Mirror',
+                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.primaryContainer),
+                    ),
+                    onPressed: () {
+                      downloadFileFromUrl('https://rama-store-api.onrender.com/downloads/samaur-mart-app.apk', filename: 'samaur-mart-app.apk');
+                    },
+                  ),
+                  const SizedBox(height: 20),
 
                   // Step-by-Step Installation Guide
                   Container(
