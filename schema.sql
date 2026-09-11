@@ -1,4 +1,4 @@
--- schema.sql -- Rama Store SQLite Database Initialization (Phase 6 Production Enterprise Schema)
+-- schema.sql -- Samaur Mart SQLite Database Initialization (Phase 6 Production Enterprise Schema)
 
 PRAGMA foreign_keys = ON;
 

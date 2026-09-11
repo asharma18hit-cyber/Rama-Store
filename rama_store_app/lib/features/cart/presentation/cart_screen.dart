@@ -378,7 +378,7 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                   child: AppTextField(
                     controller: _couponController,
                     label: 'Have a Promo Code?',
-                    hint: 'e.g. RAMA50, FESTIVE10',
+                    hint: 'e.g. SAMAUR50, FESTIVE10',
                   ),
                 ),
                 const SizedBox(width: 8),

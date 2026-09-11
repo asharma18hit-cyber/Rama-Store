@@ -82,7 +82,7 @@ class ProfileScreen extends ConsumerWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              user?.fullname.isNotEmpty == true ? user!.fullname : 'Rama Store Member',
+                              user?.fullname.isNotEmpty == true ? user!.fullname : 'Samaur Mart Member',
                               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Color(0xFF0B1C30)),
                             ),
                             const SizedBox(height: 4),

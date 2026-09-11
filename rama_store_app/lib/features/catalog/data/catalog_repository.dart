@@ -152,10 +152,7 @@ class ApiCatalogRepository implements CatalogRepository {
   }) async {
     // 1. Try Cloud Firestore first
     try {
-      final snap = await _firestore
-          .collection('products')
-          .where('status', isEqualTo: 'published')
-          .get();
+      final snap = await _firestore.collection('products').get();
 
       if (snap.docs.isNotEmpty) {
         final fsProducts = snap.docs.map((doc) {

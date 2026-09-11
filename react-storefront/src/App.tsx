@@ -61,7 +61,7 @@ const testimonialsData: Testimonial[] = [
     avatarSrc: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=100&q=80',
     name: 'Priya Sharma',
     handle: '@priya_books',
-    text: 'Rama Store has been my go-to counter for university registers since 1998. Extremely quick shipping!'
+    text: 'Samaur Mart has been my go-to counter for university registers since 1998. Extremely quick shipping!'
   },
   {
     avatarSrc: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&q=80',
@@ -167,7 +167,7 @@ export default function App() {
             <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
               {/* Logo */}
               <div className="flex items-center gap-2 cursor-pointer" onClick={() => { setSelectedCategory(null); setSearchQuery(''); }}>
-                <span className="text-xl font-bold tracking-tight text-amber-500">Rama <span className="text-white">Store</span></span>
+                <span className="text-xl font-bold tracking-tight text-amber-500">Samaur <span className="text-white">Mart</span></span>
               </div>
 
               {/* Search Bar */}
@@ -312,7 +312,7 @@ export default function App() {
           {/* Footer */}
           <footer className="bg-zinc-900 text-zinc-400 py-8 border-t border-zinc-800">
             <div className="max-w-7xl mx-auto px-4 text-center text-xs space-y-2">
-              <p className="font-bold text-zinc-200">Rama Store - Samaur Bazar, Fazilnagar Road 274401</p>
+              <p className="font-bold text-zinc-200">Samaur Mart - Samaur Bazar, Fazilnagar Road 274401</p>
               <p>Providing quality literature and school text registers to neighborhood desks since 1994.</p>
             </div>
           </footer>

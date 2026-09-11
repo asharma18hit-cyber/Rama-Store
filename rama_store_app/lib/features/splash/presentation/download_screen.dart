@@ -15,7 +15,7 @@ class DownloadScreen extends StatelessWidget {
       backgroundColor: const Color(0xFF0B0F19),
       appBar: AppBar(
         backgroundColor: const Color(0xFF0F172A),
-        title: const Text('Download Rama Store Mobile App', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+        title: const Text('Download Samaur Mart Mobile App', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
           onPressed: () => context.go('/home'),
@@ -53,7 +53,7 @@ class DownloadScreen extends StatelessWidget {
                   const SizedBox(height: 20),
 
                   const Text(
-                    'RAMA STORE MOBILE',
+                    'SAMAUR MART MOBILE',
                     style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, letterSpacing: 2, color: AppColors.secondaryFixedDim),
                   ),
                   const SizedBox(height: 4),
@@ -116,7 +116,7 @@ class DownloadScreen extends StatelessWidget {
                     text: 'Download Android APK (53.4 MB)',
                     icon: Icons.download_rounded,
                     onPressed: () {
-                      downloadFileFromUrl('/downloads/rama-store-app.apk', filename: 'rama-store-app.apk');
+                      downloadFileFromUrl('/downloads/rama-store-app.apk', filename: 'samaur-mart-app.apk');
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Row(
@@ -124,7 +124,7 @@ class DownloadScreen extends StatelessWidget {
                               Icon(Icons.download_done_rounded, color: AppColors.secondaryFixedDim),
                               SizedBox(width: 10),
                               Expanded(
-                                child: Text('🚀 Download started! Check your device downloads for rama-store-app.apk'),
+                                child: Text('🚀 Download started! Check your device downloads for samaur-mart-app.apk'),
                               ),
                             ],
                           ),
@@ -150,7 +150,7 @@ class DownloadScreen extends StatelessWidget {
                         SizedBox(height: 10),
                         Text('1. Tap the "Download Android APK" button above.', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                         SizedBox(height: 6),
-                        Text('2. Open the downloaded rama-store-app.apk file from your notification bar or Files app.', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                        Text('2. Open the downloaded samaur-mart-app.apk file from your notification bar or Files app.', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                         SizedBox(height: 6),
                         Text('3. When prompted, enable "Install unknown apps" in Settings and tap "Install".', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                       ],

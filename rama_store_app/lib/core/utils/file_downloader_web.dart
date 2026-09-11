@@ -6,7 +6,7 @@ void downloadFileFromUrl(String url, {String? filename}) {
   if (filename != null && filename.isNotEmpty) {
     anchor.setAttribute('download', filename);
   } else {
-    anchor.setAttribute('download', 'rama-store-app.apk');
+    anchor.setAttribute('download', 'samaur-mart-app.apk');
   }
   anchor.style.display = 'none';
   html.document.body?.append(anchor);

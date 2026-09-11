@@ -1,6 +1,6 @@
-# Rama Store Native Mobile Application (Android + iOS)
+# Samaur Mart Native Mobile Application (Android + iOS)
 
-A production-quality, high-performance Flutter mobile application for **Rama Store** (bakery, groceries, medicine, books, stationery, sports gear). It operates as an independent companion frontend communicating with the live backend at `https://rama-store-3u49.onrender.com`.
+A production-quality, high-performance Flutter mobile application for **Samaur Mart** (bakery, groceries, medicine, books, stationery, sports gear). It operates as an independent companion frontend communicating with the live backend at `https://rama-store-3u49.onrender.com`.
 
 ---
 

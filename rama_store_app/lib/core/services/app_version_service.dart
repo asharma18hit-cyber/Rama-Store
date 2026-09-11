@@ -81,8 +81,8 @@ class AppVersionService {
               children: [
                 Text(
                   isMandatory
-                      ? 'This installed version of Rama Store ($currentAppVersion) is no longer supported. Please update to continue using the application.'
-                      : 'A new version ($latestAvailableVersion) of Rama Store is available with live synchronization, instant image upload, and performance enhancements.',
+                      ? 'This installed version of Samaur Mart ($currentAppVersion) is no longer supported. Please update to continue using the application.'
+                      : 'A new version ($latestAvailableVersion) of Samaur Mart is available with live synchronization, instant image upload, and performance enhancements.',
                   style: const TextStyle(fontSize: 13, color: AppColors.textSecondary, height: 1.5),
                 ),
                 const SizedBox(height: 16),

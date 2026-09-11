@@ -93,7 +93,7 @@ class OrderModel {
         .toList();
 
     final rawStatus = json['order_status'] ?? json['orderStatus'] ?? json['status'] ?? 'Confirmed';
-    final rawPaymentStatus = json['payment_status'] ?? json['paymentStatus'] ?? (json['payment_method']?.toString().toUpperCase() == 'COD' ? 'Pending' : 'Paid');
+    final rawPaymentStatus = json['payment_status'] ?? json['paymentStatus'] ?? 'Pending';
     final rawPaymentMethod = json['payment_method'] ?? json['paymentMethod'] ?? 'Card';
     final rawCreatedAt = json['created_at'] ?? json['createdAt'] ?? '';
 

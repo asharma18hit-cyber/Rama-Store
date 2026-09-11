@@ -467,7 +467,7 @@ export default function App() {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={COLORS.primary} />
-        <Text style={styles.loadingText}>Loading Rama Store...</Text>
+        <Text style={styles.loadingText}>Loading Samaur Mart...</Text>
       </View>
     );
   }
@@ -482,7 +482,7 @@ export default function App() {
           <ScrollView contentContainerStyle={styles.authScrollContainer}>
             <View style={styles.headerTitleBox}>
               <ShoppingBag size={48} color={COLORS.primary} />
-              <Text style={styles.mainTitle}>RAMA STORE</Text>
+              <Text style={styles.mainTitle}>SAMAUR MART</Text>
               <Text style={styles.subtitle}>Retail Management & POS Platform</Text>
             </View>
 
@@ -651,7 +651,7 @@ export default function App() {
     <SafeAreaView style={styles.safeContainer}>
       <View style={styles.topHeader}>
         <View>
-          <Text style={styles.headerStoreName}>Rama Store</Text>
+          <Text style={styles.headerStoreName}>Samaur Mart</Text>
           <Text style={styles.headerWelcome}>Hello, {user.fullname} ({user.role})</Text>
         </View>
         <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
@@ -1027,7 +1027,7 @@ export default function App() {
             <View style={{ alignItems: 'center', marginBottom: 12 }}>
               <FileText size={32} color={COLORS.primary} />
               <Text style={styles.receiptTitle}>TRANSACTION RECEIPT</Text>
-              <Text style={styles.receiptStore}>Rama Store POS</Text>
+              <Text style={styles.receiptStore}>Samaur Mart POS</Text>
             </View>
             <ScrollView style={{ maxHeight: 200 }}>
               {receipt?.items?.map((item: any, idx: number) => (

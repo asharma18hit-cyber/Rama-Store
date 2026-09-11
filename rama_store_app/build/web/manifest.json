@@ -1,11 +1,11 @@
 {
-    "name": "rama_store_app",
-    "short_name": "rama_store_app",
+    "name": "Samaur Mart",
+    "short_name": "Samaur Mart",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Samaur Mart - Elite High-Performance Fashion & Retail Essentials.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

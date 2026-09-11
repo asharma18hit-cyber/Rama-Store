@@ -1,5 +1,5 @@
 class AppConstants {
-  static const String appName = 'Rama Store';
+  static const String appName = 'Samaur Mart';
   static const String appTagline = 'Curated Essentials for Your Daily Lifestyle';
   
   // Default Base API URL (Overrideable via --dart-define=BASE_URL=http://...)

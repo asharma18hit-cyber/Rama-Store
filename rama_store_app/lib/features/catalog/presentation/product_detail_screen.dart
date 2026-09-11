@@ -293,7 +293,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
 
         // Description
         const Text(
-          'Curated high-performance item from the official Rama Store autumn drop. Tested for durability, hyper-local express dispatch within 30 minutes, and eligible for 10% loyalty cashback.',
+          'Curated high-performance item from the official Samaur Mart autumn drop. Tested for durability, hyper-local express dispatch within 30 minutes, and eligible for 10% loyalty cashback.',
           style: TextStyle(color: Color(0xFF464555), height: 1.6, fontSize: 14),
         ),
         const SizedBox(height: 24),

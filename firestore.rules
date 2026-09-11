@@ -34,9 +34,9 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // Products (Public published read, Admin full access)
+    // Products (Public catalog read, Admin write)
     match /products/{productId} {
-      allow read: if resource.data.status == 'published' || isAdmin();
+      allow read: if true;
       allow write: if isAdmin();
     }
 

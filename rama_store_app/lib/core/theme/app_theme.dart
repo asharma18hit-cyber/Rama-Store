@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../constants/app_colors.dart';
 
-/// Rama Store Application Theme Configuration (Google Stitch "Rama Elite")
+/// Samaur Mart Application Theme Configuration (Google Stitch "Rama Elite")
 class AppTheme {
   static ThemeData get lightTheme {
     return ThemeData(

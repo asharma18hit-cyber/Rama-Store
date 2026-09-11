@@ -363,7 +363,7 @@ class OrdersScreen extends ConsumerWidget {
 
   void _openPayNowModal(BuildContext context, OrderModel order, WidgetRef ref) {
     const merchantVpa = 'ramastore.official@icici';
-    const merchantName = 'Rama Store Inc';
+    const merchantName = 'Samaur Mart Inc';
     final amountStr = order.totalAmount.toStringAsFixed(2);
     final upiPayload = 'upi://pay?pa=$merchantVpa&pn=${Uri.encodeComponent(merchantName)}&am=$amountStr&cu=INR&tn=Order%20${order.trackingNumber}&tr=${order.trackingNumber}';
     final qrCodeUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${Uri.encodeComponent(upiPayload)}';

@@ -129,7 +129,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             SliverToBoxAdapter(
               child: _buildSectionHeader(
                 context,
-                title: 'Why Shop With Rama Store',
+                title: 'Why Shop With Samaur Mart',
                 subtitle: 'Our commitment to authentic quality and frictionless commerce',
               ),
             ),
@@ -224,7 +224,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   GestureDetector(
                     onTap: () => context.go('/home'),
                     child: const Text(
-                      'Rama Store',
+                      'Samaur Mart',
                       style: TextStyle(
                         fontSize: 26,
                         fontWeight: FontWeight.w800,
@@ -1088,7 +1088,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 child: const Icon(Icons.shopping_bag_rounded, size: 18, color: Colors.white),
               ),
               const SizedBox(width: 10),
-              const Text('RAMA STORE', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16, color: Color(0xFF3525CD), letterSpacing: 1.0)),
+              const Text('SAMAUR MART', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16, color: Color(0xFF3525CD), letterSpacing: 1.0)),
             ],
           ),
           const SizedBox(height: 12),
@@ -1110,7 +1110,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: const [
-              Text('© 2026 Rama Store Inc. All Rights Reserved.', style: TextStyle(fontSize: 10, color: Color(0xFF777587))),
+              Text('© 2026 Samaur Mart. All Rights Reserved.', style: TextStyle(fontSize: 10, color: Color(0xFF777587))),
               Text('Authentic Quality Guaranteed', style: TextStyle(fontSize: 10, color: Color(0xFF777587))),
             ],
           ),

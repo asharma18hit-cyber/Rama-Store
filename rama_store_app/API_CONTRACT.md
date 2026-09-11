@@ -1,4 +1,4 @@
-# Rama Store Mobile Application - API Contract Specification
+# Samaur Mart Mobile Application - API Contract Specification
 
 This document details all REST API endpoints discovered from reverse-engineering the live backend at `https://rama-store-3u49.onrender.com` (Flask + SQLite).
 

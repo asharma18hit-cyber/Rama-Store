@@ -3,6 +3,7 @@ import '../../../core/network/api_client.dart';
 import '../../../core/storage/local_storage_service.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/services/otp_service.dart';
+import '../../../core/services/firebase_auth_service.dart';
 import 'auth_model.dart';
 
 abstract class AuthRepository {
@@ -49,6 +50,19 @@ class ApiAuthRepository implements AuthRepository {
 
   @override
   Future<AuthUser?> checkAuthStatus() async {
+    final fbUser = FirebaseAuthService.currentUser;
+    if (fbUser != null) {
+      final storedRole = storage.getString(AppConstants.keyUserRole) ?? 'customer';
+      final storedName = storage.getString(AppConstants.keyUserFullname) ?? fbUser.displayName ?? 'Customer';
+      final emailOrPhone = fbUser.phoneNumber ?? fbUser.email ?? storage.getString(AppConstants.keyUserEmail) ?? '';
+      return AuthUser(
+        id: fbUser.uid,
+        emailOrPhone: emailOrPhone,
+        fullname: storedName,
+        role: storedRole,
+      );
+    }
+
     try {
       final res = await apiClient.get('/api/auth/status');
       if (res != null && res['authenticated'] == true && res['user'] != null) {
@@ -237,6 +251,7 @@ class ApiAuthRepository implements AuthRepository {
 
   @override
   Future<void> logout() async {
+    await FirebaseAuthService.signOut();
     try {
       await apiClient.post('/api/auth/logout');
     } catch (_) {}

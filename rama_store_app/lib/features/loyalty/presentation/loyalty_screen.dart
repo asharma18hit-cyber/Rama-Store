@@ -16,7 +16,7 @@ class LoyaltyScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Rama Loyalty & Rewards'),
+        title: const Text('Samaur Mart Loyalty & Rewards'),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
@@ -70,7 +70,7 @@ class LoyaltyScreen extends ConsumerWidget {
             const Text('10% Cash-Back Program Policy', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
             const SizedBox(height: 8),
             Text(
-              'Every time you complete a order on Rama Store (mobile app or live website), 10% of your total order amount is instantly credited as loyalty points to your account.',
+              'Every time you complete an order on Samaur Mart (mobile app or live website), 10% of your total order amount is instantly credited as loyalty points to your account.',
               style: TextStyle(fontSize: 14, color: AppColors.textSecondary, height: 1.5),
             ),
 

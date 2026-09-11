@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }, 40);
     
-    // Stage 2: Wordmark "Rama Store" blur-to-focus reveal
+    // Stage 2: Wordmark "Samaur Mart" blur-to-focus reveal
     setTimeout(() => {
         wordmark.classList.remove('stage-hidden');
         wordmark.classList.add('stage-visible');

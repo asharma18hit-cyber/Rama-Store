@@ -29,7 +29,7 @@ class _AppDownloadBannerState extends State<AppDownloadBanner> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text(
-                    '📱 Get Rama Store App',
+                    '📱 Get Samaur Mart App',
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: AppColors.textPrimary),
                   ),
                   IconButton(
@@ -74,7 +74,7 @@ class _AppDownloadBannerState extends State<AppDownloadBanner> {
                 icon: const Icon(Icons.download_rounded, color: Colors.white),
                 label: const Text('Download APK Directly (53 MB)', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                 onPressed: () {
-                  downloadFileFromUrl('/downloads/rama-store-app.apk', filename: 'rama-store-app.apk');
+                  downloadFileFromUrl('/downloads/rama-store-app.apk', filename: 'samaur-mart-app.apk');
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
@@ -83,7 +83,7 @@ class _AppDownloadBannerState extends State<AppDownloadBanner> {
                           Icon(Icons.download_done_rounded, color: AppColors.secondaryFixedDim),
                           SizedBox(width: 10),
                           Expanded(
-                            child: Text('🚀 Download started! Check your browser downloads for rama-store-app.apk'),
+                            child: Text('🚀 Download started! Check your browser downloads for samaur-mart-app.apk'),
                           ),
                         ],
                       ),
@@ -141,7 +141,7 @@ class _AppDownloadBannerState extends State<AppDownloadBanner> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 const Text(
-                  '📱 Get the Rama Store Mobile App',
+                  '📱 Get the Samaur Mart Mobile App',
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.white),
                 ),
                 if (!isSmallScreen)

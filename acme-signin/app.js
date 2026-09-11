@@ -130,7 +130,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       if (valid) {
-        showToast("Signed in successfully to Rama Store!");
+        showToast("Signed in successfully to Samaur Mart!");
       }
     });
   }

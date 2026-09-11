@@ -14,12 +14,12 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
 
   final List<Map<String, String>> _faqs = [
     {
-      'question': 'How fast is Rama Store hyper-local delivery?',
+      'question': 'How fast is Samaur Mart hyper-local delivery?',
       'answer': 'Orders within a 5km radius are fulfilled and delivered to your doorstep within 30 minutes. Express shipping is complimentary for orders above ₹500.'
     },
     {
       'question': 'How does the 10% Loyalty Cash-Back program work?',
-      'answer': 'Every confirmed purchase credits 10% of the total item value into your Rama Store Loyalty Wallet upon successful order delivery. Wallet credits can be redeemed on any future checkout.'
+      'answer': 'Every confirmed purchase credits 10% of the total item value into your Samaur Mart Loyalty Wallet upon successful order delivery. Wallet credits can be redeemed on any future checkout.'
     },
     {
       'question': 'What payment methods are supported?',

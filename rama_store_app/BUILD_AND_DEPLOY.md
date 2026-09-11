@@ -1,6 +1,6 @@
-# Rama Store Mobile Application - Build & Deployment Guide
+# Samaur Mart Mobile Application - Build & Deployment Guide
 
-This guide provides exact copy-pasteable terminal commands to run, build, sign, and deploy the **Rama Store** Flutter mobile app for Android and iOS.
+This guide provides exact copy-pasteable terminal commands to run, build, sign, and deploy the **Samaur Mart** Flutter mobile app for Android and iOS.
 
 ---
 

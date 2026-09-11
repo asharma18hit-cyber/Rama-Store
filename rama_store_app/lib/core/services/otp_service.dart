@@ -104,6 +104,7 @@ class OtpService {
       if (fbUser != null) {
         final phone = fbUser.phoneNumber ?? FirebaseAuthService.formatPhoneNumber(identifier);
         final user = AuthUser(
+          id: fbUser.uid,
           emailOrPhone: phone,
           fullname: fbUser.displayName ?? 'Customer',
           role: 'customer',

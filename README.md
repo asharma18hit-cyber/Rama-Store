@@ -1,6 +1,6 @@
-# Rama Store - Simple Retail Management System
+# Samaur Mart - Simple Retail Management System
 
-Rama Store is a lightweight, highly optimized single-user desktop or local web application designed to allow shop owners to manage product inventory and process quick customer sales.
+Samaur Mart is a lightweight, highly optimized retail application designed to allow shop owners to manage product inventory and process quick customer sales.
 
 The frontend is built with vanilla HTML5, CSS3, and ES6+ JavaScript, with **zero compilation or build steps** required. The backend uses Python (Flask) with an optimized local file-based SQLite database.
 

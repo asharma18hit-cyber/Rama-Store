@@ -269,7 +269,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                         child: AppTextField(
                           controller: _promoController,
                           label: '',
-                          hint: 'Enter Promo Code (e.g. RAMA10)',
+                          hint: 'Enter Promo Code (e.g. SAMAUR10)',
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -280,14 +280,15 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                           width: 80,
                           height: 48,
                           onPressed: () {
-                            if (_promoController.text.trim().toUpperCase() == 'RAMA10') {
+                            final code = _promoController.text.trim().toUpperCase();
+                            if (code == 'SAMAUR10' || code == 'RAMA10') {
                               cartNotifier.applyDiscount(50.0);
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Promo Code RAMA10 applied! ₹50 Discount added.')),
+                                SnackBar(content: Text('Promo Code $code applied! ₹50 Discount added.')),
                               );
                             } else {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Invalid promo code. Try RAMA10')),
+                                const SnackBar(content: Text('Invalid promo code. Try SAMAUR10')),
                               );
                             }
                           },
@@ -551,7 +552,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
   void _launchRealUpiPaymentGateway(BuildContext context, String trackingNumber, dynamic cartState, String addr) {
     const merchantVpa = 'ramastore.official@icici';
-    const merchantName = 'Rama Store Inc';
+    const merchantName = 'Samaur Mart Inc';
     final amountStr = cartState.grandTotal.toStringAsFixed(2);
     final upiPayload = 'upi://pay?pa=$merchantVpa&pn=${Uri.encodeComponent(merchantName)}&am=$amountStr&cu=INR&tn=Order%20$trackingNumber&tr=$trackingNumber';
     final qrCodeUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${Uri.encodeComponent(upiPayload)}';

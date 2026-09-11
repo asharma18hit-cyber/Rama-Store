@@ -13,7 +13,7 @@ void main() {
       ),
     );
 
-    expect(find.text('RAMA STORE'), findsOneWidget);
+    expect(find.text('SAMAUR MART'), findsOneWidget);
     expect(find.text('Enter Store Front'), findsOneWidget);
     expect(find.text('Sign In / Register'), findsOneWidget);
   });

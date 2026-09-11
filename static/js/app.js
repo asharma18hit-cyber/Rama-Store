@@ -1144,7 +1144,7 @@ function renderPrintableReceipt(receipt) {
     container.innerHTML = `
         <div class="receipt-wrapper">
             <div class="receipt-header">
-                <div class="receipt-store-name">RAMA STORE</div>
+                <div class="receipt-store-name">SAMAUR MART</div>
                 <div class="receipt-meta">
                     <div>Tracking ID: ${receipt.tracking_number}</div>
                     <div>Date: ${dateFormatted}</div>
@@ -1439,7 +1439,7 @@ function initInfiniteScrollObserver() {
 
 function loadCustomerCartFromStorage() {
     try {
-        const localData = localStorage.getItem('rama_store_client_cart');
+        const localData = localStorage.getItem('samaur_mart_client_cart') || localStorage.getItem('rama_store_client_cart');
         state.cart = localData ? JSON.parse(localData) : [];
         updateCustomerCartBadgeUI();
     } catch(e) {
@@ -1448,7 +1448,7 @@ function loadCustomerCartFromStorage() {
 }
 
 function saveCustomerCartToStorage() {
-    localStorage.setItem('rama_store_client_cart', JSON.stringify(state.cart));
+    localStorage.setItem('samaur_mart_client_cart', JSON.stringify(state.cart));
     updateCustomerCartBadgeUI();
 }
 

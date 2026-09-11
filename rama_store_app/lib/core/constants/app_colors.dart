@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// App color system for Rama Store:
+/// App color system for Samaur Mart:
 /// Deep Indigo (#3525CD), Emerald Mint (#4EDEA3 / #006C49), Sleek Glass Surfaces.
 class AppColors {
   // Primary Brand Colors

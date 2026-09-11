@@ -81,7 +81,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     state = state.copyWith(isLoading: true, errorMessage: null);
     try {
       final user = await repository.registerVerify(email, otp, username: username);
-      state = state.copyWith(user: user, isLoading: false, infoMessage: 'Registration successful! Welcome to Rama Store.');
+      state = state.copyWith(user: user, isLoading: false, infoMessage: 'Registration successful! Welcome to Samaur Mart.');
       return true;
     } catch (e) {
       state = state.copyWith(isLoading: false, errorMessage: e.toString().replaceAll('Exception: ', ''));

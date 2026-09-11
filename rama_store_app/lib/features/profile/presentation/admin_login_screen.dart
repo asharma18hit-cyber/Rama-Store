@@ -179,7 +179,7 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
                   const SizedBox(height: 20),
                   const Center(
                     child: Text(
-                      'RAMA STORE',
+                      'SAMAUR MART',
                       style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, letterSpacing: 2, color: AppColors.secondaryFixedDim),
                     ),
                   ),

@@ -161,7 +161,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: const [
                         Text(
-                          'Rama Store Enterprise Identity & Auth',
+                          'Samaur Mart Enterprise Identity & Auth',
                           style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
                         ),
                         Text(

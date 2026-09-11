@@ -333,7 +333,7 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> wit
               ),
             ),
             const SizedBox(width: 10),
-            const Text('Rama Store Master Center', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF0B1C30))),
+            const Text('Samaur Mart Master Center', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF0B1C30))),
           ],
         ),
         actions: [
