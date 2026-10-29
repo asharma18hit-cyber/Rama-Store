@@ -10,36 +10,80 @@
     "source": "functions"
   },
   "hosting": {
-    "public": "rama_store_app/build/web",
+    "public": "public_web",
+    "cleanUrls": true,
+    "trailingSlash": false,
     "ignore": [
       "firebase.json",
-      "**/.*",
-      "**/node_modules/**",
-      "**/downloads/**",
-      "**/*.apk",
-      "**/*.exe"
+      "**/.*"
     ],
     "rewrites": [
       {
-        "source": "**",
-        "destination": "/index.html"
+        "source": "/api/**",
+        "function": "api"
+      },
+      {
+        "source": "/login",
+        "destination": "/login.html"
+      },
+      {
+        "source": "/profile",
+        "destination": "/login.html"
+      },
+      {
+        "source": "/store",
+        "destination": "/store.html"
+      },
+      {
+        "source": "/admin",
+        "destination": "/admin.html"
+      },
+      {
+        "source": "/admin/login",
+        "destination": "/admin_login.html"
+      },
+      {
+        "source": "/vendor/login",
+        "destination": "/vendor_login.html"
+      },
+      {
+        "source": "/vendor/register",
+        "destination": "/vendor_register.html"
+      },
+      {
+        "source": "/vendor",
+        "destination": "/vendor.html"
+      },
+      {
+        "source": "/vendor/**",
+        "destination": "/vendor.html"
       }
     ],
     "headers": [
       {
-        "source": "/downloads/**",
+        "source": "**/*.@(js|css)",
         "headers": [
           {
-            "key": "Content-Disposition",
-            "value": "attachment"
-          },
-          {
-            "key": "Content-Type",
-            "value": "application/vnd.android.package-archive"
-          },
+            "key": "Cache-Control",
+            "value": "no-cache, no-store, must-revalidate"
+          }
+        ]
+      },
+      {
+        "source": "**/*.@(jpg|jpeg|gif|png|svg|webp|woff2)",
+        "headers": [
           {
             "key": "Cache-Control",
-            "value": "public, max-age=3600"
+            "value": "public, max-age=86400, stale-while-revalidate=604800"
+          }
+        ]
+      },
+      {
+        "source": "/api/**",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache, no-store, must-revalidate"
           }
         ]
       },
@@ -48,15 +92,7 @@
         "headers": [
           {
             "key": "Cache-Control",
-            "value": "no-cache, no-store, must-revalidate, max-age=0"
-          },
-          {
-            "key": "Pragma",
-            "value": "no-cache"
-          },
-          {
-            "key": "Expires",
-            "value": "0"
+            "value": "no-cache, no-store, must-revalidate"
           }
         ]
       }

@@ -1,0 +1,2592 @@
+<!-- templates/admin.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rama Store Admin - Owner & Seller Control Hub</title>
+    
+    <!-- STRICT AUTHENTICATION GUARD & TAB CONTROLLER: Admin Gateway -->
+    <script>
+        (function() {
+            try {
+                const token = localStorage.getItem('adminToken');
+                const adminUser = JSON.parse(localStorage.getItem('adminUser') || 'null');
+                const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+                if (!token) {
+                    window.location.replace('/admin/login');
+                    return;
+                }
+                // Ensure currentUser is marked as admin while inside the admin console
+                if (!currentUser || currentUser.role !== 'admin') {
+                    const effectiveUser = adminUser || {
+                        id: 'admin_7268903804',
+                        uid: 'admin_7268903804',
+                        role: 'admin',
+                        fullname: 'Rama Store Owner (Admin)',
+                        username: 'Rama Store Owner',
+                        phone: '7268903804'
+                    };
+                    localStorage.setItem('currentUser', JSON.stringify(effectiveUser));
+                }
+            } catch (_) {
+                window.location.replace('/admin/login');
+            }
+        })();
+
+        // Robust, fail-safe switchTab implementation immediately available on boot
+        function switchTab(tabName) {
+            if (!tabName) tabName = 'dashboard';
+            try {
+                if (window.history && window.history.replaceState) {
+                    window.history.replaceState(null, null, '#' + tabName);
+                }
+                localStorage.setItem('admin_last_tab', tabName);
+            } catch (_) {}
+
+            // Auto close mobile drawer if open
+            try {
+                const sb = document.querySelector('.admin-sidebar');
+                if (sb && window.innerWidth <= 992) sb.classList.remove('open');
+            } catch (_) {}
+
+            // Update active states on sidebar buttons
+            document.querySelectorAll('.admin-nav-item, .tab-btn').forEach(btn => btn.classList.remove('active'));
+            const activeBtn = document.getElementById('sidebar-tab-' + tabName) ||
+                              document.getElementById('btn-tab-' + tabName) ||
+                              document.querySelector('[data-tab="' + tabName + '"]');
+            if (activeBtn) activeBtn.classList.add('active');
+
+            // Switch tab content views
+            document.querySelectorAll('.tab-content').forEach(section => {
+                section.classList.remove('active');
+                section.style.display = 'none';
+            });
+            const targetSection = document.getElementById('tab-' + tabName);
+            if (targetSection) {
+                targetSection.classList.add('active');
+                targetSection.style.display = 'block';
+            }
+
+            // Update headings & metric summary visibility
+            const heading = document.getElementById('admin-view-heading');
+            const subheading = document.getElementById('admin-view-subheading');
+            const metricsRow = document.getElementById('admin-metrics-row');
+
+            const titles = {
+                dashboard: { h: "Dashboard Overview", sub: "Analyze active sales metrics and counter inventory", metrics: true },
+                pos: { h: "Cashier POS Desk", sub: "Process retail billing bills for counter buyers", metrics: false },
+                inventory: { h: "Inventory Catalog", sub: "Manage products catalog registers and hierarchy trees", metrics: false },
+                orders: { h: "Fulfillment Manager", sub: "Track and update customer checkout deliveries", metrics: false },
+                announcements: { h: "Announcements Publisher", sub: "Display announcements at the top of the storefront", metrics: false },
+                coupons: { h: "Coupons & Discounts Manager", sub: "Create and manage customer discount promo codes", metrics: false },
+                delivery: { h: "Delivery & Serviceable PIN Codes", sub: "Control deliverable area PIN codes and shipping fee rules", metrics: false },
+                customers: { h: "Customer Profiles & Accounts", sub: "Manage registered shoppers, lifetime orders, and addresses", metrics: false },
+                reports: { h: "Financial Reports & Catalog Exports", sub: "Valuation, revenue breakdown, and 1-click CSV data downloads", metrics: false },
+                firebase: { h: "Firebase Cloud Console", sub: "Monitor Cloud Firestore NoSQL synchronization and Identity Platform", metrics: false }
+            };
+
+            if (titles[tabName]) {
+                if (heading) heading.innerText = titles[tabName].h;
+                if (subheading) subheading.innerText = titles[tabName].sub;
+                if (metricsRow) metricsRow.style.display = titles[tabName].metrics ? 'grid' : 'none';
+            }
+
+            // Safe tab loaders
+            try {
+                if (tabName === 'dashboard') {
+                    if (typeof loadDashboardMetrics === 'function') loadDashboardMetrics();
+                    if (typeof loadAdminDashboardLowStock === 'function') loadAdminDashboardLowStock();
+                } else if (tabName === 'inventory') {
+                    if (typeof loadCatalog === 'function') loadCatalog();
+                    if (typeof loadAdminCategoryDetails === 'function') loadAdminCategoryDetails();
+                } else if (tabName === 'pos') {
+                    if (typeof renderPOSCart === 'function') renderPOSCart();
+                    const posInput = document.getElementById('pos-search-input');
+                    if (posInput) setTimeout(() => posInput.focus(), 80);
+                } else if (tabName === 'orders') {
+                    if (typeof loadAdminOrders === 'function') loadAdminOrders();
+                } else if (tabName === 'announcements') {
+                    if (typeof loadAnnouncementsIntoForm === 'function') loadAnnouncementsIntoForm();
+                } else if (tabName === 'coupons') {
+                    if (typeof loadAdminCoupons === 'function') loadAdminCoupons();
+                } else if (tabName === 'delivery') {
+                    if (typeof loadAdminDeliverySettings === 'function') loadAdminDeliverySettings();
+                } else if (tabName === 'customers') {
+                    if (typeof loadAdminCustomers === 'function') loadAdminCustomers();
+                } else if (tabName === 'reports') {
+                    if (typeof loadAdminReports === 'function') loadAdminReports();
+                } else if (tabName === 'firebase') {
+                    if (typeof loadFirebaseStatus === 'function') loadFirebaseStatus();
+                }
+            } catch (err) {
+                console.error("Tab switch loader notice:", err);
+            }
+        }
+        window.switchTab = switchTab;
+    </script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+    
+    <!-- Main Style Reference -->
+    <link rel="stylesheet" href="/static/css/style.css?v=20261029_v6_multivendor">
+    
+    <style>
+        :root {
+            /* Custom Dark mode variables for Admin console */
+            --admin-bg: #090d16;
+            --admin-card: rgba(30, 41, 59, 0.45);
+            --admin-border: rgba(184, 137, 43, 0.15);
+            --admin-text: #f1f5f9;
+            --admin-text-muted: #94a3b8;
+            --gold-accent: #b8892b;
+            --gold-accent-hover: #9c711f;
+        }
+
+        /* Modal Dark Theme Fixes for Admin Console */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(3, 7, 18, 0.85) !important;
+            backdrop-filter: blur(12px) !important;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 99999 !important;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease;
+        }
+        .modal-overlay.active {
+            opacity: 1 !important;
+            pointer-events: auto !important;
+        }
+        .modal-container {
+            background: #0f172a !important;
+            border: 1px solid rgba(184, 137, 43, 0.4) !important;
+            border-radius: var(--radius-lg) !important;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85), 0 0 35px rgba(184, 137, 43, 0.2) !important;
+            width: 90% !important;
+            max-width: 650px !important;
+            overflow: hidden;
+            transform: translateY(-20px) scale(0.97);
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            color: #f8fafc !important;
+        }
+        .modal-overlay.active .modal-container {
+            transform: translateY(0) scale(1) !important;
+        }
+        .modal-header {
+            background: rgba(15, 23, 42, 0.98) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+            padding: 1.25rem 1.5rem !important;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal-header h3 {
+            margin: 0;
+            color: #f8fafc !important;
+            font-size: 1.25rem;
+            font-weight: 800;
+        }
+        .modal-header .modal-close {
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            font-size: 1.5rem;
+            cursor: pointer;
+            line-height: 1;
+        }
+        .modal-header .modal-close:hover {
+            color: #fff;
+        }
+        .modal-body {
+            padding: 1.5rem !important;
+            background: #0f172a !important;
+            color: #f8fafc !important;
+            max-height: 75vh;
+            overflow-y: auto;
+        }
+        .modal-body label {
+            display: block;
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: #94a3b8 !important;
+            margin-bottom: 0.4rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .modal-body input,
+        .modal-body select,
+        .modal-body textarea {
+            width: 100% !important;
+            background: rgba(30, 41, 59, 0.8) !important;
+            border: 1px solid rgba(255, 255, 255, 0.18) !important;
+            border-radius: 6px !important;
+            padding: 0.7rem 0.9rem !important;
+            color: #f8fafc !important;
+            font-size: 0.95rem !important;
+            box-sizing: border-box !important;
+        }
+        .modal-body input:focus,
+        .modal-body select:focus,
+        .modal-body textarea:focus {
+            border-color: var(--gold-accent) !important;
+            background: rgba(30, 41, 59, 1) !important;
+            outline: none !important;
+            box-shadow: 0 0 10px rgba(184, 137, 43, 0.3) !important;
+        }
+
+        /* Table Inline Editing Styles */
+        .table-inline-input {
+            background: rgba(15, 23, 42, 0.9) !important;
+            border: 1px solid rgba(255, 255, 255, 0.22) !important;
+            border-radius: 6px !important;
+            color: #f8fafc !important;
+            padding: 0.45rem 0.6rem !important;
+            font-size: 0.88rem !important;
+            transition: all 0.2s ease !important;
+            box-sizing: border-box !important;
+        }
+        .table-inline-input:focus {
+            border-color: var(--gold-accent) !important;
+            background: #0f172a !important;
+            box-shadow: 0 0 10px rgba(184, 137, 43, 0.35) !important;
+            outline: none !important;
+        }
+        .table-inline-input.price-input {
+            color: #f59e0b !important;
+            font-weight: 800 !important;
+            font-family: 'IBM Plex Mono', monospace !important;
+            text-align: right !important;
+            width: 95px !important;
+        }
+        .table-inline-input.mrp-input {
+            color: #94a3b8 !important;
+            font-family: 'IBM Plex Mono', monospace !important;
+            text-align: right !important;
+            width: 85px !important;
+        }
+        .table-inline-input.stock-input {
+            color: #10b981 !important;
+            font-weight: 700 !important;
+            font-family: 'IBM Plex Mono', monospace !important;
+            text-align: center !important;
+            width: 75px !important;
+        }
+        .table-inline-input.name-input {
+            font-weight: 700 !important;
+            color: #f8fafc !important;
+            width: 100% !important;
+            min-width: 200px !important;
+        }
+        .btn-save-inline {
+            background: #059669 !important;
+            color: #ffffff !important;
+            border: 1px solid #10b981 !important;
+            border-radius: 6px !important;
+            padding: 0.45rem 0.75rem !important;
+            font-size: 0.82rem !important;
+            font-weight: 700 !important;
+            cursor: pointer !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 4px !important;
+            box-shadow: 0 2px 8px rgba(5, 150, 105, 0.35) !important;
+            transition: all 0.2s ease !important;
+            white-space: nowrap !important;
+        }
+        .btn-save-inline:hover {
+            background: #10b981 !important;
+            transform: translateY(-1px) !important;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.45) !important;
+        }
+
+        body.admin-body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--admin-bg);
+            color: var(--admin-text);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            min-height: 100vh;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.08) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(184, 137, 43, 0.05) 0px, transparent 50%);
+        }
+
+        .admin-sidebar {
+            width: 280px;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(12px);
+            border-right: 1px solid var(--admin-border);
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            position: fixed;
+            height: 100vh;
+            left: 0;
+            top: 0;
+            z-index: 100;
+        }
+
+        .admin-sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px dashed var(--admin-border);
+        }
+
+        .admin-sidebar-logo img {
+            width: 38px;
+            height: 38px;
+            border-radius: var(--radius-sm);
+            border: 1.5px solid var(--gold-accent);
+            object-fit: cover;
+        }
+
+        .admin-sidebar-logo h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin: 0;
+            color: var(--admin-text);
+            letter-spacing: 0.02em;
+        }
+
+        .admin-sidebar-logo h1 span {
+            color: var(--gold-accent);
+        }
+
+        .admin-nav-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            flex-grow: 1;
+        }
+
+        .admin-nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.85rem 1rem;
+            background: transparent;
+            border: 1px solid transparent;
+            border-radius: var(--radius-md);
+            color: var(--admin-text-muted);
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 100%;
+        }
+
+        .admin-nav-item:hover {
+            color: var(--admin-text);
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .admin-nav-item.active {
+            color: var(--admin-text);
+            background: rgba(184, 137, 43, 0.15);
+            border-color: rgba(184, 137, 43, 0.3);
+            box-shadow: 0 4px 20px -5px rgba(184, 137, 43, 0.2);
+        }
+
+        .admin-nav-icon {
+            font-size: 1.2rem;
+        }
+
+        .admin-sidebar-footer {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding-top: 1.5rem;
+            border-top: 1px dashed var(--admin-border);
+        }
+
+        .admin-sidebar-footer .user-avatar {
+            width: 36px;
+            height: 36px;
+            background: var(--gold-accent);
+            color: var(--admin-text);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+
+        .admin-sidebar-footer .user-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .admin-sidebar-footer .user-name {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--admin-text);
+        }
+
+        .admin-sidebar-footer .logout-btn {
+            background: transparent;
+            border: none;
+            color: var(--danger);
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 0;
+            text-align: left;
+            margin-top: 2px;
+            transition: opacity 0.2s;
+        }
+
+        .admin-sidebar-footer .logout-btn:hover {
+            opacity: 0.8;
+        }
+
+        .admin-content-area {
+            margin-left: 280px;
+            padding: 2.5rem 3rem;
+            flex-grow: 1;
+            max-width: 1400px;
+            min-height: 100vh;
+        }
+
+        .admin-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .admin-header-title h2 {
+            font-size: 1.75rem;
+            font-weight: 800;
+            margin: 0;
+            letter-spacing: -0.02em;
+        }
+
+        .admin-header-title p {
+            color: var(--admin-text-muted);
+            margin: 0.25rem 0 0 0;
+            font-size: 0.9rem;
+        }
+
+        /* Metrics Bar grid override */
+        .admin-metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .admin-metric-card {
+            background: var(--admin-card);
+            border: 1px solid var(--admin-border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            backdrop-filter: blur(8px);
+            transition: transform 0.3s var(--transition-bounce);
+        }
+
+        .admin-metric-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(184, 137, 43, 0.3);
+        }
+
+        .admin-metric-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: rgba(184, 137, 43, 0.1);
+            color: var(--gold-accent);
+        }
+
+        .admin-metric-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .admin-metric-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--admin-text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .admin-metric-value {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--admin-text);
+            margin: 0;
+            font-family: 'IBM Plex Mono', monospace;
+        }
+
+        /* Glassmorphic forms, inputs, tables */
+        .card {
+            background: var(--admin-card) !important;
+            border: 1px solid var(--admin-border) !important;
+            border-radius: var(--radius-lg) !important;
+            backdrop-filter: blur(12px);
+            color: var(--admin-text) !important;
+        }
+
+        .card-header h2 {
+            color: var(--admin-text) !important;
+            font-weight: 700;
+        }
+
+        input, select, textarea {
+            background: rgba(15, 23, 42, 0.5) !important;
+            border: 1px solid var(--admin-border) !important;
+            color: var(--admin-text) !important;
+            border-radius: var(--radius-sm) !important;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--gold-accent) !important;
+            box-shadow: 0 0 10px rgba(184, 137, 43, 0.15) !important;
+        }
+
+        .data-table, .cart-table {
+            color: var(--admin-text) !important;
+        }
+
+        .data-table th, .cart-table th {
+            background: rgba(15, 23, 42, 0.75) !important;
+            color: var(--gold-accent) !important;
+            border-bottom: 1px solid var(--admin-border) !important;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+        }
+
+        .data-table td, .cart-table td {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+        }
+
+        .data-table tbody tr:hover, .cart-table tbody tr:hover {
+            background: rgba(255, 255, 255, 0.02) !important;
+        }
+
+        .btn-primary {
+            background: var(--gold-accent) !important;
+            border: 1px solid var(--gold-accent) !important;
+            color: var(--admin-bg) !important;
+            font-weight: 700 !important;
+            transition: all 0.25s !important;
+        }
+
+        .btn-primary:hover {
+            background: var(--gold-accent-hover) !important;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05) !important;
+            border: 1px solid var(--admin-border) !important;
+            color: var(--admin-text) !important;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1) !important;
+        }
+        
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.4s ease-out;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* Mobile Navigation & Responsive Toolbar */
+        .admin-mobile-topbar {
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 1.25rem;
+            background: rgba(15, 23, 42, 0.95);
+            border-bottom: 1px solid var(--admin-border);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .admin-mobile-toggle {
+            background: transparent;
+            border: 1px solid var(--admin-border);
+            color: var(--gold-accent);
+            font-size: 1.4rem;
+            padding: 0.2rem 0.55rem;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .admin-mobile-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-weight: 700;
+            font-size: 1.05rem;
+        }
+
+        .admin-mobile-brand img {
+            width: 28px;
+            height: 28px;
+            border-radius: 4px;
+            border: 1px solid var(--gold-accent);
+        }
+
+        .catalog-filter-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--admin-border);
+            color: var(--admin-text-muted);
+            padding: 0.45rem 0.85rem;
+            border-radius: 20px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .catalog-filter-btn:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .catalog-filter-btn.active {
+            background: var(--gold-accent);
+            color: #000;
+            font-weight: 700;
+            border-color: var(--gold-accent);
+            box-shadow: 0 2px 10px rgba(184, 137, 43, 0.35);
+        }
+
+        @media (max-width: 992px) {
+            body.admin-body {
+                flex-direction: column;
+            }
+            .admin-mobile-topbar {
+                display: flex;
+            }
+            .admin-sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+                z-index: 2000;
+                box-shadow: 10px 0 30px rgba(0, 0, 0, 0.6);
+            }
+            .admin-sidebar.open {
+                transform: translateX(0);
+            }
+            .admin-content-area {
+                margin-left: 0 !important;
+                padding: 1.25rem 1rem !important;
+                max-width: 100% !important;
+                box-sizing: border-box;
+            }
+            .inventory-layout {
+                grid-template-columns: 1fr !important;
+            }
+            .admin-metrics-grid {
+                grid-template-columns: 1fr 1fr !important;
+                gap: 1rem;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .admin-metrics-grid {
+                grid-template-columns: 1fr !important;
+            }
+            .admin-header-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body class="admin-body">
+
+    <!-- MOBILE TOPBAR FOR RESPONSIVE NAVIGATION -->
+    <header class="admin-mobile-topbar">
+        <button type="button" class="admin-mobile-toggle" onclick="toggleAdminSidebar()" aria-label="Toggle Menu">☰</button>
+        <div class="admin-mobile-brand">
+            <img src="/static/rama_store_logo.jpg" alt="Logo">
+            <span>Rama <strong>Store</strong> <small style="color: var(--gold-accent); font-size: 0.75rem; text-transform: uppercase;">Admin</small></span>
+        </div>
+        <a href="/store" target="_blank" style="color: var(--gold-accent); text-decoration: none; font-size: 0.85rem; font-weight: 700; border: 1px solid var(--admin-border); padding: 0.3rem 0.6rem; border-radius: 6px;">🏬 Store</a>
+    </header>
+
+    <!-- A. SIDENAV MENU PANEL -->
+    <aside class="admin-sidebar">
+        <div class="admin-sidebar-logo" onclick="window.location.href='/admin'" style="cursor: pointer;">
+            <img src="/static/rama_store_logo.jpg" alt="Rama Store Logo">
+            <div>
+                <h1 style="font-size: 1.15rem; margin: 0;">Rama <span>Store</span></h1>
+                <span style="font-size: 0.7rem; color: var(--gold-accent); text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em;">Seller Control Hub</span>
+            </div>
+        </div>
+        
+        <nav class="admin-nav-menu">
+            <button class="admin-nav-item active" id="sidebar-tab-dashboard" onclick="switchTab('dashboard')">
+                <span class="admin-nav-icon">📊</span> Overview Metrics
+            </button>
+            <button class="admin-nav-item" id="sidebar-tab-pos" onclick="switchTab('pos')">
+                <span class="admin-nav-icon">🛒</span> Cashier POS Desk
+            </button>
+            <button class="admin-nav-item" id="sidebar-tab-inventory" onclick="switchTab('inventory')">
+                <span class="admin-nav-icon">📦</span> Products & Catalog
+            </button>
+            <button class="admin-nav-item" id="sidebar-tab-orders" onclick="switchTab('orders')">
+                <span class="admin-nav-icon">📋</span> Orders Fulfillment
+            </button>
+            <button class="admin-nav-item" id="sidebar-tab-announcements" onclick="switchTab('announcements')">
+                <span class="admin-nav-icon">📢</span> Deals & Announcements
+            </button>
+            <button class="admin-nav-item" id="sidebar-tab-coupons" onclick="switchTab('coupons')">
+                <span class="admin-nav-icon">🏷️</span> Coupons & Offers
+            </button>
+            <button class="admin-nav-item" id="sidebar-tab-delivery" onclick="switchTab('delivery')">
+                <span class="admin-nav-icon">🚚</span> Delivery & PIN Codes
+            </button>
+            <button class="admin-nav-item" id="sidebar-tab-customers" onclick="switchTab('customers')">
+                <span class="admin-nav-icon">👥</span> Customers & Users
+            </button>
+            <button class="admin-nav-item" id="sidebar-tab-reports" onclick="switchTab('reports')">
+                <span class="admin-nav-icon">📈</span> Analytics & Reports
+            </button>
+            <button class="admin-nav-item" id="sidebar-tab-vendors" onclick="switchTab('vendors')">
+                <span class="admin-nav-icon">🏪</span> Vendors & Merchants
+            </button>
+            <button class="admin-nav-item" id="sidebar-tab-firebase" onclick="switchTab('firebase')">
+                <span class="admin-nav-icon">🔥</span> Cloud Database Sync
+            </button>
+            <a href="/store" target="_blank" class="admin-nav-item" style="margin-top: 1.25rem; border: 1px dashed rgba(184, 137, 43, 0.4); color: var(--gold-accent); text-decoration: none; display: flex; align-items: center; gap: 0.75rem;">
+                <span class="admin-nav-icon">🌐</span> View Live Storefront ➔
+            </a>
+        </nav>
+        
+        <div class="admin-sidebar-footer">
+            <div class="user-avatar" id="user-avatar" style="background: linear-gradient(135deg, #b8892b, #e5ab37); color: #000; font-size: 1.1rem; box-shadow: 0 0 10px rgba(184, 137, 43, 0.4);">👑</div>
+            <div class="user-info" style="flex: 1;">
+                <span class="user-name" id="user-display-name" style="font-weight: 700;">Rama Store Owner</span>
+                <span style="font-size: 0.72rem; color: #94a3b8; font-family: monospace;" id="admin-sidebar-phone">7268903804</span>
+                <button type="button" class="logout-btn" onclick="handleAdminLogout()" style="color: #ef4444; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; margin-top: 4px;">
+                    🚪 Log Out Desk
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- B. CORE WORKSPACE AREA -->
+    <main class="admin-content-area">
+        
+        <!-- Header row -->
+        <header class="admin-header-row">
+            <div class="admin-header-title">
+                <h2 id="admin-view-heading">Dashboard Overview</h2>
+                <p id="admin-view-subheading">Analyze active sales metrics and counter inventory</p>
+            </div>
+        </header>
+
+        <!-- Metric summaries bar (Visible on Overview & POS) -->
+        <div class="admin-metrics-grid" id="admin-metrics-row">
+            <div class="admin-metric-card" id="metric-total-products-card" onclick="switchTab('inventory')" style="cursor: pointer;" title="Click to view full Products & Catalog">
+                <div class="admin-metric-icon">📦</div>
+                <div class="admin-metric-info">
+                    <span class="admin-metric-label">Total Products (Click to View)</span>
+                    <h3 class="admin-metric-value" id="metric-total-products">0</h3>
+                </div>
+            </div>
+            <div class="admin-metric-card" id="metric-low-stock-card" onclick="switchTab('inventory'); if (typeof setCatalogFilter==='function') setCatalogFilter('low_stock');" style="cursor: pointer;" title="Click to filter low stock items in catalog">
+                <div class="admin-metric-icon" style="background: rgba(239, 68, 68, 0.1); color: #ef4444;">⚠️</div>
+                <div class="admin-metric-info">
+                    <span class="admin-metric-label">Low Stock Alerts</span>
+                    <h3 class="admin-metric-value" id="metric-low-stock" style="color: #ef4444;">0</h3>
+                </div>
+            </div>
+            <div class="admin-metric-card" id="metric-revenue-card">
+                <div class="admin-metric-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">📈</div>
+                <div class="admin-metric-info">
+                    <span class="admin-metric-label">Today's Revenue</span>
+                    <h3 class="admin-metric-value" id="metric-revenue" style="color: #10b981;">₹0.00</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- 1. OVERVIEW TAB -->
+        <section id="tab-dashboard" class="tab-content active">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Low Stock Alerts</h2>
+                    </div>
+                    <div class="card-body" style="padding: 1.5rem;">
+                        <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 1rem;">Items with stock quantity less than 10 units:</p>
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>SKU</th>
+                                        <th>Product Name</th>
+                                        <th>Price</th>
+                                        <th style="text-align: center;">Stock</th>
+                                        <th style="text-align: center;">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-low-stock-body">
+                                    <tr>
+                                        <td colspan="5" style="text-align: center; color: var(--admin-text-muted); padding: 2rem 0;">No low stock alerts. All items healthy.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Quick Sales Summary</h2>
+                    </div>
+                    <div class="card-body" style="padding: 2.5rem; text-align: center;">
+                        <div style="font-size: 4rem; margin-bottom: 1rem;">💵</div>
+                        <h3 style="font-size: 1.5rem; margin-bottom: 0.5rem; font-weight: 700;">Counter Register Active</h3>
+                        <p style="color: var(--admin-text-muted); font-size: 0.9rem; max-width: 320px; margin: 0 auto 1.5rem auto;">Quickly create a cashier checkout bill for walk-in retail counter buyers.</p>
+                        <button class="btn btn-primary" onclick="switchTab('pos')" style="padding: 0.75rem 2rem;">Open POS Terminal</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. POS TERMINAL TAB -->
+        <section id="tab-pos" class="tab-content">
+            <div class="pos-layout">
+                <div class="pos-main">
+                    <div class="search-container">
+                        <div class="search-icon-wrapper">
+                            <input type="text" id="pos-search-input" placeholder="Scan SKU barcode or type product details..." autocomplete="off">
+                        </div>
+                        <div class="suggestions-dropdown" id="pos-suggestions"></div>
+                    </div>
+
+                    <div class="card cart-card">
+                        <div class="card-header">
+                            <h2>Active Billing Cart</h2>
+                            <button class="btn btn-secondary" onclick="clearCart()">Clear Cart</button>
+                        </div>
+                        <div class="cart-table-wrapper">
+                            <table class="cart-table" id="cart-table" style="display: none;">
+                                <thead>
+                                    <tr>
+                                        <th>Product Details</th>
+                                        <th>SKU</th>
+                                        <th>Price</th>
+                                        <th>Quantity</th>
+                                        <th>Total</th>
+                                        <th style="text-align: center;">Remove</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="cart-items-body"></tbody>
+                            </table>
+                            <div class="cart-empty-state" id="cart-empty-message">
+                                <div class="cart-empty-icon">🛒</div>
+                                <p>Billing cart is empty. Scan barcodes or search to add billing products.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pos-sidebar">
+                    <div class="card checkout-card">
+                        <div class="card-header">
+                            <h2>Billing checkout desk</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="summary-section">
+                                <div class="summary-row">
+                                    <span>Subtotal</span>
+                                    <span id="pos-subtotal">₹0.00</span>
+                                </div>
+                                <div class="summary-row">
+                                    <span>GST Tax (18%)</span>
+                                    <span id="pos-tax">₹0.00</span>
+                                </div>
+                                <div class="summary-row total">
+                                    <span>Amount Payable</span>
+                                    <span id="pos-total">₹0.00</span>
+                                </div>
+                            </div>
+                            
+                            <form id="pos-checkout-form" onsubmit="handlePOSCheckout(event)" style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1.5rem;">
+                                <div class="auth-input-group">
+                                    <label for="pos-customer-phone">Customer Phone Number (Optional)</label>
+                                    <input type="text" id="pos-customer-phone" placeholder="e.g. 9876543210" maxlength="10">
+                                </div>
+                                <button type="submit" class="btn btn-primary checkout-btn" style="padding: 1rem; font-size: 1rem; font-weight: 700;">Complete Cashier Sale</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. CATALOG EDITOR TAB -->
+<!-- 3. CATALOG EDITOR TAB -->
+        <section id="tab-inventory" class="tab-content">
+            <div class="inventory-layout" style="display: flex; flex-direction: column; gap: 1.5rem; width: 100%;">
+                
+                <!-- Main Active Catalog Management Card -->
+                <div class="card inventory-table-card" style="width: 100%; box-sizing: border-box; background: #0d1527; border: 1px solid rgba(184, 137, 43, 0.28); border-radius: 12px;">
+                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; border-bottom: 1px solid rgba(184, 137, 43, 0.2); background: #111c35; padding: 1.25rem 1.5rem; border-radius: 12px 12px 0 0;">
+                        <div>
+                            <h2 style="font-size: 1.35rem; font-weight: 800; margin: 0; color: #ffffff; letter-spacing: -0.01em;">Active Catalog Inventory</h2>
+                            <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: #94a3b8;">Manage product listings, multi-image galleries, variants, live pricing, and storefront publication</p>
+                        </div>
+                        <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+                            <button type="button" class="btn btn-secondary" onclick="downloadCatalogCsv()" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 700; padding: 0.6rem 1rem; border-radius: 8px; background: #1e293b; color: #f8fafc; border: 1px solid rgba(255,255,255,0.18); cursor: pointer;" title="Export current catalog to CSV">
+                                📥 Export CSV
+                            </button>
+                            <button type="button" class="btn btn-secondary" onclick="openCsvImportModal()" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 700; padding: 0.6rem 1rem; border-radius: 8px; background: #1e293b; color: #f8fafc; border: 1px solid rgba(255,255,255,0.18); cursor: pointer;" title="Bulk import inventory items from CSV">
+                                📤 Bulk Import CSV
+                            </button>
+                            <button type="button" class="btn btn-primary" onclick="openProductEditor('new')" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 800; padding: 0.65rem 1.35rem; border-radius: 8px; background: #d97706; color: #ffffff; border: none; cursor: pointer; box-shadow: 0 4px 14px rgba(217, 119, 6, 0.4);">
+                                ➕ Register New Item
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="card-body" style="padding: 1.5rem; background: #0d1527;">
+                        <!-- Comprehensive Status Filter Tabs with Database Counts -->
+                        <div class="status-tabs-container">
+                            <button type="button" class="status-tab-btn active" data-status="all" onclick="setCatalogFilter('all')">
+                                All Items <span class="tab-count" id="catalog-count-all">0</span>
+                            </button>
+                            <button type="button" class="status-tab-btn" data-status="published" onclick="setCatalogFilter('published')">
+                                🟢 Live on Store <span class="tab-count" id="catalog-count-published">0</span>
+                            </button>
+                            <button type="button" class="status-tab-btn" data-status="draft" onclick="setCatalogFilter('draft')">
+                                🔒 Drafts <span class="tab-count" id="catalog-count-draft">0</span>
+                            </button>
+                            <button type="button" class="status-tab-btn" data-status="scheduled" onclick="setCatalogFilter('scheduled')">
+                                ⏰ Scheduled <span class="tab-count" id="catalog-count-scheduled">0</span>
+                            </button>
+                            <button type="button" class="status-tab-btn" data-status="low_stock" onclick="setCatalogFilter('low_stock')">
+                                ⚠️ Low Stock <span class="tab-count" id="catalog-count-low">0</span>
+                            </button>
+                            <button type="button" class="status-tab-btn" data-status="out_of_stock" onclick="setCatalogFilter('out_of_stock')">
+                                🔴 Out of Stock <span class="tab-count" id="catalog-count-out">0</span>
+                            </button>
+                            <button type="button" class="status-tab-btn" data-status="archived" onclick="setCatalogFilter('archived')">
+                                📦 Archived <span class="tab-count" id="catalog-count-archived">0</span>
+                            </button>
+                        </div>
+
+                        <!-- Secondary Toolbar: Search, Category Filter, Sort, and Items Per Page -->
+                        <div class="catalog-toolbar-grid">
+                            <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+                                <div class="catalog-search-box">
+                                    <input type="text" id="catalog-search" placeholder="Search product name, SKU, brand, barcode..." oninput="debounceCatalogSearch()">
+                                    <button type="button" onclick="clearCatalogSearch()" style="position: absolute; right: 8px; background: transparent; border: none; color: #94a3b8; cursor: pointer; font-size: 1rem;">&times;</button>
+                                </div>
+                                <select id="catalog-category-filter" class="catalog-select-filter" onchange="handleCategoryFilterChange(this.value)">
+                                    <option value="all">All Categories</option>
+                                </select>
+                                <select id="catalog-sort-by" class="catalog-select-filter" onchange="handleSortChange(this.value)">
+                                    <option value="newest">Sort: Newest First</option>
+                                    <option value="name_asc">Name: A to Z</option>
+                                    <option value="name_desc">Name: Z to A</option>
+                                    <option value="price_asc">Price: Low to High</option>
+                                    <option value="price_desc">Price: High to Low</option>
+                                    <option value="stock_asc">Stock: Low to High</option>
+                                    <option value="stock_desc">Stock: High to Low</option>
+                                </select>
+                            </div>
+                            <div style="display: flex; gap: 0.75rem; align-items: center;">
+                                <span style="font-size: 0.85rem; color: #94a3b8;">Show:</span>
+                                <select id="catalog-page-size" class="catalog-select-filter" style="padding: 0.45rem 0.75rem;" onchange="handlePageSizeChange(this.value)">
+                                    <option value="10">10 / page</option>
+                                    <option value="25">25 / page</option>
+                                    <option value="50">50 / page</option>
+                                    <option value="100">100 / page</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Floating Bulk Action Toolbar -->
+                        <div class="bulk-actions-bar" id="bulk-actions-bar">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <span style="font-weight: 700; color: #fbbf24; font-size: 0.95rem;">
+                                    <span id="bulk-selected-count">0</span> items selected
+                                </span>
+                                <button type="button" class="btn btn-secondary btn-sm" onclick="clearAllSelections()" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #cbd5e1; padding: 3px 8px; border-radius: 4px; font-size: 0.78rem;">
+                                    Clear
+                                </button>
+                            </div>
+                            <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+                                <button type="button" class="btn btn-sm" onclick="executeBulkAction('publish')" style="background: #064e3b; color: #34d399; border: 1px solid #059669; font-weight: 700; border-radius: 6px; padding: 0.4rem 0.8rem; cursor: pointer;">
+                                    🟢 Publish
+                                </button>
+                                <button type="button" class="btn btn-sm" onclick="executeBulkAction('unpublish')" style="background: #78350f; color: #fcd34d; border: 1px solid #d97706; font-weight: 700; border-radius: 6px; padding: 0.4rem 0.8rem; cursor: pointer;">
+                                    🔒 Move to Draft
+                                </button>
+                                <button type="button" class="btn btn-sm" onclick="openBulkCategoryModal()" style="background: #1e293b; color: #f8fafc; border: 1px solid rgba(255,255,255,0.2); font-weight: 600; border-radius: 6px; padding: 0.4rem 0.8rem; cursor: pointer;">
+                                    📂 Set Category
+                                </button>
+                                <button type="button" class="btn btn-sm" onclick="openBulkPriceModal()" style="background: #1e293b; color: #fbbf24; border: 1px solid rgba(251,191,36,0.3); font-weight: 600; border-radius: 6px; padding: 0.4rem 0.8rem; cursor: pointer;">
+                                    💰 Adjust Price
+                                </button>
+                                <button type="button" class="btn btn-sm" onclick="executeBulkAction('archive')" style="background: #1e293b; color: #cbd5e1; border: 1px solid rgba(255,255,255,0.2); font-weight: 600; border-radius: 6px; padding: 0.4rem 0.8rem; cursor: pointer;">
+                                    📦 Archive
+                                </button>
+                                <button type="button" class="btn btn-sm" onclick="executeBulkAction('delete')" style="background: #7f1d1d; color: #fca5a5; border: 1px solid #b91c1c; font-weight: 700; border-radius: 6px; padding: 0.4rem 0.8rem; cursor: pointer;">
+                                    🗑️ Delete
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Spacious E-Commerce Product Table -->
+                        <div class="table-responsive" style="width: 100%; overflow-x: auto; border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.08); background: #0b1220;">
+                            <table class="admin-catalog-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 40px; text-align: center;">
+                                            <input type="checkbox" id="select-all-products" onchange="toggleSelectAll(this.checked)" style="cursor: pointer; width: 16px; height: 16px; accent-color: #d97706;">
+                                        </th>
+                                        <th style="width: 60px; text-align: center;">Media</th>
+                                        <th style="text-align: left; min-width: 280px;">Product Name & Identifiers</th>
+                                        <th style="text-align: left; min-width: 130px;">Category</th>
+                                        <th style="text-align: right; min-width: 130px;">Pricing (₹)</th>
+                                        <th style="text-align: center; min-width: 140px;">Stock & Availability</th>
+                                        <th style="text-align: center; min-width: 120px;">Channel Status</th>
+                                        <th style="text-align: right; min-width: 150px; padding-right: 1.5rem;">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="catalog-items-body">
+                                    <!-- Rendered dynamically via JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination Footer -->
+                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-top: 1.5rem; padding: 0.5rem 0.25rem;">
+                            <div style="font-size: 0.88rem; color: #94a3b8;">
+                                Showing <span id="pagination-start" style="color: #fff; font-weight: 700;">0</span> to <span id="pagination-end" style="color: #fff; font-weight: 700;">0</span> of <span id="pagination-total" style="color: #fbbf24; font-weight: 800;">0</span> products
+                            </div>
+                            <div class="pagination-bar" id="catalog-pagination" style="display: flex; gap: 0.4rem; align-items: center;">
+                                <!-- Dynamic pagination buttons -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+                <section id="tab-orders" class="tab-content">
+            <div class="card">
+                <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                    <div>
+                        <h2>Client Orders Delivery Tracking</h2>
+                        <p style="font-size: 0.85rem; color: #94a3b8; margin-top: 4px;">Live customer checkouts and in-store transactions</p>
+                    </div>
+                    <div style="display: flex; gap: 0.75rem; align-items: center;">
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="loadAdminOrders()" title="Refresh live orders" style="display: inline-flex; align-items: center; gap: 4px;">🔄 Refresh Orders</button>
+                        <button type="button" class="btn btn-sm" onclick="purgeAllOrders()" title="Remove all dummy and test orders" style="background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 6px; padding: 0.45rem 0.85rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">🗑️ Clear Test Orders</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Date</th>
+                                    <th>Customer Details</th>
+                                    <th>Shipping Address</th>
+                                    <th>Total Amount</th>
+                                    <th>Status Badging</th>
+                                    <th style="text-align: center;">Update Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-orders-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. ANNOUNCEMENTS & DEALS TAB (Flipkart / Amazon Seller Central Style) -->
+        <section id="tab-announcements" class="tab-content">
+            <div style="display: grid; grid-template-columns: 1.25fr 1fr; gap: 2rem; align-items: start;">
+                
+                <!-- Left Column: Publisher Controls -->
+                <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                    
+                    <form id="announcement-form" onsubmit="handleAnnouncementSubmit(event)">
+                        
+                        <!-- Panel 1: Top Announcement Ticker -->
+                        <div class="card" style="margin-bottom: 1.5rem;">
+                            <div class="card-header" style="border-bottom: 1px solid var(--admin-border); padding-bottom: 0.75rem;">
+                                <h2 style="font-size: 1.15rem; display: flex; align-items: center; gap: 8px;">
+                                    <span>📢</span> Live Storefront Header Ticker Bar
+                                </h2>
+                                <p style="font-size: 0.8rem; color: var(--admin-text-muted); margin: 3px 0 0 0;">This marquee ticker displays at the top of every page on the live customer storefront.</p>
+                            </div>
+                            <div class="card-body" style="padding: 1.25rem;">
+                                <div class="auth-input-group" style="margin-bottom: 1rem;">
+                                    <label for="ann-stock-status">📦 Fresh Stock Arrival Alert</label>
+                                    <input type="text" id="ann-stock-status" placeholder="e.g. Fresh stock of Premium Atta, Basmati Rice & Oil arrived today!" required oninput="updateAnnouncementPreview()">
+                                </div>
+                                <div class="auth-input-group" style="margin-bottom: 1rem;">
+                                    <label for="ann-loyalty-offer">⚡ Flash Promo / Coupon Announcement</label>
+                                    <input type="text" id="ann-loyalty-offer" placeholder="e.g. Flash Offer: Flat 20% OFF on all groceries with code RAMA20!" required oninput="updateAnnouncementPreview()">
+                                </div>
+                                <div class="auth-input-group">
+                                    <label for="ann-home-delivery">🚚 Delivery Promise & Coverage Alert</label>
+                                    <input type="text" id="ann-home-delivery" placeholder="e.g. Express 45-min Home Delivery across Samaur on orders above ₹499" required oninput="updateAnnouncementPreview()">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Panel 2: Deal of the Day / Flash Sale Banner -->
+                        <div class="card" style="margin-bottom: 1.5rem;">
+                            <div class="card-header" style="border-bottom: 1px solid var(--admin-border); padding-bottom: 0.75rem; display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <h2 style="font-size: 1.15rem; display: flex; align-items: center; gap: 8px;">
+                                        <span>⚡</span> Flash Deal / Deal of the Day Spotlight
+                                    </h2>
+                                    <p style="font-size: 0.8rem; color: var(--admin-text-muted); margin: 3px 0 0 0;">Displays a high-converting hero card above the product catalog (Flipkart/Amazon style).</p>
+                                </div>
+                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 700; color: #10b981;">
+                                    <input type="checkbox" id="ann-deal-active" checked onchange="updateAnnouncementPreview()" style="width: 18px; height: 18px; accent-color: #10b981;">
+                                    Active on Store
+                                </label>
+                            </div>
+                            <div class="card-body" style="padding: 1.25rem;">
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                                    <div class="auth-input-group">
+                                        <label for="ann-deal-tag">Deal Tag / Category</label>
+                                        <input type="text" id="ann-deal-tag" placeholder="e.g. ⚡ DEAL OF THE DAY" oninput="updateAnnouncementPreview()">
+                                    </div>
+                                    <div class="auth-input-group">
+                                        <label for="ann-deal-discount">Discount Badge Text</label>
+                                        <input type="text" id="ann-deal-discount" placeholder="e.g. FLAT 40% OFF" oninput="updateAnnouncementPreview()">
+                                    </div>
+                                </div>
+                                <div class="auth-input-group" style="margin-bottom: 1rem;">
+                                    <label for="ann-deal-title">Deal Main Title</label>
+                                    <input type="text" id="ann-deal-title" placeholder="e.g. Mega Grocery Dhamaka Sale" oninput="updateAnnouncementPreview()">
+                                </div>
+                                <div class="auth-input-group" style="margin-bottom: 1rem;">
+                                    <label for="ann-deal-subtitle">Deal Subtitle / Selling Points</label>
+                                    <input type="text" id="ann-deal-subtitle" placeholder="e.g. Huge discounts on rice, cooking oil, spices, and snacks!" oninput="updateAnnouncementPreview()">
+                                </div>
+                                <div class="auth-input-group" style="margin-bottom: 0.75rem;">
+                                    <label for="ann-deal-image">Deal Banner Image URL</label>
+                                    <input type="text" id="ann-deal-image" placeholder="https://images.unsplash.com/..." oninput="updateAnnouncementPreview()">
+                                </div>
+                                <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                                    <span style="font-size: 0.75rem; color: #94a3b8; align-self: center;">Quick Presets:</span>
+                                    <button type="button" class="btn btn-secondary btn-sm" onclick="setDealImagePreset('https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1200&q=80')" style="font-size: 0.75rem; padding: 2px 8px;">🌾 Grocery</button>
+                                    <button type="button" class="btn btn-secondary btn-sm" onclick="setDealImagePreset('https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=1200&q=80')" style="font-size: 0.75rem; padding: 2px 8px;">🎂 Bakery & Sweets</button>
+                                    <button type="button" class="btn btn-secondary btn-sm" onclick="setDealImagePreset('https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?auto=format&fit=crop&w=1200&q=80')" style="font-size: 0.75rem; padding: 2px 8px;">📚 Stationery & Copies</button>
+                                    <button type="button" class="btn btn-secondary btn-sm" onclick="setDealImagePreset('https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=1200&q=80')" style="font-size: 0.75rem; padding: 2px 8px;">💊 Medicine & Care</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Panel 3: Store Notice -->
+                        <div class="card" style="margin-bottom: 1.5rem;">
+                            <div class="card-header" style="border-bottom: 1px solid var(--admin-border); padding-bottom: 0.75rem; display: flex; justify-content: space-between; align-items: center;">
+                                <h2 style="font-size: 1.15rem; display: flex; align-items: center; gap: 8px;">
+                                    <span>🏪</span> Store Notice / Timing Alert
+                                </h2>
+                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 700; color: #f59e0b;">
+                                    <input type="checkbox" id="ann-notice-active" onchange="updateAnnouncementPreview()" style="width: 18px; height: 18px; accent-color: #f59e0b;">
+                                    Show Notice
+                                </label>
+                            </div>
+                            <div class="card-body" style="padding: 1.25rem;">
+                                <div class="auth-input-group">
+                                    <label for="ann-notice-text">Notice Headline</label>
+                                    <input type="text" id="ann-notice-text" placeholder="e.g. 🏪 Store is open 7 days a week: 7:00 AM – 10:00 PM in Samaur." oninput="updateAnnouncementPreview()">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Submit Button -->
+                        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 1rem; font-size: 1rem; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 20px rgba(184, 137, 43, 0.4);">
+                            <span>🚀</span> Publish Announcements & Deals Live to Storefront
+                        </button>
+                        <p style="text-align: center; font-size: 0.8rem; color: var(--admin-text-muted); margin-top: 0.5rem;">
+                            ⚡ Changes reflect immediately across all customer devices without delay.
+                        </p>
+                    </form>
+                </div>
+
+                <!-- Right Column: Live Mockup Customer Preview -->
+                <div style="position: sticky; top: 1rem;">
+                    <div class="card" style="border: 1.5px solid var(--gold-accent);">
+                        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--admin-border); padding-bottom: 0.75rem;">
+                            <h2 style="font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
+                                <span>📱</span> Live Storefront Customer Preview
+                            </h2>
+                            <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; font-size: 0.75rem; padding: 2px 8px; border-radius: 12px;">Real-time</span>
+                        </div>
+                        <div class="card-body" style="padding: 1rem;">
+                            <p style="font-size: 0.78rem; color: #94a3b8; margin-bottom: 0.75rem;">Here is exactly how visitors see your announcements and deals right now:</p>
+                            
+                            <!-- Mockup Container -->
+                            <div style="border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; overflow: hidden; background: #030712;">
+                                
+                                <!-- Mockup Top Header -->
+                                <div style="background: #0f172a; padding: 0.6rem 1rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.06);">
+                                    <div style="display: flex; align-items: center; gap: 6px;">
+                                        <div style="width: 8px; height: 8px; border-radius: 50%; background: #ef4444;"></div>
+                                        <div style="width: 8px; height: 8px; border-radius: 50%; background: #f59e0b;"></div>
+                                        <div style="width: 8px; height: 8px; border-radius: 50%; background: #10b981;"></div>
+                                        <span style="font-size: 0.72rem; color: #64748b; margin-left: 6px; font-family: monospace;">rama-store.web.app/store</span>
+                                    </div>
+                                    <span style="font-size: 0.72rem; color: var(--gold-accent); font-weight: 700;">LIVE</span>
+                                </div>
+
+                                <!-- Mockup Ticker -->
+                                <div style="background: #e5ab37; color: #000; padding: 0.45rem 0.75rem; font-size: 0.75rem; font-weight: 700; text-align: center; border-bottom: 1px solid rgba(0,0,0,0.1);">
+                                    <span id="preview-ticker-text">Loading ticker preview...</span>
+                                </div>
+
+                                <!-- Mockup Notice Bar -->
+                                <div id="preview-notice-bar" style="display: none; background: #1e293b; color: #f8fafc; padding: 0.35rem 0.75rem; font-size: 0.72rem; border-bottom: 1px solid rgba(255,255,255,0.05); align-items: center; gap: 6px; justify-content: center;">
+                                    <span style="background: rgba(184, 137, 43, 0.3); color: #fbbf24; padding: 1px 5px; border-radius: 4px; font-size: 0.65rem; font-weight: 700;">NOTICE</span>
+                                    <span id="preview-notice-text"></span>
+                                </div>
+
+                                <!-- Mockup Deal Banner -->
+                                <div id="preview-deal-card" style="padding: 1rem; background: linear-gradient(135deg, #090d16 0%, #1e1b4b 70%, #2e1065 100%); margin: 0.75rem; border-radius: 10px; border: 1px solid rgba(184, 137, 43, 0.4);">
+                                    <div style="display: flex; gap: 0.75rem; align-items: center;">
+                                        <div style="flex: 1;">
+                                            <div style="display: flex; gap: 4px; margin-bottom: 4px;">
+                                                <span id="preview-deal-tag" style="background: #e11d48; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.65rem; font-weight: 800;">⚡ DEAL OF THE DAY</span>
+                                                <span id="preview-deal-badge" style="background: rgba(184, 137, 43, 0.3); color: #fbbf24; padding: 2px 6px; border-radius: 10px; font-size: 0.65rem; font-weight: 700;">FLAT 40% OFF</span>
+                                            </div>
+                                            <div id="preview-deal-title" style="font-weight: 800; font-size: 0.95rem; color: #ffffff; margin-bottom: 2px;">Mega Grocery Dhamaka Sale</div>
+                                            <div id="preview-deal-sub" style="font-size: 0.75rem; color: #cbd5e1; margin-bottom: 8px;">Exclusive Discounts on Daily Household Essentials</div>
+                                            <div style="display: inline-block; background: #e5ab37; color: #000; font-weight: 800; font-size: 0.7rem; padding: 3px 8px; border-radius: 4px;">Shop Now ➔</div>
+                                        </div>
+                                        <div style="width: 70px; height: 70px; border-radius: 8px; overflow: hidden; flex-shrink: 0; border: 1px solid rgba(255,255,255,0.1);">
+                                            <img id="preview-deal-img" src="https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=200&q=80" alt="Preview" style="width: 100%; height: 100%; object-fit: cover;">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div style="padding: 0.5rem 0.75rem 0.75rem 0.75rem; text-align: center;">
+                                    <a href="/store" target="_blank" class="btn btn-secondary btn-sm" style="display: inline-flex; align-items: center; gap: 6px; text-decoration: none; font-size: 0.78rem; padding: 0.35rem 0.85rem;">
+                                        <span>🌐</span> Open Live Customer Storefront
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 6: FIREBASE CLOUD CONSOLE -->
+        <section id="tab-firebase" class="tab-content">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin-top: 1rem;">
+                <div class="card">
+                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                        <h2>🔥 Firebase Cloud Architecture</h2>
+                        <span id="firebase-badge" class="badge" style="background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; padding: 4px 10px; border-radius: 20px; font-weight: 600;">Connecting...</span>
+                    </div>
+                    <div class="card-body">
+                        <table style="width: 100%; border-collapse: collapse; font-size: 0.95rem;">
+                            <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+                                <td style="padding: 10px 0; color: var(--admin-text-muted);">Firebase Project</td>
+                                <td style="padding: 10px 0; text-align: right; font-family: 'IBM Plex Mono', monospace; font-weight: 600; color: var(--gold-accent);" id="fb-proj-id">ma-store-949c7</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+                                <td style="padding: 10px 0; color: var(--admin-text-muted);">Auth Domain</td>
+                                <td style="padding: 10px 0; text-align: right; font-family: 'IBM Plex Mono', monospace; color: #fff;" id="fb-auth-domain">ma-store-949c7.firebaseapp.com</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+                                <td style="padding: 10px 0; color: var(--admin-text-muted);">Cloud Firestore (NoSQL)</td>
+                                <td style="padding: 10px 0; text-align: right; color: #10b981; font-weight: 600;">(default) Database Live</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+                                <td style="padding: 10px 0; color: var(--admin-text-muted);">Cloud Storage Bucket</td>
+                                <td style="padding: 10px 0; text-align: right; font-family: 'IBM Plex Mono', monospace; color: #fff;" id="fb-storage-bucket">ma-store-949c7.firebasestorage.app</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px 0; color: var(--admin-text-muted);">Backend Engine Mode</td>
+                                <td style="padding: 10px 0; text-align: right; font-weight: 600;" id="fb-backend-mode">Dual-Store Hybrid</td>
+                            </tr>
+                        </table>
+
+                        <div style="margin-top: 1.5rem; display: flex; gap: 10px; flex-wrap: wrap;">
+                            <button type="button" class="btn btn-primary" onclick="syncAllToFirestore(this)" style="flex: 1; padding: 0.85rem 1.25rem;">
+                                🚀 Sync All Catalog & Orders to Firestore
+                            </button>
+                            <button type="button" class="btn btn-secondary" onclick="loadFirebaseStatus()" style="padding: 0.85rem 1.25rem;">
+                                🔄 Refresh Status
+                            </button>
+                        </div>
+                        <div id="fb-sync-result" style="margin-top: 1rem; font-size: 0.9rem;"></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2>⚙️ Cloud Backend Service Account Setup</h2>
+                    </div>
+                    <div class="card-body" style="font-size: 0.92rem; line-height: 1.6; color: var(--admin-text-muted);">
+                        <p style="margin-top: 0;">To grant the backend administrative full read/write privileges to Cloud Firestore without public rules:</p>
+                        <ol style="padding-left: 1.25rem; margin-bottom: 1.25rem;">
+                            <li>Open <a href="https://console.firebase.google.com/project/ma-store-949c7/settings/serviceaccounts/adminsdk" target="_blank" style="color: var(--gold-accent); text-decoration: underline;">Firebase Console Service Accounts</a>.</li>
+                            <li>Click <strong>Generate new private key</strong> and confirm.</li>
+                            <li>Rename the downloaded JSON file to <code>firebase_service_account.json</code>.</li>
+                            <li>Place it in the project root directory (<code>Store Rahul/</code>).</li>
+                        </ol>
+                        <div style="background: rgba(15, 23, 42, 0.6); padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);">
+                            <span style="color: #fff; font-weight: 600;">Status: </span>
+                            <span id="fb-sa-status">Detecting...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 7: COUPONS & DISCOUNTS -->
+        <section id="tab-coupons" class="tab-content">
+            <div style="display: grid; grid-template-columns: 1.3fr 1fr; gap: 2rem; align-items: start;">
+                <!-- Left: Coupons List Table -->
+                <div class="card">
+                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                        <h2>Active Store Coupons & Offers</h2>
+                        <button type="button" class="btn btn-secondary" onclick="loadAdminCoupons()" style="padding: 0.35rem 0.75rem; font-size: 0.85rem;">🔄 Refresh</button>
+                    </div>
+                    <div class="card-body">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Coupon Code</th>
+                                    <th>Discount</th>
+                                    <th>Min Order</th>
+                                    <th>Status</th>
+                                    <th style="text-align: center;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-coupons-table-body">
+                                <tr><td colspan="5" style="text-align: center; padding: 2rem; color: #94a3b8;">Loading coupons...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Right: Create New Coupon Form -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Create New Promo Coupon</h2>
+                    </div>
+                    <div class="card-body">
+                        <form id="admin-coupon-form" onsubmit="handleCreateCoupon(event)">
+                            <div class="auth-input-group" style="margin-bottom: 0.75rem;">
+                                <label for="coupon-code-input">Coupon Code *</label>
+                                <input type="text" id="coupon-code-input" placeholder="e.g. MEGA20" required style="text-transform: uppercase; font-family: monospace; font-weight: 700;">
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
+                                <div class="auth-input-group" style="margin-bottom: 0;">
+                                    <label for="coupon-type-input">Discount Type *</label>
+                                    <select id="coupon-type-input" required style="width: 100%; padding: 0.65rem 0.75rem; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #f8fafc;">
+                                        <option value="percent">Percentage (% OFF)</option>
+                                        <option value="flat">Flat Amount (₹ OFF)</option>
+                                    </select>
+                                </div>
+                                <div class="auth-input-group" style="margin-bottom: 0;">
+                                    <label for="coupon-value-input">Discount Value *</label>
+                                    <input type="number" step="0.01" id="coupon-value-input" placeholder="e.g. 20 or 50" required>
+                                </div>
+                            </div>
+                            <div class="auth-input-group" style="margin-bottom: 0.75rem;">
+                                <label for="coupon-min-order-input">Minimum Order Amount (₹)</label>
+                                <input type="number" step="1" id="coupon-min-order-input" placeholder="e.g. 499" value="0">
+                            </div>
+                            <div class="auth-input-group" style="margin-bottom: 1.25rem;">
+                                <label for="coupon-desc-input">Offer Description</label>
+                                <input type="text" id="coupon-desc-input" placeholder="e.g. 20% OFF on all grocery orders">
+                            </div>
+                            <button type="submit" class="btn btn-primary" style="width: 100%; font-weight: 700; padding: 0.75rem;">Create Store Coupon</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 8: DELIVERY & PIN CODES -->
+        <section id="tab-delivery" class="tab-content">
+            <div style="max-width: 800px; margin: 0 auto;">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>🚚 Delivery Areas, PIN Codes & Shipping Rules</h2>
+                    </div>
+                    <div class="card-body">
+                        <form id="admin-delivery-form" onsubmit="handleSaveDeliverySettings(event)">
+                            <div class="auth-input-group" style="margin-bottom: 1.25rem;">
+                                <label style="font-size: 0.95rem; font-weight: 700; color: #f8fafc; margin-bottom: 0.5rem; display: block;">Delivery Coverage Mode</label>
+                                <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #f8fafc;">
+                                        <input type="radio" name="delivery-mode" value="ALL" id="deliv-mode-all" checked onchange="togglePincodeInput(false)" style="accent-color: #e5ab37;">
+                                        <span><strong>Deliver to All PIN Codes (All India)</strong> — Accept orders from anywhere across India</span>
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #f8fafc;">
+                                        <input type="radio" name="delivery-mode" value="SPECIFIC" id="deliv-mode-specific" onchange="togglePincodeInput(true)" style="accent-color: #e5ab37;">
+                                        <span><strong>Deliver to Specific Serviceable PIN Codes Only</strong> — Restrict checkout only to selected area PIN codes</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div id="pincodes-wrapper" class="auth-input-group" style="margin-bottom: 1.25rem; display: none;">
+                                <label for="deliv-pincodes">Serviceable PIN Codes (Comma or Space Separated) *</label>
+                                <textarea id="deliv-pincodes" rows="4" placeholder="e.g. 273001, 273002, 273003, 110001, 226001" style="width: 100%; padding: 0.75rem; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #f8fafc; font-family: monospace;"></textarea>
+                                <small style="color: #94a3b8; font-size: 0.78rem;">Customers entering any other PIN code will be informed that delivery is not currently available.</small>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+                                <div class="auth-input-group" style="margin-bottom: 0;">
+                                    <label for="deliv-free-min">Free Delivery Minimum Order (₹) *</label>
+                                    <input type="number" id="deliv-free-min" value="500" required>
+                                    <small style="color: #94a3b8; font-size: 0.75rem;">Orders at or above this value get FREE shipping.</small>
+                                </div>
+                                <div class="auth-input-group" style="margin-bottom: 0;">
+                                    <label for="deliv-std-fee">Standard Delivery Fee (₹) *</label>
+                                    <input type="number" id="deliv-std-fee" value="49" required>
+                                    <small style="color: #94a3b8; font-size: 0.75rem;">Charged when order is below free threshold.</small>
+                                </div>
+                            </div>
+
+                            <div class="auth-input-group" style="margin-bottom: 1.5rem;">
+                                <label for="deliv-est-days">Estimated Delivery Days Label *</label>
+                                <input type="text" id="deliv-est-days" value="1-2 Business Days" required placeholder="e.g. 1-2 Business Days or Same Day Delivery">
+                            </div>
+
+                            <button type="submit" class="btn btn-primary" style="width: 100%; font-weight: 700; padding: 0.85rem; font-size: 1rem;">Save Delivery & Shipping Rules</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 9: CUSTOMERS & USERS -->
+        <section id="tab-customers" class="tab-content">
+            <div class="card">
+                <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                    <div>
+                        <h2>Registered Customers & Shopper Accounts</h2>
+                        <p style="font-size: 0.85rem; color: #94a3b8; margin-top: 4px;">Direct visibility into client registrations, contact information, lifetime orders, and delivery addresses</p>
+                    </div>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="loadAdminCustomers()" style="display: inline-flex; align-items: center; gap: 4px;">
+                        🔄 Refresh Customers
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Customer Name</th>
+                                    <th>Phone Number</th>
+                                    <th>Email Address</th>
+                                    <th>Delivery Address</th>
+                                    <th style="text-align: center;">Lifetime Orders</th>
+                                    <th style="text-align: right;">Total Spend (₹)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-customers-table-body">
+                                <tr>
+                                    <td colspan="6" style="text-align: center; color: #94a3b8; padding: 2rem;">Loading customers...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 10: ANALYTICS & REPORTS -->
+        <section id="tab-reports" class="tab-content">
+            <div style="display: flex; flex-direction: column; gap: 2rem;">
+                <!-- Summary Cards Row -->
+                <div class="admin-metrics-grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
+                    <div class="admin-metric-card">
+                        <div class="admin-metric-icon" style="background: rgba(184, 137, 43, 0.15); color: #f59e0b;">📦</div>
+                        <div class="admin-metric-info">
+                            <span class="admin-metric-label">Selling Inventory Value</span>
+                            <h3 class="admin-metric-value" id="report-total-val" style="color: #f59e0b;">₹0.00</h3>
+                        </div>
+                    </div>
+                    <div class="admin-metric-card">
+                        <div class="admin-metric-icon" style="background: rgba(99, 102, 241, 0.15); color: #818cf8;">💰</div>
+                        <div class="admin-metric-info">
+                            <span class="admin-metric-label">Cost / Purchase Value</span>
+                            <h3 class="admin-metric-value" id="report-cost-val" style="color: #818cf8;">₹0.00</h3>
+                        </div>
+                    </div>
+                    <div class="admin-metric-card">
+                        <div class="admin-metric-icon" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">📈</div>
+                        <div class="admin-metric-info">
+                            <span class="admin-metric-label">Estimated Gross Margin</span>
+                            <h3 class="admin-metric-value" id="report-margin" style="color: #10b981;">₹0.00</h3>
+                        </div>
+                    </div>
+                    <div class="admin-metric-card">
+                        <div class="admin-metric-icon" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8;">💳</div>
+                        <div class="admin-metric-info">
+                            <span class="admin-metric-label">Lifetime Store Revenue</span>
+                            <h3 class="admin-metric-value" id="report-tot-rev" style="color: #38bdf8;">₹0.00</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Secondary Reports Grid -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                    <!-- Card 1: Catalog Health Breakdown -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>Catalog Inventory Health</h2>
+                        </div>
+                        <div class="card-body" style="padding: 1.5rem;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid #10b981; padding: 1rem; border-radius: 8px; text-align: center;">
+                                    <div style="font-size: 0.8rem; color: #10b981; font-weight: 700;">LIVE ON STORE</div>
+                                    <div id="report-published-cnt" style="font-size: 1.75rem; font-weight: 800; color: #fff; margin-top: 4px;">0</div>
+                                </div>
+                                <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid #f59e0b; padding: 1rem; border-radius: 8px; text-align: center;">
+                                    <div style="font-size: 0.8rem; color: #f59e0b; font-weight: 700;">DRAFTS / HIDDEN</div>
+                                    <div id="report-draft-cnt" style="font-size: 1.75rem; font-weight: 800; color: #fff; margin-top: 4px;">0</div>
+                                </div>
+                                <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; padding: 1rem; border-radius: 8px; text-align: center;">
+                                    <div style="font-size: 0.8rem; color: #ef4444; font-weight: 700;">LOW STOCK (&lt;10)</div>
+                                    <div id="report-low-cnt" style="font-size: 1.75rem; font-weight: 800; color: #fff; margin-top: 4px;">0</div>
+                                </div>
+                                <div style="background: rgba(148, 163, 184, 0.1); border: 1px solid #64748b; padding: 1rem; border-radius: 8px; text-align: center;">
+                                    <div style="font-size: 0.8rem; color: #94a3b8; font-weight: 700;">OUT OF STOCK</div>
+                                    <div id="report-outofstock-cnt" style="font-size: 1.75rem; font-weight: 800; color: #fff; margin-top: 4px;">0</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 2: Orders by Status & Export -->
+                    <div class="card">
+                        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                            <h2>Orders & Fulfillment Status</h2>
+                            <span id="report-tot-orders" style="background: var(--gold-accent); color: #000; font-weight: 800; font-size: 0.8rem; padding: 2px 8px; border-radius: 12px;">0 Orders</span>
+                        </div>
+                        <div class="card-body" style="padding: 1.5rem;">
+                            <div id="report-status-breakdown" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; margin-bottom: 1.5rem;"></div>
+                            
+                            <div style="border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 1rem; display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                                <button type="button" class="btn btn-primary" onclick="downloadCatalogCsv()" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 700; flex: 1;">
+                                    📥 Export Catalog CSV
+                                </button>
+                                <button type="button" class="btn btn-secondary" onclick="downloadOrdersCsv()" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 700; flex: 1;">
+                                    📥 Export Orders CSV
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- TAB 11: VENDORS & MULTI-VENDOR MARKETPLACE MANAGEMENT -->
+        <section id="tab-vendors" class="tab-content">
+            <!-- Metric KPI Summary Row -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 1.25rem; margin-bottom: 2rem;">
+                <div class="card" style="background: #0d1527 !important; border: 1px solid rgba(184, 137, 43, 0.28); border-radius: 12px; padding: 1.25rem 1.5rem;">
+                    <div style="font-size: 0.8rem; font-weight: 700; color: #94a3b8; text-transform: uppercase;">Total Registered Merchants</div>
+                    <div id="adm-total-vendors" style="font-size: 1.85rem; font-weight: 800; color: #f8fafc; margin-top: 0.35rem;">0</div>
+                </div>
+                <div class="card" style="background: #0d1527 !important; border: 1px solid rgba(245, 158, 11, 0.4); border-radius: 12px; padding: 1.25rem 1.5rem;">
+                    <div style="font-size: 0.8rem; font-weight: 700; color: #fbbf24; text-transform: uppercase;">Pending Applications</div>
+                    <div id="adm-pending-vendors" style="font-size: 1.85rem; font-weight: 800; color: #fbbf24; margin-top: 0.35rem;">0</div>
+                </div>
+                <div class="card" style="background: #0d1527 !important; border: 1px solid rgba(16, 185, 129, 0.4); border-radius: 12px; padding: 1.25rem 1.5rem;">
+                    <div style="font-size: 0.8rem; font-weight: 700; color: #34d399; text-transform: uppercase;">Approved & Active</div>
+                    <div id="adm-approved-vendors" style="font-size: 1.85rem; font-weight: 800; color: #34d399; margin-top: 0.35rem;">0</div>
+                </div>
+                <div class="card" style="background: #0d1527 !important; border: 1px solid rgba(239, 68, 68, 0.4); border-radius: 12px; padding: 1.25rem 1.5rem;">
+                    <div style="font-size: 0.8rem; font-weight: 700; color: #f87171; text-transform: uppercase;">Pending Product Approvals</div>
+                    <div id="adm-pending-prods-count" style="font-size: 1.85rem; font-weight: 800; color: #f87171; margin-top: 0.35rem;">0</div>
+                </div>
+            </div>
+
+            <!-- PRODUCT APPROVAL QUEUE CARD -->
+            <div class="card" style="background: #0d1527 !important; border: 1px solid rgba(184, 137, 43, 0.28); border-radius: 14px; overflow: hidden; margin-bottom: 2rem;">
+                <div class="card-header" style="background: #111c35 !important; border-bottom: 1px solid rgba(184, 137, 43, 0.28); padding: 1.25rem 1.75rem; display: flex; align-items: center; justify-content: space-between;">
+                    <div>
+                        <h3 style="margin: 0; color: #f8fafc; font-size: 1.2rem;">⚖️ Vendor Product Listings Approval Queue</h3>
+                        <p style="margin: 4px 0 0 0; color: #94a3b8; font-size: 0.85rem;">Every vendor product requires Owner verification before appearing on the customer storefront.</p>
+                    </div>
+                    <button type="button" class="btn btn-secondary" onclick="loadAdminPendingProducts()" style="font-size: 0.825rem;">
+                        🔄 Refresh Queue
+                    </button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table" style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background: #0d1527; color: #cbd5e1; font-size: 0.775rem; text-transform: uppercase;">
+                                <th style="padding: 0.85rem 1.25rem;">Item Details</th>
+                                <th style="padding: 0.85rem 1.25rem;">Vendor / Shop</th>
+                                <th style="padding: 0.85rem 1.25rem;">SKU</th>
+                                <th style="padding: 0.85rem 1.25rem;">Selling Price</th>
+                                <th style="padding: 0.85rem 1.25rem;">Stock</th>
+                                <th style="padding: 0.85rem 1.25rem;">Review Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-pending-products-body">
+                            <tr><td colspan="6" style="text-align: center; color: #94a3b8; padding: 2.5rem;">Loading pending product submissions...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- VENDORS ROSTER & APPLICATION MANAGEMENT -->
+            <div class="card" style="background: #0d1527 !important; border: 1px solid rgba(184, 137, 43, 0.28); border-radius: 14px; overflow: hidden;">
+                <div class="card-header" style="background: #111c35 !important; border-bottom: 1px solid rgba(184, 137, 43, 0.28); padding: 1.25rem 1.75rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+                    <div>
+                        <h3 style="margin: 0; color: #f8fafc; font-size: 1.2rem;">🏪 Merchant Partners & Application Dossiers</h3>
+                        <p style="margin: 4px 0 0 0; color: #94a3b8; font-size: 0.85rem;">Approve, reject, or manage commission agreements for all marketplace sellers.</p>
+                    </div>
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        <button type="button" class="btn btn-sm btn-secondary" onclick="loadAdminVendors('all')">All Vendors</button>
+                        <button type="button" class="btn btn-sm btn-secondary" onclick="loadAdminVendors('submitted')">⏳ Pending Review</button>
+                        <button type="button" class="btn btn-sm btn-secondary" onclick="loadAdminVendors('approved')">🟢 Approved</button>
+                        <button type="button" class="btn btn-sm btn-secondary" onclick="loadAdminVendors('suspended')">🔒 Suspended</button>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table" style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background: #0d1527; color: #cbd5e1; font-size: 0.775rem; text-transform: uppercase;">
+                                <th style="padding: 0.85rem 1.25rem;">Shop & Contact Info</th>
+                                <th style="padding: 0.85rem 1.25rem;">Categories</th>
+                                <th style="padding: 0.85rem 1.25rem;">Tax / GSTIN</th>
+                                <th style="padding: 0.85rem 1.25rem;">Commission Rate</th>
+                                <th style="padding: 0.85rem 1.25rem;">Status</th>
+                                <th style="padding: 0.85rem 1.25rem;">Decisions & Controls</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-vendors-roster-body">
+                            <tr><td colspan="6" style="text-align: center; color: #94a3b8; padding: 2.5rem;">Loading vendors...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    <!-- GLOBAL TOAST NOTIFICATIONS -->
+    <div class="toast-container" id="toast-container"></div>
+
+
+    <!-- MODAL: OWNER VENDOR DOSSIER & REVIEW -->
+    <div class="modal-overlay" id="modal-vendor-dossier">
+        <div class="modal-container" style="max-width: 720px; background: #0d1527; border: 1px solid rgba(184, 137, 43, 0.4); border-radius: 16px;">
+            <div class="modal-header" style="background: #111c35; border-bottom: 1px solid rgba(184, 137, 43, 0.3);">
+                <h3 id="dossier-modal-title" style="color: #f8fafc; font-size: 1.25rem;">Merchant Application Dossier</h3>
+                <button type="button" class="modal-close" onclick="closeVendorDossierModal()">×</button>
+            </div>
+            <div class="modal-body" style="padding: 1.75rem; color: #e2e8f0;">
+                <input type="hidden" id="dossier-vendor-id">
+
+                <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 1.25rem; margin-bottom: 1.5rem;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 0.75rem;">
+                        <div>
+                            <span style="font-size: 0.775rem; color: #94a3b8; text-transform: uppercase;">Shop Name:</span>
+                            <div id="dossier-biz-name" style="font-size: 1.05rem; font-weight: 700; color: #fbbf24;"></div>
+                        </div>
+                        <div>
+                            <span style="font-size: 0.775rem; color: #94a3b8; text-transform: uppercase;">Contact Person:</span>
+                            <div id="dossier-contact-name" style="font-size: 1.05rem; font-weight: 700; color: #f8fafc;"></div>
+                        </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 0.75rem;">
+                        <div>
+                            <span style="font-size: 0.775rem; color: #94a3b8; text-transform: uppercase;">Email:</span>
+                            <div id="dossier-email" style="font-size: 0.95rem; color: #cbd5e1;"></div>
+                        </div>
+                        <div>
+                            <span style="font-size: 0.775rem; color: #94a3b8; text-transform: uppercase;">Phone:</span>
+                            <div id="dossier-phone" style="font-size: 0.95rem; color: #cbd5e1;"></div>
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 0.75rem;">
+                        <span style="font-size: 0.775rem; color: #94a3b8; text-transform: uppercase;">Operating Address & PIN:</span>
+                        <div id="dossier-address" style="font-size: 0.95rem; color: #cbd5e1;"></div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div>
+                            <span style="font-size: 0.775rem; color: #94a3b8; text-transform: uppercase;">Tax ID / GSTIN:</span>
+                            <div id="dossier-tax-id" style="font-size: 0.95rem; color: #cbd5e1; font-family: monospace;"></div>
+                        </div>
+                        <div>
+                            <span style="font-size: 0.775rem; color: #94a3b8; text-transform: uppercase;">Bank & IFSC:</span>
+                            <div id="dossier-bank-info" style="font-size: 0.95rem; color: #cbd5e1;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- OWNER COMMISSION & DIRECT PUBLISH CONFIGURATION -->
+                <div style="background: rgba(184, 137, 43, 0.08); border: 1px solid rgba(184, 137, 43, 0.25); border-radius: 10px; padding: 1.25rem; margin-bottom: 1.5rem;">
+                    <h4 style="margin: 0 0 1rem 0; color: #fbbf24; font-size: 1rem;">⚙️ Commercial Terms & Agreement</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;">
+                        <div>
+                            <label style="display: block; font-size: 0.85rem; color: #cbd5e1; margin-bottom: 0.4rem;">Marketplace Commission Rate (%)</label>
+                            <input type="number" id="dossier-commission-input" step="0.5" min="0" max="50" style="width: 100%; box-sizing: border-box; background: #090f1d; border: 1px solid #1e293b; color: #f8fafc; padding: 0.7rem; border-radius: 6px; font-weight: 700;">
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px; padding-top: 1.5rem;">
+                            <input type="checkbox" id="dossier-auto-publish-check" style="width: 18px; height: 18px; accent-color: #b8892b;">
+                            <label for="dossier-auto-publish-check" style="font-size: 0.85rem; color: #f8fafc; cursor: pointer;">
+                                Grant Direct Auto-Publish (Trusted Merchant)
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- OWNER ACTION DECISION BUTTONS -->
+                <div style="display: flex; gap: 0.75rem; justify-content: flex-end; flex-wrap: wrap;">
+                    <button type="button" class="btn btn-secondary" onclick="closeVendorDossierModal()">Close</button>
+                    <button type="button" class="btn btn-danger" onclick="executeVendorDecision('rejected')" style="background: rgba(239, 68, 68, 0.2); border-color: #ef4444; color: #fca5a5;">
+                        ❌ Reject Application
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="executeVendorDecision('suspended')" style="background: rgba(245, 158, 11, 0.2); border-color: #f59e0b; color: #fcd34d;">
+                        🔒 Suspend Account
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="executeVendorDecision('approved')" style="background: linear-gradient(135deg, #10b981, #059669); border: none; font-weight: 700;">
+                        ✅ Approve Merchant Account
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 1: EDIT PRODUCT DIALOG (Keep for backup safety) -->
+    <div class="modal-overlay" id="edit-product-modal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3>Edit Product Details</h3>
+                <button class="modal-close" onclick="closeEditModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="edit-product-form" onsubmit="handleEditFormSubmit(event)">
+                                        <input type="hidden" id="edit-prod-id">
+                    <div class="product-form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div>
+                            <label for="edit-prod-sku">Unique SKU / Barcode ID *</label>
+                            <input type="text" id="edit-prod-sku" required>
+                        </div>
+                        <div>
+                            <label for="edit-prod-brand">Brand / Manufacturer</label>
+                            <input type="text" id="edit-prod-brand" placeholder="e.g. Aashirvaad, Amul">
+                        </div>
+                        <div style="grid-column: span 2;">
+                            <label for="edit-prod-name">Product Name *</label>
+                            <input type="text" id="edit-prod-name" required>
+                        </div>
+                        <div>
+                            <label for="edit-prod-category-id">Category Tree Node</label>
+                            <select id="edit-prod-category-id">
+                                <option value="">Select category...</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="edit-prod-status">Visibility Status *</label>
+                            <select id="edit-prod-status" required>
+                                <option value="published">🟢 Published (Live on Storefront)</option>
+                                <option value="draft">🔒 Draft (Hidden)</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Edit Image Dropzone -->
+                        <div style="grid-column: span 2;">
+                            <label>Product Image (Direct Upload or Cloud CDN)</label>
+                            <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+                                <label for="edit-file-input" class="btn btn-secondary" style="cursor: pointer; display: inline-flex; align-items: center; gap: 6px; padding: 0.55rem 1rem; font-size: 0.88rem; background: #1e293b; color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px;">
+                                    📷 Upload New Photo from Computer
+                                    <input type="file" id="edit-file-input" accept="image/png,image/jpeg,image/webp,image/gif" multiple style="display: none;" onchange="handleProductImageFiles(this.files, 'edit')">
+                                </label>
+                                <span style="color: #94a3b8; font-size: 0.82rem;">Or direct URL:</span>
+                            </div>
+                            <div id="edit-upload-progress" style="display: none; color: #f59e0b; font-size: 0.82rem; margin-top: 6px;"></div>
+                            <div id="edit-image-previews" style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 8px;"></div>
+                            <input type="text" id="edit-prod-image-url" placeholder="https://images.unsplash.com/... (auto-filled on upload)" style="margin-top: 6px;" oninput="syncDirectImageUrl('edit')">
+                        </div>
+
+                        <div>
+                            <label for="edit-prod-purchase-price">Purchase Price (₹) *</label>
+                            <input type="number" step="0.01" id="edit-prod-purchase-price" required>
+                        </div>
+                        <div>
+                            <label for="edit-prod-original-price">MRP / Market Price (₹)</label>
+                            <input type="number" step="0.01" id="edit-prod-original-price" placeholder="e.g. 240.00">
+                        </div>
+                        <div>
+                            <label for="edit-prod-selling-price" style="color: #fbbf24; font-weight: 700;">Selling Price (₹) *</label>
+                            <input type="number" step="0.01" id="edit-prod-selling-price" required style="border-color: rgba(251, 191, 36, 0.4);">
+                        </div>
+                        <div>
+                            <label for="edit-prod-stock">Stock Quantity *</label>
+                            <input type="number" id="edit-prod-stock" required>
+                        </div>
+                        <div>
+                            <label for="edit-prod-low-threshold">Low Stock Alert Level</label>
+                            <input type="number" id="edit-prod-low-threshold" value="10">
+                        </div>
+                        <div>
+                            <label for="edit-prod-unit">Unit / Weight (e.g. 5 kg, 500 g)</label>
+                            <input type="text" id="edit-prod-unit" placeholder="e.g. 5 kg">
+                        </div>
+                        <div>
+                            <label for="edit-prod-gst">GST Rate (%)</label>
+                            <select id="edit-prod-gst">
+                                <option value="0">0% (Exempt)</option>
+                                <option value="5">5% (Grocery)</option>
+                                <option value="12">12%</option>
+                                <option value="18">18%</option>
+                            </select>
+                        </div>
+                        <div id="edit-discount-preview" style="grid-column: span 2; font-size: 0.85rem; font-weight: 700; color: #10b981; padding: 6px 12px; background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 6px;"></div>
+                        <div style="grid-column: span 2;">
+                            <label for="edit-prod-description">Product Description</label>
+                            <textarea id="edit-prod-description" rows="3" style="width: 100%; box-sizing: border-box; background: rgba(15, 23, 42, 0.8); border: 1px solid var(--admin-border); border-radius: 6px; color: #fff; padding: 0.6rem;"></textarea>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="margin-top: 1.5rem; width: 100%;">Save Changes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: PRINTABLE RECEIPT SUCCESS -->
+    <div class="modal-overlay" id="receipt-modal">
+        <div class="modal-container" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3>Transaction Success</h3>
+                <button class="modal-close" onclick="closeReceiptModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="success-checkmark-wrapper">
+                    <svg class="checkmark-svg" viewBox="0 0 52 52">
+                        <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none"/>
+                        <path class="checkmark-kick" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                    </svg>
+                </div>
+                <div id="receipt-modal-content"></div>
+            </div>
+            <div class="modal-footer" style="justify-content: space-between;">
+                <button class="btn btn-secondary" onclick="printReceipt()">Print Receipt</button>
+                <button class="btn btn-primary" onclick="closeReceiptModal()">Done</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Script with dynamic cache-buster -->
+    <script src="/static/js/app.js?v=20261029_v6_multivendor"></script>
+    
+    <script>
+        if (typeof openEditModal === 'function') window.editProduct = openEditModal;
+
+        async function loadFirebaseStatus() {
+            try {
+                const res = await fetch('/api/firebase/status');
+                const data = await res.json();
+                if (res.ok) {
+                    const badge = document.getElementById('firebase-badge');
+                    if (badge) {
+                        badge.innerText = data.connected ? '🟢 Cloud Online' : '⚠️ Ready';
+                        badge.style.color = data.connected ? '#10b981' : '#f59e0b';
+                        badge.style.borderColor = data.connected ? '#10b981' : '#f59e0b';
+                    }
+                    if (document.getElementById('fb-proj-id')) document.getElementById('fb-proj-id').innerText = data.project_id;
+                    if (document.getElementById('fb-auth-domain')) document.getElementById('fb-auth-domain').innerText = data.auth_domain;
+                    if (document.getElementById('fb-storage-bucket')) document.getElementById('fb-storage-bucket').innerText = data.storage_bucket;
+                    if (document.getElementById('fb-backend-mode')) document.getElementById('fb-backend-mode').innerText = data.mode;
+                    const saStatus = document.getElementById('fb-sa-status');
+                    if (saStatus) {
+                        if (data.has_service_account) {
+                            saStatus.innerHTML = '<span style="color:#10b981; font-weight:600;">✅ Service Account Active (Full Admin Privileges)</span>';
+                        } else {
+                            saStatus.innerHTML = '<span style="color:#f59e0b;">⚡ Client Bridge Mode (API Key Active). Add <code>firebase_service_account.json</code> for full admin write access.</span>';
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error("Firebase status fetch error:", e);
+            }
+        }
+
+        async function syncAllToFirestore(btn) {
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '⏳ Syncing Database to Cloud Firestore...';
+            const resEl = document.getElementById('fb-sync-result');
+            if (resEl) resEl.innerHTML = '<span style="color: #94a3b8;">Exporting SQLite records to Google Cloud...</span>';
+
+            try {
+                const res = await fetch('/api/admin/firebase/sync', { method: 'POST' });
+                const data = await res.json();
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+
+                if (res.ok) {
+                    const s = data.stats || {};
+                    showToast("Sync completed! Exported to Cloud Firestore.");
+                    if (resEl) {
+                        resEl.innerHTML = `<div style="background: rgba(16, 185, 129, 0.1); border: 1px solid #10b981; padding: 10px; border-radius: 6px; color: #10b981;">
+                            ✅ <strong>Export Complete:</strong> ${s.products || 0} products, ${s.categories || 0} categories, ${s.announcements || 0} announcements, and ${s.orders || 0} orders synced to Firestore!
+                        </div>`;
+                    }
+                } else {
+                    showToast(data.error || "Sync failed", "error");
+                    if (resEl) resEl.innerHTML = `<span style="color: #ef4444;">❌ Error: ${data.error}</span>`;
+                }
+            } catch (e) {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+                showToast("Connection failed: " + e.message, "error");
+                if (resEl) resEl.innerHTML = `<span style="color: #ef4444;">❌ Error: ${e.message}</span>`;
+            }
+        }
+        
+        async function loadAdminDashboardLowStock() {
+            try {
+                const response = await fetch('/api/products?per_page=100');
+                const data = await response.json();
+                if (response.ok) {
+                    const lowStockItems = data.products.filter(p => p.stock < 10);
+                    const tbody = document.getElementById('admin-low-stock-body');
+                    if (lowStockItems.length === 0) {
+                        tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--admin-text-muted); padding: 2rem 0;">No low stock alerts. All items healthy.</td></tr>`;
+                    } else {
+                        tbody.innerHTML = lowStockItems.map(p => `
+                            <tr>
+                                <td><span class="badge badge-draft">${p.sku}</span></td>
+                                <td style="font-weight: 600;">${p.name}</td>
+                                <td>${formatINR(p.selling_price)}</td>
+                                <td style="text-align: center; font-weight: 700; color: var(--danger);">${p.stock} units</td>
+                                <td style="text-align: center;">
+                                    <button class="btn btn-secondary btn-sm" onclick="switchTab('inventory'); editProduct(${p.id})">Restock</button>
+                                </td>
+                            </tr>
+                        `).join('');
+                    }
+                }
+            } catch(e) {
+                console.error("Failed to load dashboard low stock alerts:", e);
+            }
+        }
+        
+        // Initial setup
+        window.addEventListener('DOMContentLoaded', async () => {
+            // Restore user into reactive state from localStorage
+            try {
+                const storedUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+                if (storedUser) {
+                    state.user = storedUser;
+                    const nameEl = document.getElementById('user-display-name');
+                    if (nameEl && storedUser.fullname) nameEl.innerText = storedUser.fullname;
+                    const phoneEl = document.getElementById('admin-sidebar-phone');
+                    if (phoneEl && storedUser.phone) phoneEl.innerText = storedUser.phone;
+                }
+            } catch (_) {}
+
+            // Verify session live with backend
+            const token = localStorage.getItem('adminToken');
+            if (!token) {
+                window.location.replace('/admin/login');
+                return;
+            }
+            try {
+                const res = await fetch('/api/auth/admin-verify-session', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.status === 401 || res.status === 403) {
+                    localStorage.removeItem('adminToken');
+                    localStorage.removeItem('currentUser');
+                    window.location.replace('/admin/login');
+                    return;
+                }
+            } catch (_) {}
+
+            loadDashboardMetrics();
+            loadAdminDashboardLowStock();
+            loadAdminCategoryDetails();
+            loadCatalog();
+            loadAnnouncementsIntoForm();
+
+            // Auto-activate requested or remembered tab (e.g. #inventory or #pos)
+            const initialTab = (window.location.hash ? window.location.hash.replace('#', '') : '') ||
+                               localStorage.getItem('admin_last_tab') ||
+                               'dashboard';
+            switchTab(initialTab);
+        });
+    </script>
+
+    <!-- MODAL: CSV BULK IMPORT -->
+    <div class="modal-overlay" id="csv-import-modal">
+        <div class="modal-container" style="max-width: 620px; width: 95%;">
+            <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--admin-border); padding-bottom: 1rem;">
+                <h3 style="margin: 0; font-size: 1.25rem; font-weight: 800; color: #fff;">Bulk Import Catalog (CSV)</h3>
+                <button type="button" onclick="closeCsvImportModal()" style="background: transparent; border: none; font-size: 1.5rem; color: #94a3b8; cursor: pointer;">&times;</button>
+            </div>
+            <div class="modal-body" style="padding: 1.5rem 0;">
+                <p style="color: #94a3b8; font-size: 0.9rem; margin-top: 0;">Upload or paste a CSV file containing your inventory items. Format: <code>name,sku,category,selling_price,mrp,purchase_price,stock,unit,image_url,status</code></p>
+                <div style="margin-bottom: 1.25rem;">
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="downloadCsvTemplate()" style="display: inline-flex; align-items: center; gap: 6px; background: #1e293b; color: #fff; border: 1px solid rgba(255,255,255,0.2); padding: 0.45rem 0.85rem; border-radius: 6px; cursor: pointer;">
+                        📥 Download Sample CSV Template
+                    </button>
+                </div>
+                <div class="upload-dropzone" id="csv-dropzone" style="border: 2px dashed rgba(245, 158, 11, 0.4); border-radius: 10px; padding: 1.75rem; text-align: center; background: rgba(15, 23, 42, 0.5); cursor: pointer;" onclick="document.getElementById('csv-file-input').click()">
+                    <div style="font-size: 2.2rem; margin-bottom: 0.5rem;">📄</div>
+                    <div style="font-weight: 700; color: #f8fafc; font-size: 0.95rem;">Click to browse CSV or drop file here</div>
+                    <div style="color: #64748b; font-size: 0.8rem; margin-top: 4px;">Supports standard UTF-8 .csv files</div>
+                    <input type="file" id="csv-file-input" accept=".csv,text/csv" style="display: none;" onchange="handleCsvFileSelected(this.files)">
+                </div>
+                <div id="csv-file-info" style="margin-top: 1rem; display: none; padding: 0.75rem 1rem; background: rgba(16, 185, 129, 0.1); border: 1px solid #10b981; border-radius: 6px; color: #10b981; font-size: 0.88rem; font-weight: 600;"></div>
+                <div style="margin-top: 1rem;">
+                    <label style="display: block; font-size: 0.85rem; color: #cbd5e1; margin-bottom: 6px; font-weight: 600;">Or Paste CSV Raw Content:</label>
+                    <textarea id="csv-raw-textarea" rows="6" placeholder="name,sku,category,selling_price,mrp,purchase_price,stock,unit,image_url,status&#10;Premium Basmati Rice,RICE-001,Staples,145.00,165.00,120.00,50,1 kg,,published" style="width: 100%; box-sizing: border-box; background: rgba(15, 23, 42, 0.8); border: 1px solid var(--admin-border); border-radius: 6px; color: #f8fafc; font-family: monospace; font-size: 0.82rem; padding: 0.75rem;"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 0.75rem; border-top: 1px solid var(--admin-border); padding-top: 1rem;">
+                <button type="button" class="btn btn-secondary" onclick="closeCsvImportModal()" style="background: #1e293b; color: #fff; border: 1px solid rgba(255,255,255,0.2); padding: 0.6rem 1.2rem; border-radius: 6px; cursor: pointer;">Cancel</button>
+                <button type="button" class="btn btn-primary" id="btn-submit-csv-import" onclick="handleCsvImportSubmit()" style="cursor: pointer;">🚀 Import Catalog to Database</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ========================================================================== -->
+    <!-- COMPLETE PRODUCT EDITOR SUITE MODAL (CREATION & FULL EDITING)               -->
+    <!-- ========================================================================== -->
+    <div class="modal-overlay" id="product-editor-modal" style="z-index: 100000;">
+        <div class="editor-modal-container">
+            <!-- Modal Header Bar -->
+            <div class="editor-header-bar">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="font-size: 1.5rem;">🛍️</div>
+                    <div>
+                        <h3 id="editor-title" style="margin: 0; font-size: 1.25rem; font-weight: 800; color: #ffffff;">Register New Product</h3>
+                        <p id="editor-subtitle" style="margin: 2px 0 0 0; font-size: 0.8rem; color: #94a3b8;">Configure product details, gallery images, variants, tax rates, and live storefront publication</p>
+                    </div>
+                    <div id="editor-status-badge" style="margin-left: 8px;"></div>
+                </div>
+                <div style="display: flex; gap: 0.75rem; align-items: center;">
+                    <button type="button" class="btn btn-secondary btn-sm" id="btn-editor-preview" onclick="previewCurrentProduct()" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); color: #cbd5e1; border-radius: 6px; padding: 0.45rem 0.85rem; cursor: pointer; display: none;">
+                        👁️ Storefront Preview
+                    </button>
+                    <button type="button" onclick="closeProductEditor()" style="background: transparent; border: none; font-size: 1.6rem; color: #94a3b8; cursor: pointer; padding: 0 0.5rem;" title="Close without saving">&times;</button>
+                </div>
+            </div>
+
+            <!-- Two-Column Editor Layout -->
+            <div class="editor-body-layout">
+                <!-- Left Navigation Sidebar -->
+                <nav class="editor-sidebar-nav">
+                    <button type="button" class="editor-nav-tab active" data-pane="pane-basic" onclick="switchEditorTab('pane-basic')">
+                        <span>ℹ️</span> Basic Information
+                    </button>
+                    <button type="button" class="editor-nav-tab" data-pane="pane-media" onclick="switchEditorTab('pane-media')">
+                        <span>🖼️</span> Images & Gallery <span id="editor-tab-img-count" style="font-size: 0.75rem; color: #fbbf24;"></span>
+                    </button>
+                    <button type="button" class="editor-nav-tab" data-pane="pane-pricing" onclick="switchEditorTab('pane-pricing')">
+                        <span>💰</span> Pricing & Tax
+                    </button>
+                    <button type="button" class="editor-nav-tab" data-pane="pane-inventory" onclick="switchEditorTab('pane-inventory')">
+                        <span>📦</span> Inventory & Variants
+                    </button>
+                    <button type="button" class="editor-nav-tab" data-pane="pane-delivery" onclick="switchEditorTab('pane-delivery')">
+                        <span>🚚</span> Delivery & Shipping
+                    </button>
+                    <button type="button" class="editor-nav-tab" data-pane="pane-seo" onclick="switchEditorTab('pane-seo')">
+                        <span>🌐</span> SEO & Storefront
+                    </button>
+                    <button type="button" class="editor-nav-tab" data-pane="pane-publication" onclick="switchEditorTab('pane-publication')">
+                        <span>⏱️</span> Publication Status
+                    </button>
+                    <button type="button" class="editor-nav-tab" data-pane="pane-audit" onclick="switchEditorTab('pane-audit')">
+                        <span>📜</span> Audit History
+                    </button>
+                </nav>
+
+                <!-- Right Scrollable Content Viewport -->
+                <div class="editor-content-pane">
+                    <form id="product-master-form" onsubmit="handleMasterProductSubmit(event)">
+                        <input type="hidden" id="edit-master-id">
+
+                        <!-- PANE 1: BASIC INFORMATION -->
+                        <div class="editor-tab-pane active" id="pane-basic">
+                            <div class="editor-section-card">
+                                <h4><span>📝</span> Core Product Identification</h4>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                    <div style="grid-column: span 2;">
+                                        <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">Product Name *</label>
+                                        <input type="text" id="m-name" required placeholder="e.g. Aashirvaad Superior MP Shudh Chakki Atta (5 kg)" style="width: 100%; box-sizing: border-box; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; padding: 0.65rem 0.85rem; color: #fff; font-size: 0.92rem;" oninput="handleProductNameChange(this.value)">
+                                    </div>
+                                    <div>
+                                        <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">URL Slug (Handle) *</label>
+                                        <input type="text" id="m-slug" required placeholder="aashirvaad-superior-mp-shudh-chakki-atta-5kg" style="width: 100%; box-sizing: border-box; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; padding: 0.65rem 0.85rem; color: #fbbf24; font-family: 'IBM Plex Mono', monospace; font-size: 0.85rem;">
+                                        <small style="color: #64748b; font-size: 0.75rem;">URL: /store?product=<span id="m-slug-preview">...</span></small>
+                                    </div>
+                                    <div>
+                                        <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">Unique SKU Code *</label>
+                                        <div style="display: flex; gap: 6px;">
+                                            <input type="text" id="m-sku" required placeholder="e.g. RAMA-ATT-001" style="flex: 1; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; padding: 0.65rem 0.85rem; color: #fff; font-family: 'IBM Plex Mono', monospace;">
+                                            <button type="button" class="btn btn-secondary btn-sm" onclick="generateAutoSku()" style="background: #1e293b; color: #f8fafc; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; cursor: pointer; white-space: nowrap;">Auto SKU</button>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">Barcode / EAN / UPC</label>
+                                        <input type="text" id="m-barcode" placeholder="e.g. 8901030383042" style="width: 100%; box-sizing: border-box; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; padding: 0.65rem 0.85rem; color: #fff; font-family: 'IBM Plex Mono', monospace;">
+                                    </div>
+                                    <div>
+                                        <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">Brand / Manufacturer</label>
+                                        <input type="text" id="m-brand" placeholder="e.g. Aashirvaad, Amul, MDH, Everest, Classmate" style="width: 100%; box-sizing: border-box; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; padding: 0.65rem 0.85rem; color: #fff;">
+                                    </div>
+                                    <div>
+                                        <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">Category Tree Node *</label>
+                                        <select id="m-category-id" required style="width: 100%; box-sizing: border-box; background: #1e293b; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; padding: 0.65rem 0.85rem; color: #fff;">
+                                            <option value="">-- Choose Category --</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">Subcategory / Collection</label>
+                                        <input type="text" id="m-subcategory" placeholder="e.g. Whole Wheat Flours" style="width: 100%; box-sizing: border-box; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; padding: 0.65rem 0.85rem; color: #fff;">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="editor-section-card">
+                                <h4><span>📄</span> Descriptions & Marketing Copy</h4>
+                                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                                    <div>
+                                        <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">Short Summary (Storefront Cards)</label>
+                                        <input type="text" id="m-short-desc" maxlength="220" placeholder="Crisp 1-line product summary displayed in search and catalog previews..." style="width: 100%; box-sizing: border-box; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; padding: 0.65rem 0.85rem; color: #fff;">
+                                    </div>
+                                    <div>
+                                        <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">Full Product Description</label>
+                                        <textarea id="m-full-desc" rows="5" placeholder="Detailed product specifications, nutritional values, origin, directions for use..." style="width: 100%; box-sizing: border-box; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; padding: 0.75rem; color: #fff; line-height: 1.5;"></textarea>
+                                    </div>
+                                    <div>
+                                        <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">Key Features (1 feature per line)</label>
+                                        <textarea id="m-features" rows="3" placeholder="100% Pure MP Shudh Whole Wheat&#10;Zero Maida Added&#10;Rich in Dietary Fibre&#10;Soft Rotis Guaranteed for Hours" style="width: 100%; box-sizing: border-box; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; padding: 0.75rem; color: #fff;"></textarea>
+                                    </div>
+                                    <div>
+                                        <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">Search Tags (comma-separated)</label>
+                                        <input type="text" id="m-tags" placeholder="atta, wheat, flour, aashirvaad, grocery essential, roti" style="width: 100%; box-sizing: border-box; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; padding: 0.65rem 0.85rem; color: #fff;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- PANE 2: IMAGES & MEDIA GALLERY -->
+                        <div class="editor-tab-pane" id="pane-media" style="display: none;">
+                            <div class="editor-section-card">
+                                <h4><span>🖼️</span> Multi-Image Product Gallery</h4>
+                                <p style="color: #94a3b8; font-size: 0.85rem; margin-top: -6px;">Upload high-resolution product photos. Drag and drop to reorder gallery, star an image to set as Primary Cover.</p>
+                                
+                                <div class="upload-dropzone" id="m-image-dropzone" style="border: 2px dashed rgba(245, 158, 11, 0.4); border-radius: 10px; padding: 2rem; text-align: center; background: rgba(15, 23, 42, 0.5); cursor: pointer;" onclick="document.getElementById('m-file-upload').click()">
+                                    <div style="font-size: 2.4rem; margin-bottom: 0.5rem;">📸</div>
+                                    <div style="font-weight: 700; color: #f8fafc; font-size: 1rem;">Click to upload images or drag & drop files here</div>
+                                    <div style="color: #64748b; font-size: 0.82rem; margin-top: 4px;">PNG, JPG, WebP, GIF up to 8MB. Images are auto-compressed and uploaded directly to Firebase Storage CDN.</div>
+                                    <input type="file" id="m-file-upload" accept="image/*" multiple style="display: none;" onchange="handleEditorGalleryFiles(this.files)">
+                                </div>
+                                <div id="m-upload-progress-bar" style="display: none; margin-top: 1rem; color: #f59e0b; font-weight: 600; font-size: 0.88rem;"></div>
+
+                                <div style="margin-top: 1.5rem;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <span style="font-size: 0.9rem; font-weight: 700; color: #cbd5e1;">Uploaded Gallery (<span id="m-gallery-count">0</span> photos)</span>
+                                        <div style="display: flex; gap: 0.5rem;">
+                                            <input type="text" id="m-direct-url-input" placeholder="Or paste image URL..." style="padding: 0.4rem 0.75rem; font-size: 0.82rem; border-radius: 6px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255,255,255,0.15); color: #fff; width: 220px;">
+                                            <button type="button" class="btn btn-secondary btn-sm" onclick="addDirectUrlToGallery()" style="background: #1e293b; color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; cursor: pointer;">Add URL</button>
+                                        </div>
+                                    </div>
+                                    <div class="editor-gallery-grid" id="m-gallery-grid">
+                                        <!-- Rendered dynamically -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="editor-section-card">
+                                <h4><span>🎥</span> Product Video (Optional)</h4>
+                                <div>
+                                    <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">Video Embed URL (YouTube, Vimeo, MP4)</label>
+                                    <input type="text" id="m-video-url" placeholder="https://www.youtube.com/watch?v=..." style="width: 100%; box-sizing: border-box; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; padding: 0.65rem 0.85rem; color: #fff;">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- PANE 3: PRICING & TAX -->
+                        <div class="editor-tab-pane" id="pane-pricing" style="display: none;">
+                            <div class="editor-section-card">
+                                <h4><span>💰</span> Retail Pricing & Margins</h4>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+                                    <div>
+                                        <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">MRP / Market Price (₹) *</label>
+                                        <input type="number" step="0.01" id="m-mrp" required placeholder="260.00" oninput="calculatePricingMargins()" style="width: 100%; box-sizing: border-box; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; padding: 0.65rem 0.85rem; color: #fff; font-size: 1rem;">
+                                    </div>
+                                    <div>
+                                        <label style="display: block; font-size: 0.85rem; font-weight: 800; color: #fbbf24; margin-bottom: 6px;">Selling Price (₹) *</label>
+                                        <input type="number" step="0.01" id="m-selling-price" required placeholder="235.00" oninput="calculatePricingMargins()" style="width: 100%; box-sizing: border-box; background: rgba(251, 191, 36, 0.08); border: 2px solid #f59e0b; border-radius: 6px; padding: 0.65rem 0.85rem; color: #fbbf24; font-size: 1.05rem; font-weight: 800;">
+                                    </div>
+                                    <div>
+                                        <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #94a3b8; margin-bottom: 6px;">Purchase / Cost Price (₹)</label>
+                                        <input type="number" step="0.01" id="m-cost-price" placeholder="195.00" oninput="calculatePricingMargins()" style="width: 100%; box-sizing: border-box; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; padding: 0.65rem 0.85rem; color: #fff;">
+                                    </div>
+                                </div>
+
+                                <!-- Live Financial Calculation Bar -->
+                                <div id="m-pricing-calc-bar" style="margin-top: 1.25rem; padding: 0.85rem 1.25rem; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+                                    <div style="font-weight: 700; color: #34d399; font-size: 0.9rem;">
+                                        Customer Discount: <span id="m-calc-discount" style="font-family: 'IBM Plex Mono', monospace;">₹25.00 (10% OFF)</span>
+                                    </div>
+                                    <div style="font-weight: 700; color: #fbbf24; font-size: 0.9rem;">
+                                        Estimated Profit: <span id="m-calc-profit" style="font-family: 'IBM Plex Mono', monospace;">₹40.00 / unit</span> (<span id="m-calc-margin">17.0% margin</span>)
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="editor-section-card">
+                                <h4><span>🏷️</span> Tax & GST Configuration</h4>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                    <div>
+                                        <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">GST Rate (%) *</label>
+                                        <select id="m-gst-percent" style="width: 100%; box-sizing: border-box; background: #1e293b; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; padding: 0.65rem 0.85rem; color: #fff;">
+                                            <option value="0">0% (GST Exempt / Unbranded Essentials)</option>
+                                            <option value="5" selected>5% (Grocery, Atta, Rice, Spices)</option>
+                                            <option value="12">12% (Processed Foods & Stationery)</option>
+                                            <option value="18">18% (Consumer Goods, Personal Care)</option>
+                                            <option value="28">28% (Luxury & Aerated Beverages)</option>
+                                        </select>
+                                    </div>
+                                    <div style="display: flex; align-items: center; padding-top: 1.5rem;">
+                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #f8fafc; font-weight: 600; font-size: 0.9rem;">
+                                            <input type="checkbox" id="m-tax-inclusive" checked style="width: 18px; height: 18px; accent-color: #d97706;">
+                                            Selling Price includes applicable GST tax
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- PANE 4: INVENTORY & VARIANTS -->
+                        <div class="editor-tab-pane" id="pane-inventory" style="display: none;">
+                            <div class="editor-section-card">
+                                <h4><span>📦</span> Inventory Tracking</h4>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+                                    <div>
+                                        <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">Available Stock Quantity *</label>
+                                        <input type="number" id="m-stock" required placeholder="50" style="width: 100%; box-sizing: border-box; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; padding: 0.65rem 0.85rem; color: #34d399; font-weight: 800; font-size: 1rem;">
+                                    </div>
+                                    <div>
+                                        <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">Low Stock Alert Level</label>
+                                        <input type="number" id="m-low-threshold" value="10" placeholder="10" style="width: 100%; box-sizing: border-box; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; padding: 0.65rem 0.85rem; color: #fff;">
+                                    </div>
+                                    <div>
+                                        <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">Display Unit / Weight</label>
+                                        <input type="text" id="m-unit" placeholder="e.g. 5 kg, 500 g, 1 L, 1 packet" style="width: 100%; box-sizing: border-box; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; padding: 0.65rem 0.85rem; color: #fff;">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="editor-section-card">
+                                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 0.75rem; margin-bottom: 1rem;">
+                                    <h4 style="margin: 0; border: none; padding: 0;"><span>🔀</span> Product Variants (e.g. Size, Weight, Flavor)</h4>
+                                    <button type="button" class="btn btn-secondary btn-sm" onclick="addNewVariantRow()" style="background: #1e293b; color: #f8fafc; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; padding: 0.4rem 0.8rem; cursor: pointer; font-weight: 700;">
+                                        ➕ Add Variant
+                                    </button>
+                                </div>
+                                <p style="color: #94a3b8; font-size: 0.82rem; margin-top: -6px;">If this product comes in multiple packaging sizes or colors, add variants below. Each variant can have its own SKU, selling price, and stock.</p>
+                                
+                                <div style="overflow-x: auto; margin-top: 1rem;">
+                                    <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+                                        <thead>
+                                            <tr style="background: rgba(15, 23, 42, 0.8); text-transform: uppercase; color: #94a3b8; font-size: 0.75rem;">
+                                                <th style="padding: 8px; text-align: left;">Variant Name / Size</th>
+                                                <th style="padding: 8px; text-align: left;">Variant SKU</th>
+                                                <th style="padding: 8px; text-align: right;">Selling Price (₹)</th>
+                                                <th style="padding: 8px; text-align: right;">MRP (₹)</th>
+                                                <th style="padding: 8px; text-align: center;">Stock</th>
+                                                <th style="padding: 8px; text-align: center; width: 40px;">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="m-variants-tbody">
+                                            <!-- Dynamically added variant rows -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- PANE 5: DELIVERY & SERVICEABILITY -->
+                        <div class="editor-tab-pane" id="pane-delivery" style="display: none;">
+                            <div class="editor-section-card">
+                                <h4><span>🚚</span> Shipping & Serviceability</h4>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                    <div>
+                                        <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">Weight (kg)</label>
+                                        <input type="number" step="0.01" id="m-weight-kg" placeholder="e.g. 5.0" style="width: 100%; box-sizing: border-box; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; padding: 0.65rem 0.85rem; color: #fff;">
+                                    </div>
+                                    <div>
+                                        <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">Package Dimensions (L x W x H cm)</label>
+                                        <input type="text" id="m-dimensions" placeholder="e.g. 35 x 25 x 12 cm" style="width: 100%; box-sizing: border-box; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; padding: 0.65rem 0.85rem; color: #fff;">
+                                    </div>
+                                    <div>
+                                        <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">Estimated Prep / Dispatch Time</label>
+                                        <select id="m-prep-time" style="width: 100%; box-sizing: border-box; background: #1e293b; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; padding: 0.65rem 0.85rem; color: #fff;">
+                                            <option value="1">Within 1-2 Hours (Express Delivery)</option>
+                                            <option value="4">Same Day (within 4 hours)</option>
+                                            <option value="24">Next Day Delivery</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">Special Handling Requirements</label>
+                                        <select id="m-special-handling" style="width: 100%; box-sizing: border-box; background: #1e293b; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; padding: 0.65rem 0.85rem; color: #fff;">
+                                            <option value="Standard">Standard Retail Delivery</option>
+                                            <option value="Fragile">Fragile / Glass Care</option>
+                                            <option value="Perishable">Perishable / Bakery / Dairy</option>
+                                            <option value="ColdStorage">Cold Storage / Chilled</option>
+                                        </select>
+                                    </div>
+                                    <div style="grid-column: span 2;">
+                                        <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">Restricted Serviceable PIN Codes (Leave empty for all store zones)</label>
+                                        <input type="text" id="m-serviceable-pins" placeholder="e.g. 272155, 272001, 272002 (or leave blank to deliver anywhere in serviceable area)" style="width: 100%; box-sizing: border-box; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; padding: 0.65rem 0.85rem; color: #fff;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- PANE 6: SEO & STOREFRONT -->
+                        <div class="editor-tab-pane" id="pane-seo" style="display: none;">
+                            <div class="editor-section-card">
+                                <h4><span>🌐</span> Search Engine Optimization (SEO)</h4>
+                                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                                    <div>
+                                        <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">SEO Meta Title</label>
+                                        <input type="text" id="m-meta-title" placeholder="Aashirvaad Superior MP Shudh Chakki Atta (5 kg) - Buy Online | Samaur Mart" style="width: 100%; box-sizing: border-box; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; padding: 0.65rem 0.85rem; color: #fff;">
+                                    </div>
+                                    <div>
+                                        <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">SEO Meta Description</label>
+                                        <textarea id="m-meta-desc" rows="3" placeholder="Order 100% pure Aashirvaad MP Shudh Chakki Atta at best prices in Samaur Mart. Same day home delivery guaranteed..." style="width: 100%; box-sizing: border-box; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; padding: 0.65rem 0.85rem; color: #fff;"></textarea>
+                                    </div>
+                                    <div>
+                                        <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">Search Keywords</label>
+                                        <input type="text" id="m-keywords" placeholder="grocery, atta, aashirvaad, best price atta, daily essentials" style="width: 100%; box-sizing: border-box; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; padding: 0.65rem 0.85rem; color: #fff;">
+                                    </div>
+                                    <div style="display: flex; gap: 2rem; margin-top: 0.5rem;">
+                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #fff; font-weight: 600;">
+                                            <input type="checkbox" id="m-is-featured" style="width: 18px; height: 18px; accent-color: #d97706;">
+                                            ⭐ Feature on Storefront Homepage
+                                        </label>
+                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #fff; font-weight: 600;">
+                                            <input type="checkbox" id="m-is-homepage" checked style="width: 18px; height: 18px; accent-color: #d97706;">
+                                            Visible in Category Navigation
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- PANE 7: PUBLICATION & SCHEDULING -->
+                        <div class="editor-tab-pane" id="pane-publication" style="display: none;">
+                            <div class="editor-section-card">
+                                <h4><span>⏱️</span> Publication Lifecycle</h4>
+                                <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+                                    <div>
+                                        <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #cbd5e1; margin-bottom: 8px;">Product Publication Status *</label>
+                                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                            <label style="padding: 1rem; border-radius: 8px; background: rgba(6, 78, 59, 0.3); border: 2px solid #059669; cursor: pointer; display: flex; align-items: flex-start; gap: 10px;">
+                                                <input type="radio" name="m-status-radio" value="published" checked onchange="handlePublicationStatusRadio(this.value)" style="margin-top: 3px;">
+                                                <div>
+                                                    <div style="font-weight: 800; color: #34d399;">🟢 Publish Now (Live)</div>
+                                                    <div style="font-size: 0.8rem; color: #94a3b8; margin-top: 3px;">Immediately searchable and purchasable by customers online</div>
+                                                </div>
+                                            </label>
+                                            <label style="padding: 1rem; border-radius: 8px; background: rgba(120, 53, 15, 0.3); border: 1px solid rgba(217, 119, 6, 0.4); cursor: pointer; display: flex; align-items: flex-start; gap: 10px;">
+                                                <input type="radio" name="m-status-radio" value="draft" onchange="handlePublicationStatusRadio(this.value)" style="margin-top: 3px;">
+                                                <div>
+                                                    <div style="font-weight: 800; color: #fcd34d;">🔒 Save as Draft</div>
+                                                    <div style="font-size: 0.8rem; color: #94a3b8; margin-top: 3px;">Hidden from customers. Remains in catalog for review</div>
+                                                </div>
+                                            </label>
+                                            <label style="padding: 1rem; border-radius: 8px; background: rgba(88, 28, 135, 0.3); border: 1px solid rgba(147, 51, 234, 0.4); cursor: pointer; display: flex; align-items: flex-start; gap: 10px;">
+                                                <input type="radio" name="m-status-radio" value="scheduled" onchange="handlePublicationStatusRadio(this.value)" style="margin-top: 3px;">
+                                                <div>
+                                                    <div style="font-weight: 800; color: #d8b4fe;">⏰ Schedule Publication</div>
+                                                    <div style="font-size: 0.8rem; color: #94a3b8; margin-top: 3px;">Automatically goes live at a future date and time</div>
+                                                </div>
+                                            </label>
+                                            <label style="padding: 1rem; border-radius: 8px; background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255, 255, 255, 0.15); cursor: pointer; display: flex; align-items: flex-start; gap: 10px;">
+                                                <input type="radio" name="m-status-radio" value="archived" onchange="handlePublicationStatusRadio(this.value)" style="margin-top: 3px;">
+                                                <div>
+                                                    <div style="font-weight: 800; color: #94a3b8;">📦 Archive Product</div>
+                                                    <div style="font-size: 0.8rem; color: #64748b; margin-top: 3px;">Removed from store while preserving past order records</div>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div id="m-scheduled-time-container" style="display: none; padding: 1rem; background: rgba(88, 28, 135, 0.2); border: 1px solid #9333ea; border-radius: 8px;">
+                                        <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #d8b4fe; margin-bottom: 6px;">Select Future Publication Date & Time:</label>
+                                        <input type="datetime-local" id="m-scheduled-at" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; padding: 0.65rem 0.85rem; color: #fff;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- PANE 8: AUDIT HISTORY -->
+                        <div class="editor-tab-pane" id="pane-audit" style="display: none;">
+                            <div class="editor-section-card">
+                                <h4><span>📜</span> Product Audit Log</h4>
+                                <div id="m-audit-timeline" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                                    <div style="color: #94a3b8; font-size: 0.88rem;">No historical changes recorded for this item yet.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+
+            <!-- Sticky Modal Footer -->
+            <div class="editor-footer-bar">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span id="editor-dirty-indicator" style="display: none; color: #f59e0b; font-size: 0.85rem; font-weight: 700;">
+                        ⚠️ Unsaved changes
+                    </span>
+                </div>
+                <div style="display: flex; gap: 0.75rem; align-items: center;">
+                    <button type="button" class="btn btn-secondary" onclick="closeProductEditor()" style="background: #1e293b; color: #f8fafc; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; padding: 0.6rem 1.25rem; cursor: pointer;">
+                        Cancel
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="btn-save-draft" onclick="submitProductWithStatus('draft')" style="background: #78350f; color: #fcd34d; border: 1px solid #d97706; border-radius: 6px; padding: 0.6rem 1.25rem; font-weight: 700; cursor: pointer;">
+                        💾 Save Draft
+                    </button>
+                    <button type="button" class="btn btn-primary" id="btn-save-publish" onclick="submitProductWithStatus('published')" style="background: #d97706; color: #ffffff; border: none; border-radius: 6px; padding: 0.65rem 1.6rem; font-weight: 800; cursor: pointer; box-shadow: 0 4px 14px rgba(217, 119, 6, 0.4);">
+                        🚀 Save & Publish Live
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- QUICK STOCK ADJUSTMENT MODAL -->
+    <div class="modal-overlay" id="quick-stock-modal" style="z-index: 100001;">
+        <div class="modal-container" style="max-width: 440px; background: #0f172a; border: 1px solid rgba(184,137,43,0.3); border-radius: 12px; padding: 1.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.75rem;">
+                <h3 style="margin: 0; color: #fff; font-size: 1.15rem; font-weight: 800;">Quick Stock Adjustment</h3>
+                <button type="button" onclick="closeQuickStockModal()" style="background: transparent; border: none; color: #94a3b8; font-size: 1.5rem; cursor: pointer;">&times;</button>
+            </div>
+            <div style="padding: 1.25rem 0;">
+                <div id="quick-stock-prod-name" style="font-weight: 700; color: #fbbf24; margin-bottom: 1rem; font-size: 0.95rem;"></div>
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; font-size: 0.85rem; color: #cbd5e1; margin-bottom: 6px;">New Total Stock Units *</label>
+                    <input type="number" id="quick-stock-input" style="width: 100%; box-sizing: border-box; background: rgba(15, 23, 42, 0.8); border: 2px solid #10b981; border-radius: 6px; padding: 0.65rem 0.85rem; color: #34d399; font-weight: 800; font-size: 1.2rem; text-align: center;">
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.85rem; color: #cbd5e1; margin-bottom: 6px;">Adjustment Reason</label>
+                    <input type="text" id="quick-stock-reason" placeholder="e.g. Restocked from supplier, Counter inventory count" style="width: 100%; box-sizing: border-box; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; padding: 0.55rem 0.75rem; color: #fff;">
+                </div>
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 0.75rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem;">
+                <button type="button" class="btn btn-secondary" onclick="closeQuickStockModal()">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="submitQuickStock()">Confirm Restock</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- BULK PRICE ADJUSTMENT MODAL -->
+    <div class="modal-overlay" id="bulk-price-modal" style="z-index: 100001;">
+        <div class="modal-container" style="max-width: 480px; background: #0f172a; border: 1px solid rgba(184,137,43,0.3); border-radius: 12px; padding: 1.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.75rem;">
+                <h3 style="margin: 0; color: #fff; font-size: 1.15rem; font-weight: 800;">Bulk Price Adjustment</h3>
+                <button type="button" onclick="closeBulkPriceModal()" style="background: transparent; border: none; color: #94a3b8; font-size: 1.5rem; cursor: pointer;">&times;</button>
+            </div>
+            <div style="padding: 1.25rem 0;">
+                <p style="color: #94a3b8; font-size: 0.88rem; margin-top: 0;">Adjust selling prices across all <strong id="bulk-price-count" style="color: #fbbf24;">0</strong> selected products simultaneously.</p>
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; font-size: 0.85rem; color: #cbd5e1; margin-bottom: 6px;">Adjustment Type</label>
+                    <select id="bulk-price-type" style="width: 100%; box-sizing: border-box; background: #1e293b; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; padding: 0.6rem; color: #fff;">
+                        <option value="percent">Percentage Change (%) e.g. +5% or -10%</option>
+                        <option value="delta">Flat Rupee Amount (₹) e.g. +10 or -20</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.85rem; color: #cbd5e1; margin-bottom: 6px;">Adjustment Value *</label>
+                    <input type="number" step="0.01" id="bulk-price-val" placeholder="e.g. 5 or -10" style="width: 100%; box-sizing: border-box; background: rgba(15, 23, 42, 0.8); border: 2px solid #f59e0b; border-radius: 6px; padding: 0.65rem 0.85rem; color: #fbbf24; font-weight: 800; font-size: 1.1rem;">
+                </div>
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 0.75rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem;">
+                <button type="button" class="btn btn-secondary" onclick="closeBulkPriceModal()">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="submitBulkPriceAdjustment()">Apply to Selected</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- BULK CATEGORY ASSIGN MODAL -->
+    <div class="modal-overlay" id="bulk-category-modal" style="z-index: 100001;">
+        <div class="modal-container" style="max-width: 440px; background: #0f172a; border: 1px solid rgba(184,137,43,0.3); border-radius: 12px; padding: 1.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.75rem;">
+                <h3 style="margin: 0; color: #fff; font-size: 1.15rem; font-weight: 800;">Bulk Category Assignment</h3>
+                <button type="button" onclick="closeBulkCategoryModal()" style="background: transparent; border: none; color: #94a3b8; font-size: 1.5rem; cursor: pointer;">&times;</button>
+            </div>
+            <div style="padding: 1.25rem 0;">
+                <p style="color: #94a3b8; font-size: 0.88rem; margin-top: 0;">Reassign all <strong id="bulk-cat-count" style="color: #fbbf24;">0</strong> selected products to a new category node.</p>
+                <div>
+                    <label style="display: block; font-size: 0.85rem; color: #cbd5e1; margin-bottom: 6px;">Select New Category Tree Node *</label>
+                    <select id="bulk-cat-select" style="width: 100%; box-sizing: border-box; background: #1e293b; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; padding: 0.65rem; color: #fff;">
+                        <!-- Categories populated dynamically -->
+                    </select>
+                </div>
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 0.75rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem;">
+                <button type="button" class="btn btn-secondary" onclick="closeBulkCategoryModal()">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="submitBulkCategoryChange()">Assign Category</button>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

@@ -165,7 +165,19 @@ class ApiAuthRepository implements AuthRepository {
           'message': result.message ?? 'SMS OTP sent successfully.',
         };
       }
-      throw Exception(result.errorMessage ?? 'Failed to send SMS OTP.');
+      // Graceful server fallback if Firebase phone auth encounters quota or region errors
+      try {
+        final res = await apiClient.post('/api/auth/login-otp-request', data: {
+          'email_or_phone': cleanInput,
+        });
+        final map = _toMap(res);
+        return {
+          'success': true,
+          'message': map['message']?.toString() ?? 'OTP code dispatched via Store SMS Gateway.',
+        };
+      } catch (_) {
+        throw Exception(result.errorMessage ?? 'Failed to send SMS OTP.');
+      }
     } else {
       final res = await apiClient.post('/api/auth/login-otp-request', data: {
         'email_or_phone': cleanInput.toLowerCase(),
@@ -186,6 +198,20 @@ class ApiAuthRepository implements AuthRepository {
         await _saveUserLocal(result.user!);
         return result.user!;
       }
+      // Graceful server fallback if code was issued by backend gateway
+      try {
+        final res = await apiClient.post('/api/auth/login-otp-verify', data: {
+          'email_or_phone': cleanInput,
+          'otp': cleanOtp,
+        });
+        final map = _toMap(res);
+        final userJson = map['user'] is Map ? Map<String, dynamic>.from(map['user']) : null;
+        if (userJson != null) {
+          final user = AuthUser.fromJson(userJson);
+          await _saveUserLocal(user);
+          return user;
+        }
+      } catch (_) {}
       throw Exception(result.error ?? 'Invalid verification code. Please check SMS and try again.');
     } else {
       final res = await apiClient.post('/api/auth/login-otp-verify', data: {

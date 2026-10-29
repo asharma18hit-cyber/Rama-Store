@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    container_name: samaur_mart_web
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=production
+      - PORT=5000
+      - SECRET_KEY=samaur_mart_production_secure_key_2026
+      - DATABASE_PATH=/app/data/rama_store.db
+      - FIREBASE_PROJECT_ID=ma-store-949c7
+      - FIREBASE_API_KEY=AIzaSyAZ7D3XnUOphe8s2lXxxr9qmEdZYE5lQ2w
+    volumes:
+      - ./data:/app/data
+      - ./static/uploads:/app/static/uploads

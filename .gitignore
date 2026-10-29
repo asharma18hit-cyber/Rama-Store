@@ -12,3 +12,9 @@ app/__pycache__/
 .packages
 .pub-cache/
 .pub/
+*adminsdk*.json
+firebase_service_account.json
+serviceAccountKey.json
+.firebase/
+node_modules/
+functions/node_modules/

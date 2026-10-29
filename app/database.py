@@ -23,6 +23,9 @@ def get_db_connection(db_path):
     conn = sqlite3.connect(db_path, timeout=30.0)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON;")
+    conn.execute("PRAGMA journal_mode = WAL;")
+    conn.execute("PRAGMA synchronous = NORMAL;")
+    conn.execute("PRAGMA busy_timeout = 30000;")
     try:
         yield conn
         conn.commit()
@@ -164,7 +167,28 @@ def init_db(db_path, schema_path):
                 slug = cat.lower().replace(' ', '-').replace('&', 'and')
                 cursor.execute("INSERT OR IGNORE INTO categories (name, slug) VALUES (?, ?)", (cat, slug))
                 
+        # 4. Ensure Announcements table exists and has initial ticker
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS announcements (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                stock_status TEXT DEFAULT '',
+                loyalty_offer TEXT DEFAULT '',
+                home_delivery TEXT DEFAULT '',
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        cursor.execute("SELECT COUNT(*) FROM announcements")
+        if cursor.fetchone()[0] == 0:
+            cursor.execute(
+                "INSERT INTO announcements (stock_status, loyalty_offer, home_delivery) VALUES (?, ?, ?)",
+                ("Fresh Stock Across All Mart Departments", "Earn 10% Cash-Back Counter Points", "Free Instant Home Delivery Above ₹500")
+            )
+            
+    # 5. Seed default business admin & sample retail items if empty
+    seed_default_business_data(db_path)
+                
     print("Database initialization and schema validation complete.")
+
 
 def add_category(db_path, name, slug=None, parent_id=None):
     """Creates a new hierarchical category node."""
@@ -704,10 +728,10 @@ def create_user(db_path, username, email, password_hash, role="customer"):
         raise e
 
 def get_user_by_identifier(db_path, identifier):
-    """Retrieves user row matching username or email address."""
-    if not identifier or not identifier.strip():
+    """Retrieves user row matching username or email address, with resilient phone number normalization."""
+    if not identifier or not str(identifier).strip():
         return None
-    val = identifier.strip().lower()
+    val = str(identifier).strip().lower()
     with get_db_connection(db_path) as conn:
         cursor = conn.cursor()
         cursor.execute(
@@ -715,17 +739,53 @@ def get_user_by_identifier(db_path, identifier):
             (val, val)
         )
         row = cursor.fetchone()
-        return dict(row) if row else None
+        if row:
+            return dict(row)
+
+        # Resilient fallback: check trailing 10 digits for phone numbers (+91, 0, spaces, hyphens)
+        if '@' not in val:
+            digits = re.sub(r'\D', '', val)
+            if len(digits) >= 10:
+                ten_digits = digits[-10:]
+                cursor.execute(
+                    """
+                    SELECT id, username, email, password_hash, role, created_at 
+                    FROM users 
+                    WHERE LOWER(username) LIKE ? OR LOWER(email) LIKE ?
+                    LIMIT 1
+                    """,
+                    (f"%{ten_digits}%", f"%{ten_digits}%")
+                )
+                row = cursor.fetchone()
+                if row:
+                    return dict(row)
+
+        return None
 
 def update_user_password(db_path, identifier, new_password_hash):
-    """Resets user password hash via identity confirmation matches."""
+    """Resets user password hash via identity confirmation matches, with phone normalization fallback."""
+    if not identifier or not str(identifier).strip():
+        return False
+    val = str(identifier).strip().lower()
     with get_db_connection(db_path) as conn:
         cursor = conn.cursor()
         cursor.execute(
             "UPDATE users SET password_hash = ? WHERE LOWER(username) = ? OR LOWER(email) = ?",
-            (new_password_hash, identifier.strip().lower(), identifier.strip().lower())
+            (new_password_hash, val, val)
         )
-        return cursor.rowcount > 0
+        if cursor.rowcount > 0:
+            return True
+
+        digits = re.sub(r'\D', '', val)
+        if len(digits) >= 10:
+            ten_digits = digits[-10:]
+            cursor.execute(
+                "UPDATE users SET password_hash = ? WHERE LOWER(username) LIKE ? OR LOWER(email) LIKE ?",
+                (new_password_hash, f"%{ten_digits}%", f"%{ten_digits}%")
+            )
+            return cursor.rowcount > 0
+
+        return False
 
 def get_dashboard_metrics(db_path):
     """Retrieves store metrics."""
@@ -752,3 +812,133 @@ def get_dashboard_metrics(db_path):
         "low_stock_count": low_stock_count,
         "today_revenue": round(today_revenue, 2)
     }
+
+def get_announcements(db_path):
+    """Retrieves active store announcements."""
+    with get_db_connection(db_path) as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS announcements (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                stock_status TEXT DEFAULT '',
+                loyalty_offer TEXT DEFAULT '',
+                home_delivery TEXT DEFAULT '',
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        cursor.execute("SELECT stock_status, loyalty_offer, home_delivery FROM announcements ORDER BY id DESC LIMIT 1")
+        row = cursor.fetchone()
+        if row:
+            return dict(row)
+        return {
+            "stock_status": "All Departments Fully Stocked",
+            "loyalty_offer": "10% Cash-Back on All Checkouts",
+            "home_delivery": "Free Instant Delivery on ₹500+"
+        }
+
+def save_announcements(db_path, stock_status, loyalty_offer, home_delivery):
+    """Updates store announcement ticker."""
+    with get_db_connection(db_path) as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS announcements (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                stock_status TEXT DEFAULT '',
+                loyalty_offer TEXT DEFAULT '',
+                home_delivery TEXT DEFAULT '',
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        cursor.execute("SELECT id FROM announcements ORDER BY id DESC LIMIT 1")
+        row = cursor.fetchone()
+        if row:
+            cursor.execute(
+                "UPDATE announcements SET stock_status = ?, loyalty_offer = ?, home_delivery = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+                (stock_status, loyalty_offer, home_delivery, row['id'])
+            )
+        else:
+            cursor.execute(
+                "INSERT INTO announcements (stock_status, loyalty_offer, home_delivery) VALUES (?, ?, ?)",
+                (stock_status, loyalty_offer, home_delivery)
+            )
+        return True
+
+def seed_default_business_data(db_path):
+    """Seeds business-ready essentials: default admin account and sample catalog items if empty."""
+    from werkzeug.security import generate_password_hash
+    
+    with get_db_connection(db_path) as conn:
+        cursor = conn.cursor()
+        
+        # 1. Ensure Default Admin User exists
+        cursor.execute("SELECT id FROM users WHERE role = 'admin'")
+        if not cursor.fetchone():
+            admin_pwd = os.environ.get('DEFAULT_ADMIN_PASSWORD', 'Admin@12345')
+            pwd_hash = generate_password_hash(admin_pwd)
+            cursor.execute(
+                """
+                INSERT OR IGNORE INTO users (username, email, password_hash, role)
+                VALUES (?, ?, ?, ?)
+                """,
+                ('admin', 'admin@ramastore.com', pwd_hash, 'admin')
+            )
+            cursor.execute(
+                """
+                INSERT OR IGNORE INTO users (username, email, password_hash, role)
+                VALUES (?, ?, ?, ?)
+                """,
+                ('owner', '7268903804', pwd_hash, 'admin')
+            )
+            print("Default store admin account verified: admin@ramastore.com / 7268903804")
+            
+        # 2. Ensure initial catalog items if products table is empty
+        cursor.execute("SELECT COUNT(*) FROM products")
+        if cursor.fetchone()[0] == 0:
+            cursor.execute("SELECT id, name FROM categories")
+            cat_map = {row['name']: row['id'] for row in cursor.fetchall()}
+            
+            sample_products = [
+                # Grocery
+                {"sku": "GRO-RICE-01", "name": "Premium Basmati Royal Rice 5kg", "cat": "Grocery", "buy": 420.0, "sell": 599.0, "stock": 45, "img": "https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=600&q=80"},
+                {"sku": "GRO-OIL-02", "name": "Organic Cold-Pressed Olive Oil 1L", "cat": "Grocery", "buy": 680.0, "sell": 899.0, "stock": 30, "img": "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&w=600&q=80"},
+                {"sku": "GRO-TEA-03", "name": "Darjeeling Gold Assam Tea 500g", "cat": "Grocery", "buy": 180.0, "sell": 275.0, "stock": 50, "img": "https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=600&q=80"},
+                
+                # Bakery
+                {"sku": "BAK-BRD-01", "name": "Artisanal Multigrain Sourdough Loaf", "cat": "Bakery", "buy": 45.0, "sell": 85.0, "stock": 25, "img": "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=600&q=80"},
+                {"sku": "BAK-CRO-02", "name": "Golden French Butter Croissants (Pack of 4)", "cat": "Bakery", "buy": 95.0, "sell": 160.0, "stock": 20, "img": "https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&w=600&q=80"},
+                {"sku": "BAK-CK-03", "name": "Dark Belgian Chocolate Fudge Cake 500g", "cat": "Bakery", "buy": 280.0, "sell": 450.0, "stock": 15, "img": "https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=600&q=80"},
+                
+                # Foods & Restaurants
+                {"sku": "FOD-COF-01", "name": "Specialty Roasted Arabica Coffee Beans 250g", "cat": "Foods & Restaurants", "buy": 220.0, "sell": 360.0, "stock": 35, "img": "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=600&q=80"},
+                {"sku": "FOD-PAS-02", "name": "Authentic Durum Wheat Penne Rigate 500g", "cat": "Foods & Restaurants", "buy": 75.0, "sell": 135.0, "stock": 40, "img": "https://images.unsplash.com/photo-1551462147-ff29053bfc14?auto=format&fit=crop&w=600&q=80"},
+                
+                # Medicine
+                {"sku": "MED-PCM-01", "name": "Paracetamol 650mg Fast-Action (Strip of 15)", "cat": "Medicine", "buy": 16.0, "sell": 32.0, "stock": 120, "img": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=600&q=80"},
+                {"sku": "MED-KIT-02", "name": "Emergency Medical First Aid Safety Kit", "cat": "Medicine", "buy": 180.0, "sell": 320.0, "stock": 25, "img": "https://images.unsplash.com/photo-1603398938378-e54eab446dde?auto=format&fit=crop&w=600&q=80"},
+                
+                # Books
+                {"sku": "BOK-POM-01", "name": "The Psychology of Money by Morgan Housel", "cat": "Books", "buy": 190.0, "sell": 350.0, "stock": 18, "img": "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80"},
+                {"sku": "BOK-ATM-02", "name": "Atomic Habits by James Clear (Hardcover)", "cat": "Books", "buy": 320.0, "sell": 550.0, "stock": 22, "img": "https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=600&q=80"},
+                
+                # Copies & Stationary
+                {"sku": "COP-NBK-01", "name": "Executive Ruled Notebook A4 (300 Pages)", "cat": "Copies", "buy": 55.0, "sell": 99.0, "stock": 60, "img": "https://images.unsplash.com/photo-1531346878377-a5be20888e57?auto=format&fit=crop&w=600&q=80"},
+                {"sku": "STA-PEN-01", "name": "Smoothflow Gel Roller Pens (Pack of 10)", "cat": "Stationary", "buy": 70.0, "sell": 140.0, "stock": 50, "img": "https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?auto=format&fit=crop&w=600&q=80"},
+                
+                # Gift Store
+                {"sku": "GFT-CND-01", "name": "Handcrafted Aromatherapy Soy Candle", "cat": "Gift Store", "buy": 120.0, "sell": 249.0, "stock": 30, "img": "https://images.unsplash.com/photo-1603006905003-be475563bc59?auto=format&fit=crop&w=600&q=80"},
+                
+                # Sports
+                {"sku": "SPT-BAD-01", "name": "High-Tension Carbon Badminton Racquet Set", "cat": "Sports", "buy": 480.0, "sell": 850.0, "stock": 15, "img": "https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?auto=format&fit=crop&w=600&q=80"}
+            ]
+            
+            for prod in sample_products:
+                cat_id = cat_map.get(prod["cat"])
+                cursor.execute(
+                    """
+                    INSERT OR IGNORE INTO products (sku, name, category_id, purchase_price, selling_price, stock, status, image_url)
+                    VALUES (?, ?, ?, ?, ?, ?, 'published', ?)
+                    """,
+                    (prod["sku"], prod["name"], cat_id, prod["buy"], prod["sell"], prod["stock"], prod["img"])
+                )
+            print("Initial retail catalog seeded with sample business products.")
+

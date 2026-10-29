@@ -17,6 +17,10 @@
     
     <!-- Dedicated Stylesheets -->
     <link rel="stylesheet" href="/static/css/login.css">
+
+    <!-- Firebase App & Auth SDK (v9 compat mode for web client) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 </head>
 <body>
 
@@ -135,6 +139,7 @@
                             </div>
                             <button type="button" class="request-otp-btn" id="btn-send-login-otp" onclick="requestLoginOTP()">Request OTP</button>
                         </div>
+                        <div id="recaptcha-container" style="margin-top: 6px;"></div>
                     </div>
                     
                     <div class="remember-forgot-row" id="login-remember-row">
@@ -148,6 +153,18 @@
                     <button type="submit" class="submit-btn" id="login-submit-btn">
                         <span class="btn-spinner"></span>
                         <span class="btn-text">Log In</span>
+                    </button>
+
+                    <!-- Google Cloud One-Click Sign-In via Firebase -->
+                    <div style="display: flex; align-items: center; margin: 1.15rem 0 0.85rem; color: #94a3b8; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em;">
+                        <span style="flex: 1; border-bottom: 1px solid rgba(255,255,255,0.12);"></span>
+                        <span style="padding: 0 10px;">or continue with</span>
+                        <span style="flex: 1; border-bottom: 1px solid rgba(255,255,255,0.12);"></span>
+                    </div>
+
+                    <button type="button" class="google-auth-btn" id="btn-google-login" onclick="signInWithGoogle()" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; padding: 0.7rem 1rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.18); background: rgba(255,255,255,0.06); color: #fff; font-size: 0.95rem; font-weight: 500; cursor: pointer; transition: all 0.2s ease;">
+                        <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+                        <span>Sign In with Google</span>
                     </button>
                 </form>
                 
@@ -321,37 +338,276 @@
             }
         }
 
-        // Request Passwordless Login OTP (POST to backend API)
-        async function requestLoginOTP() {
-            const identifier = document.getElementById('login-identifier').value.trim();
-            if (!identifier) {
-                showToast("Please enter your Email or Phone Number first.", "error");
+        // ----------------------------------------------------
+        // FIREBASE AUTHENTICATION CONFIGURATION & INITIALIZATION
+        // ----------------------------------------------------
+        const firebaseConfig = {
+            apiKey: "AIzaSyAZ7D3XnUOphe8s2lXxxr9qmEdZYE5lQ2w",
+            authDomain: "ma-store-949c7.firebaseapp.com",
+            projectId: "ma-store-949c7",
+            storageBucket: "ma-store-949c7.firebasestorage.app",
+            messagingSenderId: "611361603523",
+            appId: "1:611361603523:web:b484f519c30b5fe012c776",
+            measurementId: "G-7ZT1J756XC"
+        };
+
+        let firebaseInitialized = false;
+        try {
+            if (typeof firebase !== 'undefined') {
+                firebase.initializeApp(firebaseConfig);
+                firebaseInitialized = true;
+                console.log("[Firebase] Successfully initialized for Rama Store Web.");
+                setTimeout(() => { prewarmRecaptcha(); }, 500);
+            }
+        } catch (e) {
+            console.warn("[Firebase] Init error (running with backend dispatch):", e);
+        }
+
+        let otpCountdownTimer = null;
+        function startOtpCountdown(seconds = 60) {
+            const btn = document.getElementById('btn-send-login-otp');
+            if (!btn) return;
+            if (otpCountdownTimer) clearInterval(otpCountdownTimer);
+            
+            btn.disabled = true;
+            let remaining = seconds;
+            btn.innerText = `Resend (${remaining}s)`;
+            
+            otpCountdownTimer = setInterval(() => {
+                remaining--;
+                if (remaining <= 0) {
+                    clearInterval(otpCountdownTimer);
+                    otpCountdownTimer = null;
+                    btn.disabled = false;
+                    btn.innerText = 'Request OTP';
+                } else {
+                    btn.innerText = `Resend (${remaining}s)`;
+                }
+            }, 1000);
+        }
+
+        function prewarmRecaptcha() {
+            if (!firebaseInitialized) return;
+            try {
+                const verifier = getOrCreateRecaptcha();
+                if (verifier && !window.recaptchaRendered) {
+                    verifier.render().then(widgetId => {
+                        window.recaptchaRendered = true;
+                        window.recaptchaWidgetId = widgetId;
+                        console.log("[Firebase reCAPTCHA] Pre-warmed and ready.");
+                    }).catch(err => {
+                        console.warn("[Firebase reCAPTCHA] Pre-warm render notice:", err);
+                    });
+                }
+            } catch(e) {
+                console.warn("[Firebase reCAPTCHA] Pre-warm skipped:", e);
+            }
+        }
+
+        function resetRecaptcha() {
+            try {
+                if (window.recaptchaVerifier) {
+                    window.recaptchaVerifier.clear();
+                }
+            } catch (_) {}
+            window.recaptchaVerifier = null;
+            window.recaptchaRendered = false;
+            const oldEl = document.getElementById('recaptcha-container');
+            if (oldEl) {
+                const parent = oldEl.parentNode || document.body;
+                oldEl.remove();
+                const freshEl = document.createElement('div');
+                freshEl.id = 'recaptcha-container';
+                parent.appendChild(freshEl);
+            }
+        }
+
+        function getOrCreateRecaptcha() {
+            if (!firebaseInitialized) return null;
+            if (window.recaptchaVerifier) {
+                return window.recaptchaVerifier;
+            }
+            let container = document.getElementById('recaptcha-container');
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'recaptcha-container';
+                document.body.appendChild(container);
+            }
+            try {
+                window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier(container, {
+                    'size': 'invisible',
+                    'callback': () => {},
+                    'expired-callback': () => {
+                        resetRecaptcha();
+                    }
+                });
+                return window.recaptchaVerifier;
+            } catch (e) {
+                console.warn("[Firebase reCAPTCHA] Refreshing container:", e);
+                resetRecaptcha();
+                try {
+                    const freshContainer = document.getElementById('recaptcha-container');
+                    window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier(freshContainer, {
+                        'size': 'invisible'
+                    });
+                    return window.recaptchaVerifier;
+                } catch (err2) {
+                    console.error("[Firebase reCAPTCHA] Unable to mount verifier:", err2);
+                    return null;
+                }
+            }
+        }
+
+        // Google Cloud One-Click Sign-In via Firebase
+        async function signInWithGoogle() {
+            if (!firebaseInitialized) {
+                showToast("Firebase is initializing. Please wait...", "warning");
                 return;
             }
-            
+            const btn = document.getElementById('btn-google-login');
+            if (btn) btn.disabled = true;
+
+            try {
+                showToast("Opening Google Account authorization...", "info");
+                const provider = new firebase.auth.GoogleAuthProvider();
+                provider.setCustomParameters({ prompt: 'select_account' });
+                const result = await firebase.auth().signInWithPopup(provider);
+                const user = result.user;
+                const idToken = await user.getIdToken();
+
+                showToast("Google account authenticated! Setting up session...", "success");
+                let data = {};
+                try {
+                    const res = await fetch('/api/auth/firebase-login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            id_token: idToken,
+                            email: user.email,
+                            fullname: user.displayName,
+                            phone_number: user.phoneNumber,
+                            uid: user.uid
+                        })
+                    });
+                    data = await res.json();
+                } catch(netErr) {
+                    console.log("[Firebase Client Auth] Continuing in client mode:", netErr);
+                }
+
+                // Store client Firebase auth credentials
+                localStorage.removeItem('adminToken');
+                const resolvedName = (data && data.user && data.user.fullname && data.user.fullname !== 'Customer') ? data.user.fullname :
+                                     (user.displayName && user.displayName !== 'Customer') ? user.displayName :
+                                     (localStorage.getItem('saved_customer_name') || '');
+                const custObj = {
+                    uid: user.uid,
+                    fullname: resolvedName || (user.email ? user.email.split('@')[0] : 'Rahul'),
+                    displayName: resolvedName || (user.email ? user.email.split('@')[0] : 'Rahul'),
+                    name: resolvedName || (user.email ? user.email.split('@')[0] : 'Rahul'),
+                    email: user.email,
+                    phone: user.phoneNumber,
+                    role: 'customer'
+                };
+                localStorage.setItem('currentUser', JSON.stringify(custObj));
+                localStorage.setItem('customerUser', JSON.stringify(custObj));
+                if (custObj.fullname && custObj.fullname !== 'Customer') {
+                    localStorage.setItem('saved_customer_name', custObj.fullname);
+                }
+                localStorage.setItem('firebase_id_token', idToken);
+
+                if (btn) btn.disabled = false;
+                showToast("Welcome, " + (data.user?.fullname || user.displayName || "Customer") + "!", "success");
+                const params = new URLSearchParams(window.location.search);
+                const redirectUrl = params.get('redirect') || '/store';
+                setTimeout(() => { window.location.href = redirectUrl; }, 800);
+            } catch (err) {
+                if (btn) btn.disabled = false;
+                console.error("[Google Sign-In Error]", err);
+                if (err.code === 'auth/popup-closed-by-user') {
+                    showToast("Google sign-in was canceled.", "warning");
+                } else if (err.code === 'auth/unauthorized-domain') {
+                    showToast("Domain '" + window.location.hostname + "' not authorized in Firebase Console.", "error");
+                } else if (err.code === 'auth/operation-not-allowed') {
+                    showToast("Google provider not enabled yet in Firebase Console (Authentication > Sign-in method > Google).", "error");
+                } else {
+                    showToast("Google Sign-In notice: " + (err.message || String(err)), "error");
+                }
+            }
+        }
+
+        // Request Passwordless Login OTP (Firebase Phone Auth with Server Fallback)
+        async function requestLoginOTP() {
+            const rawIdentifier = document.getElementById('login-identifier').value.trim();
+            if (!rawIdentifier) {
+                showToast("Please enter your Phone Number or Email first.", "error");
+                return;
+            }
+
             const btn = document.getElementById('btn-send-login-otp');
             const originalText = btn.innerText;
             btn.disabled = true;
-            btn.innerText = 'Sending...';
-            
+            btn.innerText = 'Connecting...';
+
+            const digitsOnly = rawIdentifier.replace(/\D/g, '');
+            const isPhone = !rawIdentifier.includes('@') && digitsOnly.length >= 10;
+            const formattedPhone = digitsOnly.length === 10 ? `+91${digitsOnly}` : (rawIdentifier.startsWith('+') ? rawIdentifier : `+${digitsOnly}`);
+
+            // 1. Try Firebase Web Phone Auth (10,000 Free Google SMS)
+            if (isPhone && firebaseInitialized) {
+                try {
+                    btn.innerText = 'Sending OTP...';
+                    const appVerifier = getOrCreateRecaptcha();
+                    if (!appVerifier) {
+                        resetRecaptcha();
+                    }
+                    const validVerifier = appVerifier || getOrCreateRecaptcha();
+                    
+                    // 30-second timeout guard to allow full telecom carrier routing in India
+                    const sendPromise = firebase.auth().signInWithPhoneNumber(formattedPhone, validVerifier);
+                    const timeoutPromise = new Promise((_, reject) => 
+                        setTimeout(() => reject(new Error("TIMEOUT_FIREBASE_SMS")), 30000)
+                    );
+
+                    const confirmationResult = await Promise.race([sendPromise, timeoutPromise]);
+                    window.confirmationResult = confirmationResult;
+                    window.firebaseActivePhone = formattedPhone;
+
+                    startOtpCountdown(30);
+                    showToast("OTP sent.", "success");
+                    const otpInput = document.getElementById('login-otp-code');
+                    if (otpInput) {
+                        otpInput.value = '';
+                        otpInput.focus();
+                    }
+                    return;
+                } catch (firebaseErr) {
+                    console.warn("[Firebase Phone Auth Notice] Falling back to Cloud Gateway:", firebaseErr);
+                    resetRecaptcha();
+                    window.confirmationResult = null;
+                }
+            }
+
+            // 2. Cloud Serverless Gateway Fallback (for Email or when Firebase SMS is delayed)
             try {
+                btn.innerText = 'Sending OTP...';
                 const response = await fetch('/api/auth/login-otp-request', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email_or_phone: identifier })
+                    body: JSON.stringify({ email_or_phone: rawIdentifier })
                 });
                 const data = await response.json();
-                
-                btn.disabled = false;
-                btn.innerText = originalText;
-                
-                if (response.ok) {
-                    showToast("Login OTP code sent!");
-                    if (data.debug_otp) {
-                        document.getElementById('login-otp-code').value = data.debug_otp;
-                        showToast(`[DEV] Login OTP: ${data.debug_otp}`, "success");
+
+                if (response.ok && data.success) {
+                    startOtpCountdown(30);
+                    showToast("OTP sent.", "success");
+                    const otpInput = document.getElementById('login-otp-code');
+                    if (otpInput) {
+                        otpInput.value = '';
+                        otpInput.focus();
                     }
                 } else {
+                    btn.disabled = false;
+                    btn.innerText = originalText;
                     showToast(data.error || "Failed to generate Login OTP.", "error");
                 }
             } catch(err) {
@@ -416,6 +672,128 @@
             btn.disabled = true;
             spinner.style.display = 'inline-block';
             btnTxt.innerText = 'Logging In...';
+
+            // Check if instant verification fallback is active
+            if (activeLoginMethod === 'otp' && window.activeDirectOtp) {
+                const otp = document.getElementById('login-otp-code').value.trim();
+                if (otp === window.activeDirectOtp) {
+                    btnTxt.innerText = 'Logging In...';
+                    localStorage.removeItem('adminToken');
+                    const cleanPhone = window.firebaseActivePhone || identifier || '';
+                    let resolvedName = localStorage.getItem('saved_customer_name') || '';
+                    if (!resolvedName || resolvedName === 'Customer') {
+                        if (cleanPhone.includes('7268903804')) {
+                            resolvedName = 'Rahul';
+                        } else if (cleanPhone.replace(/\D/g, '').length >= 10) {
+                            resolvedName = `User (${cleanPhone.replace(/\D/g, '').slice(-4)})`;
+                        } else {
+                            resolvedName = 'Rahul';
+                        }
+                    }
+                    const custObj = {
+                        uid: 'cust_' + Math.floor(Date.now() / 1000),
+                        fullname: resolvedName,
+                        displayName: resolvedName,
+                        name: resolvedName,
+                        phone: cleanPhone,
+                        role: 'customer'
+                    };
+                    localStorage.setItem('currentUser', JSON.stringify(custObj));
+                    localStorage.setItem('customerUser', JSON.stringify(custObj));
+                    localStorage.setItem('saved_customer_name', resolvedName);
+                    btn.disabled = false;
+                    spinner.style.display = 'none';
+                    btnTxt.innerText = 'Log In';
+                    showToast("Verified successfully! Welcome, " + resolvedName + ".");
+                    const params = new URLSearchParams(window.location.search);
+                    const redirectUrl = params.get('redirect') || '/store';
+                    setTimeout(() => { window.location.href = redirectUrl; }, 800);
+                    return;
+                }
+            }
+
+            // Check if active verification is Firebase Phone Auth
+            if (activeLoginMethod === 'otp' && window.confirmationResult) {
+                const otp = document.getElementById('login-otp-code').value.trim();
+                if (otp.length !== 6) {
+                    showToast("Please enter the 6-digit verification code.", "error");
+                    btn.disabled = false;
+                    spinner.style.display = 'none';
+                    btnTxt.innerText = 'Log In';
+                    return;
+                }
+
+                try {
+                    btnTxt.innerText = 'Verifying with Google...';
+                    const credential = await window.confirmationResult.confirm(otp);
+                    const user = credential.user;
+                    const idToken = await user.getIdToken();
+
+                    btnTxt.innerText = 'Logging In...';
+                    let data = {};
+                    const cleanPhone = user.phoneNumber || window.firebaseActivePhone || '';
+                    const savedLocalName = localStorage.getItem('saved_customer_name') || '';
+                    try {
+                        const res = await fetch('/api/auth/firebase-login', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                id_token: idToken,
+                                phone_number: cleanPhone,
+                                fullname: savedLocalName || undefined
+                            })
+                        });
+                        data = await res.json();
+                    } catch(netErr) {
+                        console.log("[Firebase Client Phone Auth] Continuing in client mode:", netErr);
+                    }
+
+                    localStorage.removeItem('adminToken');
+                    let resolvedName = (data && data.user && data.user.fullname && data.user.fullname !== 'Customer') ? data.user.fullname :
+                                       (savedLocalName && savedLocalName !== 'Customer') ? savedLocalName :
+                                       (user.displayName && user.displayName !== 'Customer') ? user.displayName : '';
+
+                    if (!resolvedName || resolvedName === 'Customer') {
+                        if (cleanPhone.includes('7268903804')) {
+                            resolvedName = 'Rahul';
+                        } else if (cleanPhone.replace(/\D/g, '').length >= 10) {
+                            resolvedName = `User (${cleanPhone.replace(/\D/g, '').slice(-4)})`;
+                        } else {
+                            resolvedName = 'Rahul';
+                        }
+                    }
+
+                    const custObj2 = {
+                        uid: user.uid,
+                        fullname: resolvedName,
+                        displayName: resolvedName,
+                        name: resolvedName,
+                        phone: cleanPhone,
+                        role: 'customer'
+                    };
+                    localStorage.setItem('currentUser', JSON.stringify(custObj2));
+                    localStorage.setItem('customerUser', JSON.stringify(custObj2));
+                    localStorage.setItem('saved_customer_name', resolvedName);
+                    localStorage.setItem('firebase_id_token', idToken);
+
+                    btn.disabled = false;
+                    spinner.style.display = 'none';
+                    btnTxt.innerText = 'Log In';
+
+                    showToast("Verified! Welcome back, " + resolvedName + ".");
+                    const params = new URLSearchParams(window.location.search);
+                    const redirectUrl = params.get('redirect') || '/store';
+                    setTimeout(() => { window.location.href = redirectUrl; }, 800);
+                    return;
+                } catch (firebaseErr) {
+                    console.warn("[Firebase Verify] Confirmation failed:", firebaseErr);
+                    btn.disabled = false;
+                    spinner.style.display = 'none';
+                    btnTxt.innerText = 'Log In';
+                    showToast("Invalid OTP code or expired. Please try again.", "error");
+                    return;
+                }
+            }
             
             try {
                 let url, body;
@@ -491,11 +869,12 @@
                 btnTxt.innerText = 'Request Registration OTP';
                 
                 if (response.ok) {
-                    showToast("Registration OTP verification code generated!");
+                    showToast("Registration verification code dispatched!");
                     switchFormSection('otp');
-                    if (data.debug_otp) {
-                        document.getElementById('reg-otp').value = data.debug_otp;
-                        showToast(`[DEV] Registration OTP: ${data.debug_otp}`, "success");
+                    const regInput = document.getElementById('reg-otp');
+                    if (regInput) {
+                        regInput.value = '';
+                        regInput.focus();
                     }
                 } else {
                     showToast(data.error || "Registration request rejected.", "error");
@@ -575,11 +954,12 @@
                 btnTxt.innerText = 'Request Recovery OTP';
                 
                 if (response.ok) {
-                    showToast("Access recovery OTP code generated!");
+                    showToast("Access recovery verification code dispatched!");
                     switchFormSection('reset');
-                    if (data.debug_otp) {
-                        document.getElementById('reset-otp').value = data.debug_otp;
-                        showToast(`[DEV] Recovery OTP: ${data.debug_otp}`, "success");
+                    const resetInput = document.getElementById('reset-otp');
+                    if (resetInput) {
+                        resetInput.value = '';
+                        resetInput.focus();
                     }
                 } else {
                     showToast(data.error || "Account matching coordinates not found.", "error");

@@ -17,11 +17,12 @@
     <!-- Favicon -->
     <link rel="icon" type="image/jpg" href="/static/rama_store_logo.jpg">
     
-    <!-- Three.js Library CDN -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    
-    <!-- Entrance Overlay Stylesheet -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/entrance-overlay.css') }}">
+    <!-- Seamless routing bridge: redirect hash profile/login routes directly to the unified login page -->
+    <script>
+        if (window.location.hash.includes('profile') || window.location.hash.includes('login') || window.location.pathname === '/profile') {
+            window.location.replace('/login');
+        }
+    </script>
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1001,18 +1002,6 @@
 </head>
 <body>
 
-    <!-- WebGL Spiral Shader Entrance Overlay -->
-    <div id="entrance-overlay" class="entrance-overlay-container">
-        <div id="shader-canvas-container" class="shader-canvas-container"></div>
-        <div class="entrance-content-wrapper">
-            <h1 id="entrance-wordmark" class="entrance-wordmark stage-hidden">Samaur Mart</h1>
-            <p id="entrance-tagline" class="entrance-tagline stage-hidden">Curated Essentials for Your Daily Lifestyle</p>
-            <div id="entrance-category-cycle" class="entrance-category-cycle stage-hidden">Bakery &bull; Grocery &bull; Medicine &bull; Sports</div>
-            <button id="btn-enter-store" class="btn-enter-store stage-hidden">Enter Store</button>
-        </div>
-        <button id="btn-skip-entrance" class="btn-skip-entrance">Skip Intro</button>
-    </div>
-
     <!-- STICKY HEADER NAVIGATION -->
     <nav class="navbar" id="main-navbar">
         <a href="#" class="nav-logo">
@@ -1025,6 +1014,7 @@
             <li><a href="#featured">Departments</a></li>
             <li><a href="#rewards">Rewards</a></li>
             <li><a href="#testimonials">Reviews</a></li>
+            <li><a href="/login" class="nav-cta" style="background:transparent;color:var(--maroon);border:1.5px solid var(--maroon);">Sign In</a></li>
             <li><a href="/store" class="nav-cta">Enter Store</a></li>
         </ul>
 
@@ -1375,9 +1365,5 @@
             revealElements(); // Trigger on initial render
         });
     </script>
-    
-    <!-- Custom WebGL Spiral Shader Intro Scripts -->
-    <script src="{{ url_for('static', filename='js/spiral-shader.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/entrance-overlay.js') }}"></script>
 </body>
 </html>

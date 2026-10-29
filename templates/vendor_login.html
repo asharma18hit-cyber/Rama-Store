@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Samaur Mart Marketplace - Vendor Portal Login</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=IBM+Plex+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css?v=20261029_v6_multivendor">
+
+    <style>
+        :root {
+            --v-bg: #030712;
+            --v-card: rgba(15, 23, 42, 0.88);
+            --v-border: rgba(184, 137, 43, 0.3);
+            --gold-accent: #b8892b;
+            --gold-hover: #e5ab37;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--v-bg);
+            background-image:
+                radial-gradient(circle at 15% 20%, rgba(184, 137, 43, 0.08) 0%, transparent 45%),
+                radial-gradient(circle at 85% 80%, rgba(59, 130, 246, 0.06) 0%, transparent 45%);
+            font-family: 'Outfit', -apple-system, sans-serif;
+            color: #f8fafc;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            box-sizing: border-box;
+        }
+
+        .vendor-auth-card {
+            width: 100%;
+            max-width: 460px;
+            background: var(--v-card);
+            border: 1px solid var(--v-border);
+            border-radius: 16px;
+            padding: 2.5rem 2.25rem;
+            backdrop-filter: blur(16px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 40px rgba(184, 137, 43, 0.12);
+        }
+
+        .vendor-logo-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .vendor-brand-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 14px;
+            background: rgba(184, 137, 43, 0.15);
+            border: 1px solid rgba(184, 137, 43, 0.35);
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            color: #fbbf24;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+        }
+
+        .vendor-title {
+            font-size: 1.75rem;
+            font-weight: 800;
+            margin: 0 0 0.5rem 0;
+            color: #f8fafc;
+            letter-spacing: -0.02em;
+        }
+
+        .vendor-title span {
+            color: var(--gold-accent);
+        }
+
+        .vendor-sub {
+            color: #94a3b8;
+            font-size: 0.925rem;
+            margin: 0;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+            text-align: left;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #cbd5e1;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-input {
+            width: 100%;
+            box-sizing: border-box;
+            background: #090f1d;
+            border: 1px solid #1e293b;
+            border-radius: 8px;
+            padding: 0.85rem 1rem;
+            color: #f8fafc;
+            font-size: 0.95rem;
+            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--gold-accent);
+            box-shadow: 0 0 0 3px rgba(184, 137, 43, 0.2);
+        }
+
+        .btn-vendor-submit {
+            width: 100%;
+            background: linear-gradient(135deg, #b8892b, #936b1d);
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            padding: 0.95rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 14px rgba(184, 137, 43, 0.35);
+            margin-top: 0.75rem;
+        }
+
+        .btn-vendor-submit:hover {
+            background: linear-gradient(135deg, #d49e32, #b8892b);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(184, 137, 43, 0.45);
+        }
+
+        .btn-vendor-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .vendor-alert {
+            padding: 0.85rem 1rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            margin-bottom: 1.25rem;
+            display: none;
+            line-height: 1.4;
+        }
+
+        .vendor-alert.error {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+            display: block;
+        }
+
+        .vendor-alert.info {
+            background: rgba(59, 130, 246, 0.15);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: #93c5fd;
+            display: block;
+        }
+
+        .vendor-footer-links {
+            margin-top: 1.75rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            text-align: center;
+            font-size: 0.875rem;
+            color: #94a3b8;
+        }
+
+        .vendor-footer-links a {
+            color: #fbbf24;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .vendor-footer-links a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="vendor-auth-card">
+        <div class="vendor-logo-header">
+            <div class="vendor-brand-badge">🏪 Seller Hub • Marketplace</div>
+            <h1 class="vendor-title">Samaur <span>Mart</span></h1>
+            <p class="vendor-sub">Authorized Vendor & Merchant Operations Console</p>
+        </div>
+
+        <div id="vendor-alert-box" class="vendor-alert"></div>
+
+        <form id="vendor-login-form" onsubmit="handleVendorLogin(event)">
+            <div class="form-group">
+                <label class="form-label" for="vendor-id-input">Business Email or 10-Digit Mobile</label>
+                <input
+                    type="text"
+                    id="vendor-id-input"
+                    class="form-input"
+                    placeholder="e.g. vendor@shop.com or 9876543210"
+                    required
+                    autocomplete="username"
+                >
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="vendor-pass-input">Password</label>
+                <input
+                    type="password"
+                    id="vendor-pass-input"
+                    class="form-input"
+                    placeholder="••••••••"
+                    required
+                    autocomplete="current-password"
+                >
+            </div>
+
+            <button type="submit" id="btn-vendor-login" class="btn-vendor-submit">
+                <span>Sign In to Vendor Console →</span>
+            </button>
+        </form>
+
+        <div class="vendor-footer-links">
+            <p style="margin: 0 0 0.5rem 0;">New seller on Samaur Mart? <a href="/vendor/register">Apply for Vendor Account</a></p>
+            <p style="margin: 0;"><a href="/store" style="color: #94a3b8; font-weight: normal;">← Return to Customer Storefront</a></p>
+        </div>
+    </div>
+
+    <script>
+        async function handleVendorLogin(e) {
+            e.preventDefault();
+            const alertBox = document.getElementById('vendor-alert-box');
+            const submitBtn = document.getElementById('btn-vendor-login');
+            const emailOrPhone = document.getElementById('vendor-id-input').value.trim();
+            const password = document.getElementById('vendor-pass-input').value;
+
+            alertBox.style.display = 'none';
+            alertBox.className = 'vendor-alert';
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span>Verifying credentials...</span>';
+
+            try {
+                const res = await fetch('/api/vendor/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email_or_phone: emailOrPhone, password: password })
+                });
+
+                const data = await res.json();
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<span>Sign In to Vendor Console →</span>';
+
+                if (res.ok && data.success) {
+                    localStorage.setItem('vendor_token', data.token);
+                    localStorage.setItem('vendor_user', JSON.stringify(data.vendor));
+                    window.location.href = '/vendor';
+                } else {
+                    alertBox.textContent = data.error || 'Authentication failed. Please verify credentials.';
+                    alertBox.className = (data.status === 'submitted' || data.status === 'under_review') ? 'vendor-alert info' : 'vendor-alert error';
+                    alertBox.style.display = 'block';
+                }
+            } catch (err) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<span>Sign In to Vendor Console →</span>';
+                alertBox.textContent = 'Connection error: ' + err.message;
+                alertBox.className = 'vendor-alert error';
+                alertBox.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>

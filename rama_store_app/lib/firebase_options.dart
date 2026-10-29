@@ -26,16 +26,17 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyA_placeholder_for_client_sdk_init',
-    appId: '1:611361603523:web:rama_store_app',
+    apiKey: 'AIzaSyAZ7D3XnUOphe8s2lXxxr9qmEdZYE5lQ2w',
+    appId: '1:611361603523:web:b484f519c30b5fe012c776',
     messagingSenderId: '611361603523',
     projectId: 'ma-store-949c7',
     authDomain: 'ma-store-949c7.firebaseapp.com',
     storageBucket: 'ma-store-949c7.firebasestorage.app',
+    measurementId: 'G-7ZT1J756XC',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyA_placeholder_for_client_sdk_init',
+    apiKey: 'AIzaSyAZ7D3XnUOphe8s2lXxxr9qmEdZYE5lQ2w',
     appId: '1:611361603523:android:com.ramastore.rama_store_app',
     messagingSenderId: '611361603523',
     projectId: 'ma-store-949c7',
@@ -43,7 +44,7 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyA_placeholder_for_client_sdk_init',
+    apiKey: 'AIzaSyAZ7D3XnUOphe8s2lXxxr9qmEdZYE5lQ2w',
     appId: '1:611361603523:ios:com.ramastore.ramaStoreApp',
     messagingSenderId: '611361603523',
     projectId: 'ma-store-949c7',

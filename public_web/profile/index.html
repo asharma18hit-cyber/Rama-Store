@@ -1,0 +1,978 @@
+<!-- templates/login.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Samaur Mart - Authenticate Entry</title>
+    
+    <!-- Meta Tags for SEO -->
+    <meta name="description" content="Samaur Mart - Access your personalized digital bookstore counter and catalog.">
+    <link rel="icon" type="image/jpg" href="/static/rama_store_logo.jpg">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Outfit:wght@400;500;600;700&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Dedicated Stylesheets -->
+    <link rel="stylesheet" href="/static/css/login.css">
+
+    <!-- Firebase App & Auth SDK (v9 compat mode for web client) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+</head>
+<body>
+
+    <!-- Toast Notifications Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <div class="login-page-container">
+        
+        <!-- LEFT COLUMN: BRAND DETAILS & DYNAMIC INTERACTIVE COLLAGE -->
+        <div class="brand-panel">
+            <!-- 1. Top Wordmark & Quill Icon -->
+            <a href="/" class="brand-header">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 21c-3.666 0-6-1.5-6-5V5c0-1.5 1.5-3 6-3s6 1.5 6 3v11c0 3.5-2.333 5-6 5z" stroke="currentColor"/>
+                    <path d="M6 5h12M9 9h6M9 13h6" stroke="currentColor" stroke-linecap="round"/>
+                </svg>
+                <span>Samaur <span>Mart</span></span>
+            </a>
+            
+            <!-- 2. Asymmetric Category Grid Collage -->
+            <div class="collage-container" id="interactive-collage">
+                <div class="collage-grid">
+                    <!-- Tile 1: Staples Department -->
+                    <div class="collage-tile active tile-fiction" data-tile-index="0">
+                        <div class="focus-bracket bracket-tl"></div>
+                        <div class="focus-bracket bracket-tr"></div>
+                        <div class="focus-bracket bracket-bl"></div>
+                        <div class="focus-bracket bracket-br"></div>
+                        <img src="https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=600&q=80" alt="Bakery" loading="eager">
+                    </div>
+                    <!-- Tile 2: Dining Department -->
+                    <div class="collage-tile tile-mystery" data-tile-index="1">
+                        <div class="focus-bracket bracket-tl"></div>
+                        <div class="focus-bracket bracket-tr"></div>
+                        <div class="focus-bracket bracket-bl"></div>
+                        <div class="focus-bracket bracket-br"></div>
+                        <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&q=80" alt="Foods & Restaurants" loading="lazy">
+                    </div>
+                    <!-- Tile 3: Education & Office Department -->
+                    <div class="collage-tile tile-nonfiction" data-tile-index="2">
+                        <div class="focus-bracket bracket-tl"></div>
+                        <div class="focus-bracket bracket-tr"></div>
+                        <div class="focus-bracket bracket-bl"></div>
+                        <div class="focus-bracket bracket-br"></div>
+                        <img src="https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=600&q=80" alt="Books" loading="lazy">
+                    </div>
+                    <!-- Tile 4: Lifestyle Department -->
+                    <div class="collage-tile tile-poetry" data-tile-index="3">
+                        <div class="focus-bracket bracket-tl"></div>
+                        <div class="focus-bracket bracket-tr"></div>
+                        <div class="focus-bracket bracket-bl"></div>
+                        <div class="focus-bracket bracket-br"></div>
+                        <img src="https://images.unsplash.com/photo-1549465220-1a8b9238cd48?auto=format&fit=crop&w=600&q=80" alt="Gift Store" loading="lazy">
+                    </div>
+                </div>
+                
+                <!-- 3. Dashed Caption Box -->
+                <div class="caption-box" aria-live="polite">
+                    <span class="caption-title" id="caption-title">Bakery</span>
+                    <p class="caption-desc" id="caption-desc">Bakery — Fresh bread, pastries, and treats baked daily.</p>
+                </div>
+                
+                <!-- 4. Editorial Line -->
+                <p class="editorial-line">“Everything your day needs, in one store.”</p>
+            </div>
+            
+            <!-- 5. Manual Pagination Indicators -->
+            <ul class="carousel-indicators" role="tablist">
+                <li class="indicator-pill active" data-index="0" role="tab" aria-selected="true" aria-label="Category 1"></li>
+                <li class="indicator-pill" data-index="1" role="tab" aria-selected="false" aria-label="Category 2"></li>
+                <li class="indicator-pill" data-index="2" role="tab" aria-selected="false" aria-label="Category 3"></li>
+                <li class="indicator-pill" data-index="3" role="tab" aria-selected="false" aria-label="Category 4"></li>
+                <li class="indicator-pill" data-index="4" role="tab" aria-selected="false" aria-label="Category 5"></li>
+                <li class="indicator-pill" data-index="5" role="tab" aria-selected="false" aria-label="Category 6"></li>
+                <li class="indicator-pill" data-index="6" role="tab" aria-selected="false" aria-label="Category 7"></li>
+                <li class="indicator-pill" data-index="7" role="tab" aria-selected="false" aria-label="Category 8"></li>
+                <li class="indicator-pill" data-index="8" role="tab" aria-selected="false" aria-label="Category 9"></li>
+            </ul>
+        </div>
+        
+        <!-- RIGHT COLUMN: CENTERED DYNAMIC AUTH CARD -->
+        <div class="form-panel">
+            
+            <!-- A. SIGN IN VIEW -->
+            <div class="form-container active" id="login-form-container">
+                <div class="form-header">
+                    <h2>Welcome Back</h2>
+                    <p>Enter your credentials to access your bookshelf counter</p>
+                </div>
+                
+                <form class="auth-form" onsubmit="submitLoginForm(event)">
+                    <!-- Sub-tabs: Password vs OTP -->
+                    <div class="login-method-tabs">
+                        <button type="button" class="tab-btn-sub active" id="btn-login-pwd" onclick="switchLoginMethod('password')">Password</button>
+                        <button type="button" class="tab-btn-sub" id="btn-login-otp" onclick="switchLoginMethod('otp')">Passwordless OTP</button>
+                    </div>
+
+                    <div class="input-wrapper">
+                        <input type="text" id="login-identifier" class="input-field" placeholder=" " required>
+                        <label class="floating-label" for="login-identifier">Email or Registered Number</label>
+                    </div>
+                    
+                    <!-- Password Input Wrapper -->
+                    <div class="input-wrapper" id="login-pwd-wrapper">
+                        <input type="password" id="login-password" class="input-field" placeholder=" " required>
+                        <label class="floating-label" for="login-password">Access Password</label>
+                        <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('login-password', this)">👁️</button>
+                    </div>
+
+                    <!-- OTP Code Input Wrapper (hidden initially) -->
+                    <div class="input-wrapper" id="login-otp-wrapper" style="display: none;">
+                        <div style="display: flex; gap: 0.5rem;">
+                            <div style="flex-grow: 1; position: relative;">
+                                <input type="text" id="login-otp-code" class="input-field" placeholder=" " pattern="\d{6}" maxlength="6" style="text-align: center; letter-spacing: 0.2em; font-family: monospace; font-size: 1.1rem; font-weight: 700;">
+                                <label class="floating-label" for="login-otp-code">6-Digit Code</label>
+                            </div>
+                            <button type="button" class="request-otp-btn" id="btn-send-login-otp" onclick="requestLoginOTP()">Request OTP</button>
+                        </div>
+                        <div id="recaptcha-container" style="margin-top: 6px;"></div>
+                    </div>
+                    
+                    <div class="remember-forgot-row" id="login-remember-row">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="login-remember">
+                            <span>Remember device</span>
+                        </label>
+                        <a href="javascript:void(0)" class="forgot-link" onclick="switchFormSection('forgot')">Forgot Password?</a>
+                    </div>
+                    
+                    <button type="submit" class="submit-btn" id="login-submit-btn">
+                        <span class="btn-spinner"></span>
+                        <span class="btn-text">Log In</span>
+                    </button>
+
+                    <!-- Google Cloud One-Click Sign-In via Firebase -->
+                    <div style="display: flex; align-items: center; margin: 1.15rem 0 0.85rem; color: #94a3b8; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em;">
+                        <span style="flex: 1; border-bottom: 1px solid rgba(255,255,255,0.12);"></span>
+                        <span style="padding: 0 10px;">or continue with</span>
+                        <span style="flex: 1; border-bottom: 1px solid rgba(255,255,255,0.12);"></span>
+                    </div>
+
+                    <button type="button" class="google-auth-btn" id="btn-google-login" onclick="signInWithGoogle()" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; padding: 0.7rem 1rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.18); background: rgba(255,255,255,0.06); color: #fff; font-size: 0.95rem; font-weight: 500; cursor: pointer; transition: all 0.2s ease;">
+                        <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+                        <span>Sign In with Google</span>
+                    </button>
+                </form>
+                
+                <div class="form-footer">
+                    New here? <a href="javascript:void(0)" onclick="toggleFormView('register')">Create an account</a>
+                </div>
+            </div>
+            
+            <!-- B. SIGN UP VIEW -->
+            <div class="form-container" id="register-form-container">
+                <div class="form-header">
+                    <h2>New Profile</h2>
+                    <p>Create a digital account and start earning 10% rewards</p>
+                </div>
+                
+                <form class="auth-form" onsubmit="submitRegisterForm(event)">
+                    <div class="input-wrapper">
+                        <input type="text" id="reg-username" class="input-field" placeholder=" " required>
+                        <label class="floating-label" for="reg-username">Full Username</label>
+                    </div>
+                    
+                    <div class="input-wrapper">
+                        <input type="text" id="reg-email" class="input-field" placeholder=" " required>
+                        <label class="floating-label" for="reg-email">Email or Phone Number</label>
+                    </div>
+                    
+                    <div class="input-wrapper">
+                        <input type="password" id="reg-password" class="input-field" placeholder=" " required>
+                        <label class="floating-label" for="reg-password">Set Password (min. 6 chars)</label>
+                        <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('reg-password', this)">👁️</button>
+                    </div>
+                    
+                    <button type="submit" class="submit-btn" id="reg-submit-btn">
+                        <span class="btn-spinner"></span>
+                        <span class="btn-text">Request Registration OTP</span>
+                    </button>
+                </form>
+                
+                <div class="form-footer">
+                    Already registered? <a href="javascript:void(0)" onclick="toggleFormView('login')">Log In</a>
+                </div>
+            </div>
+
+            <!-- C. REGISTRATION OTP VERIFY VIEW -->
+            <div class="form-container" id="register-otp-container">
+                <div class="form-header">
+                    <h2>Enter Security Code</h2>
+                    <p>Enter the 6-digit registration code sent to your coordinates</p>
+                </div>
+                
+                <form class="auth-form" onsubmit="submitRegisterOTPVerify(event)">
+                    <div class="input-wrapper">
+                        <input type="text" id="reg-otp" class="input-field" placeholder=" " required pattern="\d{6}" maxlength="6" style="text-align: center; font-size: 1.3rem; letter-spacing: 0.3em; font-family: monospace;">
+                        <label class="floating-label" for="reg-otp" style="text-align: center; width: 100%;">6-Digit Verification Code</label>
+                    </div>
+                    
+                    <button type="submit" class="submit-btn" id="reg-otp-submit-btn">
+                        <span class="btn-spinner"></span>
+                        <span class="btn-text">Verify & Register</span>
+                    </button>
+                </form>
+                
+                <div class="form-footer">
+                    Wrong info? <a href="javascript:void(0)" onclick="switchFormSection('register')">Back to Sign Up</a>
+                </div>
+            </div>
+
+            <!-- D. FORGOT PASSWORD VIEW -->
+            <div class="form-container" id="forgot-form-container">
+                <div class="form-header">
+                    <h2>Recover Account</h2>
+                    <p>Receive an OTP code to restore database credentials access</p>
+                </div>
+                
+                <form class="auth-form" onsubmit="submitForgotPasswordForm(event)">
+                    <div class="input-wrapper">
+                        <input type="text" id="forgot-username" class="input-field" placeholder=" " required>
+                        <label class="floating-label" for="forgot-username">Username or Email Address</label>
+                    </div>
+                    
+                    <button type="submit" class="submit-btn" id="forgot-submit-btn">
+                        <span class="btn-spinner"></span>
+                        <span class="btn-text">Request Recovery OTP</span>
+                    </button>
+                </form>
+                
+                <div class="form-footer">
+                    Remember password? <a href="javascript:void(0)" onclick="switchFormSection('login')">Back to Sign In</a>
+                </div>
+            </div>
+
+            <!-- E. PASSWORD RESET CONFIRM VIEW -->
+            <div class="form-container" id="reset-form-container">
+                <div class="form-header">
+                    <h2>Reset Password</h2>
+                    <p>Enter the security code and choose your new access password</p>
+                </div>
+                
+                <form class="auth-form" onsubmit="submitResetPasswordForm(event)">
+                    <div class="input-wrapper">
+                        <input type="text" id="reset-otp" class="input-field" placeholder=" " required pattern="\d{6}" maxlength="6" style="text-align: center; font-size: 1.3rem; letter-spacing: 0.3em; font-family: monospace;">
+                        <label class="floating-label" for="reset-otp" style="text-align: center; width: 100%;">6-Digit OTP Code</label>
+                    </div>
+                    
+                    <div class="input-wrapper">
+                        <input type="password" id="reset-new-password" class="input-field" placeholder=" " required>
+                        <label class="floating-label" for="reset-new-password">New Password (min. 6 chars)</label>
+                        <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('reset-new-password', this)">👁️</button>
+                    </div>
+                    
+                    <button type="submit" class="submit-btn" id="reset-submit-btn">
+                        <span class="btn-spinner"></span>
+                        <span class="btn-text">Confirm New Password</span>
+                    </button>
+                </form>
+                
+                <div class="form-footer">
+                    Failed to verify? <a href="javascript:void(0)" onclick="switchFormSection('forgot')">Resend OTP</a>
+                </div>
+            </div>
+            
+        </div>
+        
+    </div>
+
+    <!-- JavaScript Slider Interface Hooks -->
+    <script src="/static/js/login.js"></script>
+
+    <!-- Async API Submissions Handling Script -->
+    <script>
+        // Password visibility toggler helper
+        function togglePasswordVisibility(fieldId, btnEl) {
+            const field = document.getElementById(fieldId);
+            if (field.type === 'password') {
+                field.type = 'text';
+                btnEl.innerText = '🙈';
+            } else {
+                field.type = 'password';
+                btnEl.innerText = '👁️';
+            }
+        }
+
+        // Switch between Password and OTP Login Methods
+        let activeLoginMethod = 'password';
+        function switchLoginMethod(method) {
+            activeLoginMethod = method;
+            const btnPwd = document.getElementById('btn-login-pwd');
+            const btnOtp = document.getElementById('btn-login-otp');
+            const pwdWrapper = document.getElementById('login-pwd-wrapper');
+            const otpWrapper = document.getElementById('login-otp-wrapper');
+            const pwdInput = document.getElementById('login-password');
+            const otpInput = document.getElementById('login-otp-code');
+            const rememberRow = document.getElementById('login-remember-row');
+            
+            if (method === 'password') {
+                btnPwd.classList.add('active');
+                btnOtp.classList.remove('active');
+                pwdWrapper.style.display = 'block';
+                otpWrapper.style.display = 'none';
+                pwdInput.setAttribute('required', 'true');
+                otpInput.removeAttribute('required');
+                if (rememberRow) rememberRow.style.display = 'flex';
+            } else {
+                btnPwd.classList.remove('active');
+                btnOtp.classList.add('active');
+                pwdWrapper.style.display = 'none';
+                otpWrapper.style.display = 'block';
+                pwdInput.removeAttribute('required');
+                otpInput.setAttribute('required', 'true');
+                if (rememberRow) rememberRow.style.display = 'none';
+            }
+        }
+
+        // ----------------------------------------------------
+        // FIREBASE AUTHENTICATION CONFIGURATION & INITIALIZATION
+        // ----------------------------------------------------
+        const firebaseConfig = {
+            apiKey: "AIzaSyAZ7D3XnUOphe8s2lXxxr9qmEdZYE5lQ2w",
+            authDomain: "ma-store-949c7.firebaseapp.com",
+            projectId: "ma-store-949c7",
+            storageBucket: "ma-store-949c7.firebasestorage.app",
+            messagingSenderId: "611361603523",
+            appId: "1:611361603523:web:b484f519c30b5fe012c776",
+            measurementId: "G-7ZT1J756XC"
+        };
+
+        let firebaseInitialized = false;
+        try {
+            if (typeof firebase !== 'undefined') {
+                firebase.initializeApp(firebaseConfig);
+                firebaseInitialized = true;
+                console.log("[Firebase] Successfully initialized for Rama Store Web.");
+                setTimeout(() => { prewarmRecaptcha(); }, 500);
+            }
+        } catch (e) {
+            console.warn("[Firebase] Init error (running with backend dispatch):", e);
+        }
+
+        let otpCountdownTimer = null;
+        function startOtpCountdown(seconds = 60) {
+            const btn = document.getElementById('btn-send-login-otp');
+            if (!btn) return;
+            if (otpCountdownTimer) clearInterval(otpCountdownTimer);
+            
+            btn.disabled = true;
+            let remaining = seconds;
+            btn.innerText = `Resend (${remaining}s)`;
+            
+            otpCountdownTimer = setInterval(() => {
+                remaining--;
+                if (remaining <= 0) {
+                    clearInterval(otpCountdownTimer);
+                    otpCountdownTimer = null;
+                    btn.disabled = false;
+                    btn.innerText = 'Request OTP';
+                } else {
+                    btn.innerText = `Resend (${remaining}s)`;
+                }
+            }, 1000);
+        }
+
+        function prewarmRecaptcha() {
+            if (!firebaseInitialized) return;
+            try {
+                const verifier = getOrCreateRecaptcha();
+                if (verifier && !window.recaptchaRendered) {
+                    verifier.render().then(widgetId => {
+                        window.recaptchaRendered = true;
+                        window.recaptchaWidgetId = widgetId;
+                        console.log("[Firebase reCAPTCHA] Pre-warmed and ready.");
+                    }).catch(err => {
+                        console.warn("[Firebase reCAPTCHA] Pre-warm render notice:", err);
+                    });
+                }
+            } catch(e) {
+                console.warn("[Firebase reCAPTCHA] Pre-warm skipped:", e);
+            }
+        }
+
+        function resetRecaptcha() {
+            try {
+                if (window.recaptchaVerifier) {
+                    window.recaptchaVerifier.clear();
+                }
+            } catch (_) {}
+            window.recaptchaVerifier = null;
+            window.recaptchaRendered = false;
+            const oldEl = document.getElementById('recaptcha-container');
+            if (oldEl) {
+                const parent = oldEl.parentNode || document.body;
+                oldEl.remove();
+                const freshEl = document.createElement('div');
+                freshEl.id = 'recaptcha-container';
+                parent.appendChild(freshEl);
+            }
+        }
+
+        function getOrCreateRecaptcha() {
+            if (!firebaseInitialized) return null;
+            if (window.recaptchaVerifier) {
+                return window.recaptchaVerifier;
+            }
+            let container = document.getElementById('recaptcha-container');
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'recaptcha-container';
+                document.body.appendChild(container);
+            }
+            try {
+                window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+                    'size': 'invisible',
+                    'callback': () => {},
+                    'expired-callback': () => {
+                        resetRecaptcha();
+                    }
+                });
+                return window.recaptchaVerifier;
+            } catch (e) {
+                console.warn("[Firebase reCAPTCHA] Refreshing container:", e);
+                resetRecaptcha();
+                try {
+                    window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+                        'size': 'invisible'
+                    });
+                    return window.recaptchaVerifier;
+                } catch (err2) {
+                    console.error("[Firebase reCAPTCHA] Unable to mount verifier:", err2);
+                    return null;
+                }
+            }
+        }
+
+        // Google Cloud One-Click Sign-In via Firebase
+        async function signInWithGoogle() {
+            if (!firebaseInitialized) {
+                showToast("Firebase is initializing. Please wait...", "warning");
+                return;
+            }
+            const btn = document.getElementById('btn-google-login');
+            if (btn) btn.disabled = true;
+
+            try {
+                showToast("Opening Google Account authorization...", "info");
+                const provider = new firebase.auth.GoogleAuthProvider();
+                provider.setCustomParameters({ prompt: 'select_account' });
+                const result = await firebase.auth().signInWithPopup(provider);
+                const user = result.user;
+                const idToken = await user.getIdToken();
+
+                showToast("Google account authenticated! Setting up session...", "success");
+                let data = {};
+                try {
+                    const res = await fetch('/api/auth/firebase-login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            id_token: idToken,
+                            email: user.email,
+                            fullname: user.displayName,
+                            phone_number: user.phoneNumber,
+                            uid: user.uid
+                        })
+                    });
+                    data = await res.json();
+                } catch(netErr) {
+                    console.log("[Firebase Client Auth] Continuing in client mode:", netErr);
+                }
+
+                // Store client Firebase auth credentials
+                localStorage.removeItem('adminToken');
+                const custObj = {
+                    uid: user.uid,
+                    fullname: user.displayName || 'Customer',
+                    email: user.email,
+                    phone: user.phoneNumber,
+                    role: 'customer'
+                };
+                localStorage.setItem('currentUser', JSON.stringify(custObj));
+                localStorage.setItem('customerUser', JSON.stringify(custObj));
+                localStorage.setItem('firebase_id_token', idToken);
+
+                if (btn) btn.disabled = false;
+                showToast("Welcome, " + (data.user?.fullname || user.displayName || "Customer") + "!", "success");
+                const params = new URLSearchParams(window.location.search);
+                const redirectUrl = params.get('redirect') || '/store';
+                setTimeout(() => { window.location.href = redirectUrl; }, 800);
+            } catch (err) {
+                if (btn) btn.disabled = false;
+                console.error("[Google Sign-In Error]", err);
+                if (err.code === 'auth/popup-closed-by-user') {
+                    showToast("Google sign-in was canceled.", "warning");
+                } else if (err.code === 'auth/unauthorized-domain') {
+                    showToast("Domain '" + window.location.hostname + "' not authorized in Firebase Console.", "error");
+                } else if (err.code === 'auth/operation-not-allowed') {
+                    showToast("Google provider not enabled yet in Firebase Console (Authentication > Sign-in method > Google).", "error");
+                } else {
+                    showToast("Google Sign-In notice: " + (err.message || String(err)), "error");
+                }
+            }
+        }
+
+        // Request Passwordless Login OTP (Firebase Phone Auth with Server Fallback)
+        async function requestLoginOTP() {
+            const rawIdentifier = document.getElementById('login-identifier').value.trim();
+            if (!rawIdentifier) {
+                showToast("Please enter your Phone Number or Email first.", "error");
+                return;
+            }
+
+            const btn = document.getElementById('btn-send-login-otp');
+            const originalText = btn.innerText;
+            btn.disabled = true;
+            btn.innerText = 'Connecting...';
+
+            const digitsOnly = rawIdentifier.replace(/\D/g, '');
+            const isPhone = !rawIdentifier.includes('@') && digitsOnly.length >= 10;
+            const formattedPhone = digitsOnly.length === 10 ? `+91${digitsOnly}` : (rawIdentifier.startsWith('+') ? rawIdentifier : `+${digitsOnly}`);
+
+            // 1. Try Firebase Web Phone Auth (10,000 Free Google SMS)
+            if (isPhone && firebaseInitialized) {
+                try {
+                    btn.innerText = 'Connecting...';
+                    const appVerifier = getOrCreateRecaptcha();
+                    if (!appVerifier) {
+                        resetRecaptcha();
+                    }
+                    const validVerifier = appVerifier || getOrCreateRecaptcha();
+                    
+                    // 30-second timeout guard to allow full telecom carrier routing in India
+                    const sendPromise = firebase.auth().signInWithPhoneNumber(formattedPhone, validVerifier);
+                    const timeoutPromise = new Promise((_, reject) => 
+                        setTimeout(() => reject(new Error("TIMEOUT_FIREBASE_SMS")), 30000)
+                    );
+
+                    const confirmationResult = await Promise.race([sendPromise, timeoutPromise]);
+                    window.confirmationResult = confirmationResult;
+                    window.firebaseActivePhone = formattedPhone;
+
+                    startOtpCountdown(60);
+                    showToast(`SMS verification code dispatched to ${formattedPhone}! Please check your phone.`, "success");
+                    const otpInput = document.getElementById('login-otp-code');
+                    if (otpInput) {
+                        otpInput.value = '';
+                        otpInput.focus();
+                    }
+                    return;
+                } catch (firebaseErr) {
+                    console.warn("[Firebase Phone Auth Notice] Falling back to Cloud Gateway:", firebaseErr);
+                    resetRecaptcha();
+                    window.confirmationResult = null;
+                }
+            }
+
+            // 2. Cloud Serverless Gateway Fallback (for Email or when Firebase SMS is delayed)
+            try {
+                btn.innerText = 'Dispatching OTP...';
+                const response = await fetch('/api/auth/login-otp-request', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email_or_phone: rawIdentifier })
+                });
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    startOtpCountdown(60);
+                    showToast(data.message || "OTP code dispatched successfully!");
+                    const otpInput = document.getElementById('login-otp-code');
+                    if (otpInput) {
+                        otpInput.value = '';
+                        otpInput.focus();
+                    }
+                } else {
+                    btn.disabled = false;
+                    btn.innerText = originalText;
+                    showToast(data.error || "Failed to generate Login OTP.", "error");
+                }
+            } catch(err) {
+                btn.disabled = false;
+                btn.innerText = originalText;
+                showToast("Connection failed: " + err.message, "error");
+            }
+        }
+
+        // Sub-form visibility switching engine
+        function switchFormSection(sectionName) {
+            const containers = document.querySelectorAll('.form-container');
+            containers.forEach(c => c.classList.remove('active'));
+
+            if (sectionName === 'login') {
+                document.getElementById('login-form-container').classList.add('active');
+            } else if (sectionName === 'register') {
+                document.getElementById('register-form-container').classList.add('active');
+            } else if (sectionName === 'otp') {
+                document.getElementById('register-otp-container').classList.add('active');
+            } else if (sectionName === 'forgot') {
+                document.getElementById('forgot-form-container').classList.add('active');
+            } else if (sectionName === 'reset') {
+                document.getElementById('reset-form-container').classList.add('active');
+            }
+        }
+
+        // Toast notifications logic
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.style.backgroundColor = type === 'success' ? '#10b981' : '#ef4444';
+            
+            const icon = type === 'success' ? '✅' : '❌';
+            toast.innerHTML = `<span>${icon}</span><span>${message}</span>`;
+            
+            container.appendChild(toast);
+            
+            // Trigger animation frame reflow
+            setTimeout(() => toast.classList.add('show'), 10);
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // ----------------------------------------------------
+        // ASYNC FORMS API INTEGRATIONS
+        // ----------------------------------------------------
+
+        // A. SUBMIT SIGN IN CREDENTIALS
+        async function submitLoginForm(e) {
+            e.preventDefault();
+            const identifier = document.getElementById('login-identifier').value.trim();
+            
+            const btn = document.getElementById('login-submit-btn');
+            const spinner = btn.querySelector('.btn-spinner');
+            const btnTxt = btn.querySelector('.btn-text');
+            
+            btn.disabled = true;
+            spinner.style.display = 'inline-block';
+            btnTxt.innerText = 'Logging In...';
+
+            // Check if instant verification fallback is active
+            if (activeLoginMethod === 'otp' && window.activeDirectOtp) {
+                const otp = document.getElementById('login-otp-code').value.trim();
+                if (otp === window.activeDirectOtp) {
+                    btnTxt.innerText = 'Logging In...';
+                    localStorage.removeItem('adminToken');
+                    const custObj = {
+                        uid: 'cust_' + Math.floor(Date.now() / 1000),
+                        fullname: 'Customer',
+                        phone: window.firebaseActivePhone || identifier,
+                        role: 'customer'
+                    };
+                    localStorage.setItem('currentUser', JSON.stringify(custObj));
+                    localStorage.setItem('customerUser', JSON.stringify(custObj));
+                    btn.disabled = false;
+                    spinner.style.display = 'none';
+                    btnTxt.innerText = 'Log In';
+                    showToast("Verified successfully! Welcome to Samaur Mart.");
+                    const params = new URLSearchParams(window.location.search);
+                    const redirectUrl = params.get('redirect') || '/store';
+                    setTimeout(() => { window.location.href = redirectUrl; }, 800);
+                    return;
+                }
+            }
+
+            // Check if active verification is Firebase Phone Auth
+            if (activeLoginMethod === 'otp' && window.confirmationResult) {
+                const otp = document.getElementById('login-otp-code').value.trim();
+                if (otp.length !== 6) {
+                    showToast("Please enter the 6-digit verification code.", "error");
+                    btn.disabled = false;
+                    spinner.style.display = 'none';
+                    btnTxt.innerText = 'Log In';
+                    return;
+                }
+
+                try {
+                    btnTxt.innerText = 'Verifying with Google...';
+                    const credential = await window.confirmationResult.confirm(otp);
+                    const user = credential.user;
+                    const idToken = await user.getIdToken();
+
+                    btnTxt.innerText = 'Logging In...';
+                    let data = {};
+                    try {
+                        const res = await fetch('/api/auth/firebase-login', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                id_token: idToken,
+                                phone_number: user.phoneNumber || window.firebaseActivePhone
+                            })
+                        });
+                        data = await res.json();
+                    } catch(netErr) {
+                        console.log("[Firebase Client Phone Auth] Continuing in client mode:", netErr);
+                    }
+
+                    localStorage.removeItem('adminToken');
+                    const custObj2 = {
+                        uid: user.uid,
+                        fullname: 'Customer',
+                        phone: user.phoneNumber || window.firebaseActivePhone,
+                        role: 'customer'
+                    };
+                    localStorage.setItem('currentUser', JSON.stringify(custObj2));
+                    localStorage.setItem('customerUser', JSON.stringify(custObj2));
+                    localStorage.setItem('firebase_id_token', idToken);
+
+                    btn.disabled = false;
+                    spinner.style.display = 'none';
+                    btnTxt.innerText = 'Log In';
+
+                    showToast("Firebase verified! Welcome to Samaur Mart.");
+                    const params = new URLSearchParams(window.location.search);
+                    const redirectUrl = params.get('redirect') || '/store';
+                    setTimeout(() => { window.location.href = redirectUrl; }, 1000);
+                    return;
+                } catch (firebaseErr) {
+                    console.warn("[Firebase Verify] Confirmation failed:", firebaseErr);
+                    btn.disabled = false;
+                    spinner.style.display = 'none';
+                    btnTxt.innerText = 'Log In';
+                    showToast("Invalid OTP code or expired. Please try again.", "error");
+                    return;
+                }
+            }
+            
+            try {
+                let url, body;
+                if (activeLoginMethod === 'password') {
+                    const password = document.getElementById('login-password').value;
+                    url = '/api/auth/login';
+                    body = { email_or_phone: identifier, password: password };
+                } else {
+                    const otp = document.getElementById('login-otp-code').value.trim();
+                    url = '/api/auth/login-otp-verify';
+                    body = { email_or_phone: identifier, otp: otp };
+                }
+
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                const data = await response.json();
+                
+                btn.disabled = false;
+                spinner.style.display = 'none';
+                btnTxt.innerText = 'Log In';
+                
+                if (response.ok) {
+                    showToast("Authentication successful! Redirecting...");
+                    const params = new URLSearchParams(window.location.search);
+                    const redirectUrl = params.get('redirect') || '/store';
+                    setTimeout(() => {
+                        window.location.href = redirectUrl;
+                    }, 1000);
+                } else {
+                    showToast(data.error || "Authentication failed. Please verify credentials.", "error");
+                }
+            } catch(err) {
+                btn.disabled = false;
+                spinner.style.display = 'none';
+                btnTxt.innerText = 'Log In';
+                showToast("Connection failed: " + err.message, "error");
+            }
+        }
+
+        // B. REQUEST REGISTRATION OTP (SIGN UP STEP 1)
+        async function submitRegisterForm(e) {
+            e.preventDefault();
+            const username = document.getElementById('reg-username').value.trim();
+            const email = document.getElementById('reg-email').value.trim();
+            const password = document.getElementById('reg-password').value;
+            
+            if (password.length < 6) {
+                showToast("Password must be at least 6 characters.", "error");
+                return;
+            }
+            
+            const btn = document.getElementById('reg-submit-btn');
+            const spinner = btn.querySelector('.btn-spinner');
+            const btnTxt = btn.querySelector('.btn-text');
+            
+            btn.disabled = true;
+            spinner.style.display = 'inline-block';
+            btnTxt.innerText = 'Requesting OTP...';
+            
+            try {
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: username, email: email, password: password })
+                });
+                const data = await response.json();
+                
+                btn.disabled = false;
+                spinner.style.display = 'none';
+                btnTxt.innerText = 'Request Registration OTP';
+                
+                if (response.ok) {
+                    showToast("Registration verification code dispatched!");
+                    switchFormSection('otp');
+                    const regInput = document.getElementById('reg-otp');
+                    if (regInput) {
+                        regInput.value = '';
+                        regInput.focus();
+                    }
+                } else {
+                    showToast(data.error || "Registration request rejected.", "error");
+                }
+            } catch(err) {
+                btn.disabled = false;
+                spinner.style.display = 'none';
+                btnTxt.innerText = 'Request Registration OTP';
+                showToast("Connection failed: " + err.message, "error");
+            }
+        }
+
+        // C. VERIFY REGISTRATION OTP (SIGN UP STEP 2)
+        async function submitRegisterOTPVerify(e) {
+            e.preventDefault();
+            const otp = document.getElementById('reg-otp').value.trim();
+            
+            const btn = document.getElementById('reg-otp-submit-btn');
+            const spinner = btn.querySelector('.btn-spinner');
+            const btnTxt = btn.querySelector('.btn-text');
+            
+            btn.disabled = true;
+            spinner.style.display = 'inline-block';
+            btnTxt.innerText = 'Verifying...';
+            
+            try {
+                const response = await fetch('/api/auth/verify_otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ otp: otp })
+                });
+                const data = await response.json();
+                
+                btn.disabled = false;
+                spinner.style.display = 'none';
+                btnTxt.innerText = 'Verify & Register';
+                
+                if (response.ok) {
+                    showToast("Account registered and logged in successfully!");
+                    setTimeout(() => {
+                        window.location.href = '/store';
+                    }, 1200);
+                } else {
+                    showToast(data.error || "Invalid registration OTP code.", "error");
+                }
+            } catch(err) {
+                btn.disabled = false;
+                spinner.style.display = 'none';
+                btnTxt.innerText = 'Verify & Register';
+                showToast("Connection failed: " + err.message, "error");
+            }
+        }
+
+        // D. REQUEST FORGOT PASSWORD RECOVERY OTP
+        async function submitForgotPasswordForm(e) {
+            e.preventDefault();
+            const identifier = document.getElementById('forgot-username').value.trim();
+            
+            const btn = document.getElementById('forgot-submit-btn');
+            const spinner = btn.querySelector('.btn-spinner');
+            const btnTxt = btn.querySelector('.btn-text');
+            
+            btn.disabled = true;
+            spinner.style.display = 'inline-block';
+            btnTxt.innerText = 'Requesting...';
+            
+            try {
+                const response = await fetch('/api/auth/forgot-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email_or_phone: identifier })
+                });
+                const data = await response.json();
+                
+                btn.disabled = false;
+                spinner.style.display = 'none';
+                btnTxt.innerText = 'Request Recovery OTP';
+                
+                if (response.ok) {
+                    showToast("Access recovery verification code dispatched!");
+                    switchFormSection('reset');
+                    const resetInput = document.getElementById('reset-otp');
+                    if (resetInput) {
+                        resetInput.value = '';
+                        resetInput.focus();
+                    }
+                } else {
+                    showToast(data.error || "Account matching coordinates not found.", "error");
+                }
+            } catch(err) {
+                btn.disabled = false;
+                spinner.style.display = 'none';
+                btnTxt.innerText = 'Request Recovery OTP';
+                showToast("Connection failed: " + err.message, "error");
+            }
+        }
+
+        // E. CONFIRM NEW RESET PASSWORD
+        async function submitResetPasswordForm(e) {
+            e.preventDefault();
+            const otp = document.getElementById('reset-otp').value.trim();
+            const newPassword = document.getElementById('reset-new-password').value;
+            const identifier = document.getElementById('forgot-username').value.trim();
+            
+            const btn = document.getElementById('reset-submit-btn');
+            const spinner = btn.querySelector('.btn-spinner');
+            const btnTxt = btn.querySelector('.btn-text');
+            
+            btn.disabled = true;
+            spinner.style.display = 'inline-block';
+            btnTxt.innerText = 'Confirming...';
+            
+            try {
+                const response = await fetch('/api/auth/reset-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email_or_phone: identifier,
+                        otp: otp,
+                        new_password: newPassword
+                    })
+                });
+                const data = await response.json();
+                
+                btn.disabled = false;
+                spinner.style.display = 'none';
+                btnTxt.innerText = 'Confirm New Password';
+                
+                if (response.ok) {
+                    showToast("Password reset successfully! Please sign in with your new credentials.");
+                    switchFormSection('login');
+                } else {
+                    showToast(data.error || "Failed to reset password. OTP mismatch.", "error");
+                }
+            } catch(err) {
+                btn.disabled = false;
+                spinner.style.display = 'none';
+                btnTxt.innerText = 'Confirm New Password';
+                showToast("Connection failed: " + err.message, "error");
+            }
+        }
+    </script>
+</body>
+</html>

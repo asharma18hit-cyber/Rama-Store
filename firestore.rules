@@ -100,5 +100,15 @@ service cloud.firestore {
     match /notifications/{userId}/user_notifications/{notificationId} {
       allow read, write: if isOwner(userId) || isAdmin();
     }
+
+    // Multi-Vendor Marketplace Security: Vendors Collection (Admin only via client; backend uses Admin SDK)
+    match /vendors/{vendorId} {
+      allow read, write: if isAdmin();
+    }
+
+    // Vendor Sessions (Strictly private backend only)
+    match /vendor_sessions/{sessionId} {
+      allow read, write: if false;
+    }
   }
 }

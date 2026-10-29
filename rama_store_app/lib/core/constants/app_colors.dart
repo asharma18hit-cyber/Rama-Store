@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 /// Deep Indigo (#3525CD), Emerald Mint (#4EDEA3 / #006C49), Sleek Glass Surfaces.
 class AppColors {
   // Primary Brand Colors
-  static const Color primary = Color(0xFF3525CD);          // Deep Royal Indigo
-  static const Color primaryContainer = Color(0xFF4F46E5); // Indigo Container
-  static const Color primaryLight = Color(0xFF4D44E3);     // Surface Tint Indigo
-  static const Color primaryFixedDim = Color(0xFFC3C0FF);  // Soft Muted Indigo
+  static const Color primary = Color(0xFF6B1F28);          // Deep Luxury Maroon
+  static const Color primaryContainer = Color(0xFF4A1218); // Dark Maroon
+  static const Color primaryLight = Color(0xFF8A2E39);     // Surface Tint Maroon
+  static const Color primaryFixedDim = Color(0xFFE8D0D3);  // Soft Muted Maroon
 
   // Secondary & Emerald Accents
   static const Color secondary = Color(0xFF006C49);        // Deep Emerald Mint CTA
@@ -16,10 +16,10 @@ class AppColors {
   static const Color secondaryFixed = Color(0xFF6FFBBE);    // Mint Highlight Tag
 
   // Gold & Amber Accents (Loyalty & Badges)
-  static const Color primaryGold = Color(0xFFD97706);     // Rich gold CTA
-  static const Color primaryGoldLight = Color(0xFFF59E0B);// Bright amber highlight
-  static const Color primaryGoldDark = Color(0xFFB45309); // Muted gold hover
-  static const Color accentAmber = Color(0xFFFBBF24);     // Star rating & badges
+  static const Color primaryGold = Color(0xFFB8892B);     // Refined Store Gold
+  static const Color primaryGoldLight = Color(0xFFD4B066);// Bright Gold Highlight
+  static const Color primaryGoldDark = Color(0xFF8F681C); // Deep Muted Gold
+  static const Color accentAmber = Color(0xFFD4B066);     // Star rating & badges
 
   // Backgrounds & Surfaces
   static const Color background = Color(0xFFF8F9FF);      // Crisp clean backdrop

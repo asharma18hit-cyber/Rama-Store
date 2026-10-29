@@ -68,3 +68,12 @@ CREATE TABLE IF NOT EXISTS order_items (
 );
 
 CREATE INDEX IF NOT EXISTS idx_order_items_order_id ON order_items(order_id);
+
+-- Store Announcements Table
+CREATE TABLE IF NOT EXISTS announcements (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    stock_status TEXT DEFAULT '',
+    loyalty_offer TEXT DEFAULT '',
+    home_delivery TEXT DEFAULT '',
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);

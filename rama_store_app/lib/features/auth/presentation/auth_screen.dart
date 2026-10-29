@@ -115,13 +115,13 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
         elevation: 0,
         centerTitle: false,
         title: const Text(
-          'ACCOUNT & SECURITY',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: Color(0xFF3525CD), letterSpacing: 0.8),
+          'WELCOME BACK • SAMAUR MART',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: AppColors.primary, letterSpacing: 0.8),
         ),
         bottom: TabBar(
           controller: _tabController,
-          indicatorColor: const Color(0xFF3525CD),
-          labelColor: const Color(0xFF3525CD),
+          indicatorColor: AppColors.primary,
+          labelColor: AppColors.primary,
           unselectedLabelColor: const Color(0xFF464555),
           isScrollable: true,
           labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
