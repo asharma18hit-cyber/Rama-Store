@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Samaur Mart Marketplace - Vendor Portal Login</title>
+    <title>Samaur Mart Marketplace - Vendor Portal Login (MFA Protected)</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=IBM+Plex+Mono:wght@500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css?v=20261029_v6_multivendor">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=IBM+Plex+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css?v=20261029_v7_mfa">
 
     <style>
         :root {
             --v-bg: #030712;
-            --v-card: rgba(15, 23, 42, 0.88);
+            --v-card: rgba(15, 23, 42, 0.92);
             --v-border: rgba(184, 137, 43, 0.3);
             --gold-accent: #b8892b;
             --gold-hover: #e5ab37;
@@ -42,10 +42,13 @@
             background: var(--v-card);
             border: 1px solid var(--v-border);
             border-radius: 16px;
-            padding: 2.5rem 2.25rem;
-            backdrop-filter: blur(16px);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 40px rgba(184, 137, 43, 0.12);
+            padding: 2.75rem 2.25rem;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.8), 0 0 45px rgba(184, 137, 43, 0.15);
+            animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
+
+        @keyframes slideUp { from { transform: translateY(15px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
         .vendor-logo-header {
             text-align: center;
@@ -62,14 +65,14 @@
             border-radius: 9999px;
             font-size: 0.8rem;
             color: #fbbf24;
-            font-weight: 600;
+            font-weight: 700;
             letter-spacing: 0.05em;
             text-transform: uppercase;
             margin-bottom: 1rem;
         }
 
         .vendor-title {
-            font-size: 1.75rem;
+            font-size: 1.85rem;
             font-weight: 800;
             margin: 0 0 0.5rem 0;
             color: #f8fafc;
@@ -118,19 +121,46 @@
             box-shadow: 0 0 0 3px rgba(184, 137, 43, 0.2);
         }
 
+        .otp-input-field {
+            width: 100%;
+            box-sizing: border-box;
+            text-align: center;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 2.2rem;
+            letter-spacing: 0.35em;
+            font-weight: 800;
+            background: #090f1d;
+            border: 2px solid var(--gold-accent);
+            border-radius: 10px;
+            color: #fbbf24;
+            padding: 0.85rem 1rem;
+            outline: none;
+            transition: all 0.2s ease;
+            box-shadow: 0 0 20px rgba(184, 137, 43, 0.15);
+        }
+
+        .otp-input-field:focus {
+            border-color: #f59e0b;
+            box-shadow: 0 0 25px rgba(245, 158, 11, 0.35);
+        }
+
         .btn-vendor-submit {
             width: 100%;
             background: linear-gradient(135deg, #b8892b, #936b1d);
             color: #ffffff;
             border: none;
             border-radius: 8px;
-            padding: 0.95rem 1.5rem;
+            padding: 1rem 1.5rem;
             font-size: 1rem;
             font-weight: 700;
             cursor: pointer;
             transition: all 0.2s ease;
             box-shadow: 0 4px 14px rgba(184, 137, 43, 0.35);
             margin-top: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
 
         .btn-vendor-submit:hover {
@@ -168,6 +198,13 @@
             display: block;
         }
 
+        .vendor-alert.success {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #6ee7b7;
+            display: block;
+        }
+
         .vendor-footer-links {
             margin-top: 1.75rem;
             padding-top: 1.5rem;
@@ -192,14 +229,15 @@
 
     <div class="vendor-auth-card">
         <div class="vendor-logo-header">
-            <div class="vendor-brand-badge">🏪 Seller Hub • Marketplace</div>
+            <div class="vendor-brand-badge">🏪 Seller Hub • 2FA Enforced</div>
             <h1 class="vendor-title">Samaur <span>Mart</span></h1>
             <p class="vendor-sub">Authorized Vendor & Merchant Operations Console</p>
         </div>
 
         <div id="vendor-alert-box" class="vendor-alert"></div>
 
-        <form id="vendor-login-form" onsubmit="handleVendorLogin(event)">
+        <!-- STEP 1: CREDENTIALS (Email/Phone + Password) -->
+        <form id="form-vendor-creds" onsubmit="handleVendorCredsSubmit(event)">
             <div class="form-group">
                 <label class="form-label" for="vendor-id-input">Business Email or 10-Digit Mobile</label>
                 <input
@@ -225,55 +263,194 @@
             </div>
 
             <button type="submit" id="btn-vendor-login" class="btn-vendor-submit">
-                <span>Sign In to Vendor Console →</span>
+                <span>🔐 Verify Credentials & Proceed to MFA →</span>
             </button>
         </form>
 
+        <!-- STEP 2: MFA CHALLENGE (6-Digit OTP Code) -->
+        <form id="form-vendor-mfa" style="display: none;" onsubmit="handleVendorMfaSubmit(event)">
+            <div style="background: rgba(184, 137, 43, 0.1); border: 1px dashed rgba(184, 137, 43, 0.4); border-radius: 8px; padding: 0.85rem; margin-bottom: 1.25rem; text-align: center; font-size: 0.85rem; color: #f1f5f9; line-height: 1.5;">
+                <div style="font-weight: 700; color: #fbbf24; margin-bottom: 4px;">
+                    🛡️ Multi-Factor Authentication (MFA)
+                </div>
+                Enter the 6-digit verification code sent to <strong id="v-mfa-target-contact" style="color: #fff; font-family: 'IBM Plex Mono', monospace;">+91 98******10</strong>
+            </div>
+
+            <div class="form-group">
+                <input
+                    type="text"
+                    id="v-login-otp-input"
+                    maxlength="6"
+                    pattern="\d{6}"
+                    placeholder="------"
+                    autocomplete="one-time-code"
+                    class="otp-input-field"
+                    oninput="this.value = this.value.replace(/\D/g, '')"
+                >
+            </div>
+
+            <button type="submit" id="btn-mfa-login-submit" class="btn-vendor-submit">
+                <span>🛡️ Verify MFA & Access Vendor Console →</span>
+            </button>
+
+            <div style="text-align: center; margin-top: 1rem; font-size: 0.85rem; color: #94a3b8;">
+                Didn't receive code? <a href="javascript:void(0)" id="login-mfa-resend-link" onclick="resendLoginMfa()" style="color: #fbbf24; font-weight: 600; text-decoration: none; pointer-events: none; opacity: 0.6;">Resend Code in <span id="login-mfa-timer">30</span>s</a>
+            </div>
+
+            <div style="text-align: center; margin-top: 1.25rem;">
+                <a href="javascript:void(0)" onclick="goBackToStep1()" style="color: #94a3b8; font-size: 0.85rem; text-decoration: none;">« Back to Login Credentials</a>
+            </div>
+        </form>
+
         <div class="vendor-footer-links">
-            <p style="margin: 0 0 0.5rem 0;">New seller on Samaur Mart? <a href="/vendor/register">Apply for Vendor Account</a></p>
+            <p style="margin: 0 0 0.5rem 0;">New seller on Samaur Mart? <a href="/vendor/register">Apply for Vendor Account (MFA)</a></p>
             <p style="margin: 0;"><a href="/store" style="color: #94a3b8; font-weight: normal;">← Return to Customer Storefront</a></p>
         </div>
     </div>
 
     <script>
-        async function handleVendorLogin(e) {
+        let cachedLoginIdentifier = '';
+        let cachedLoginPassword = '';
+        let loginMfaTimerInterval = null;
+
+        function showLoginAlert(msg, type = 'error') {
+            const alertBox = document.getElementById('vendor-alert-box');
+            alertBox.textContent = msg;
+            alertBox.className = `vendor-alert ${type}`;
+            alertBox.style.display = 'block';
+        }
+
+        function startLoginMfaTimer() {
+            let seconds = 30;
+            const timerSpan = document.getElementById('login-mfa-timer');
+            const resendLink = document.getElementById('login-mfa-resend-link');
+            timerSpan.textContent = seconds;
+            resendLink.style.pointerEvents = 'none';
+            resendLink.style.opacity = '0.6';
+
+            if (loginMfaTimerInterval) clearInterval(loginMfaTimerInterval);
+            loginMfaTimerInterval = setInterval(() => {
+                seconds--;
+                timerSpan.textContent = seconds;
+                if (seconds <= 0) {
+                    clearInterval(loginMfaTimerInterval);
+                    resendLink.style.pointerEvents = 'auto';
+                    resendLink.style.opacity = '1';
+                    resendLink.innerHTML = 'Resend Code Now';
+                }
+            }, 1000);
+        }
+
+        function goBackToStep1() {
+            document.getElementById('form-vendor-mfa').style.display = 'none';
+            document.getElementById('form-vendor-creds').style.display = 'block';
+            document.getElementById('vendor-alert-box').style.display = 'none';
+            const submitBtn = document.getElementById('btn-vendor-login');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<span>🔐 Verify Credentials & Proceed to MFA →</span>';
+        }
+
+        async function handleVendorCredsSubmit(e) {
             e.preventDefault();
             const alertBox = document.getElementById('vendor-alert-box');
             const submitBtn = document.getElementById('btn-vendor-login');
-            const emailOrPhone = document.getElementById('vendor-id-input').value.trim();
-            const password = document.getElementById('vendor-pass-input').value;
-
             alertBox.style.display = 'none';
-            alertBox.className = 'vendor-alert';
+
+            cachedLoginIdentifier = document.getElementById('vendor-id-input').value.trim();
+            cachedLoginPassword = document.getElementById('vendor-pass-input').value;
+
             submitBtn.disabled = true;
-            submitBtn.innerHTML = '<span>Verifying credentials...</span>';
+            submitBtn.innerHTML = '<span>Verifying credentials & sending MFA code...</span>';
 
             try {
-                const res = await fetch('/api/vendor/login', {
+                const res = await fetch('/api/vendor/login-request', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email_or_phone: emailOrPhone, password: password })
+                    body: JSON.stringify({ email_or_phone: cachedLoginIdentifier, password: cachedLoginPassword })
                 });
 
                 const data = await res.json();
                 submitBtn.disabled = false;
-                submitBtn.innerHTML = '<span>Sign In to Vendor Console →</span>';
+                submitBtn.innerHTML = '<span>🔐 Verify Credentials & Proceed to MFA →</span>';
+
+                if (res.ok && data.success && data.mfaRequired) {
+                    // Transition to Step 2: MFA Code Challenge
+                    document.getElementById('form-vendor-creds').style.display = 'none';
+                    document.getElementById('form-vendor-mfa').style.display = 'block';
+                    document.getElementById('v-mfa-target-contact').textContent = data.masked_phone || data.masked_email || cachedLoginIdentifier;
+                    document.getElementById('v-login-otp-input').value = '';
+                    document.getElementById('v-login-otp-input').focus();
+                    startLoginMfaTimer();
+                } else {
+                    const alertType = (data.status === 'submitted' || data.status === 'under_review') ? 'info' : 'error';
+                    showLoginAlert(data.error || 'Authentication failed. Please verify credentials.', alertType);
+                }
+            } catch (err) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<span>🔐 Verify Credentials & Proceed to MFA →</span>';
+                showLoginAlert('Connection error: ' + err.message);
+            }
+        }
+
+        async function resendLoginMfa() {
+            if (!cachedLoginIdentifier || !cachedLoginPassword) return;
+            const resendLink = document.getElementById('login-mfa-resend-link');
+            resendLink.innerHTML = 'Sending...';
+
+            try {
+                const res = await fetch('/api/vendor/login-request', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email_or_phone: cachedLoginIdentifier, password: cachedLoginPassword })
+                });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    showLoginAlert('A new 6-digit MFA verification code has been dispatched.', 'success');
+                    startLoginMfaTimer();
+                } else {
+                    showLoginAlert(data.error || 'Failed to resend code.');
+                }
+            } catch (err) {
+                showLoginAlert('Network error: ' + err.message);
+            }
+        }
+
+        async function handleVendorMfaSubmit(e) {
+            e.preventDefault();
+            const otpCode = document.getElementById('v-login-otp-input').value.trim();
+            const submitBtn = document.getElementById('btn-mfa-login-submit');
+
+            if (!otpCode || otpCode.length !== 6) {
+                showLoginAlert('Please enter the complete 6-digit numeric MFA code.');
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span>Verifying MFA security code...</span>';
+            document.getElementById('vendor-alert-box').style.display = 'none';
+
+            try {
+                const res = await fetch('/api/vendor/login-verify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email_or_phone: cachedLoginIdentifier, otp: otpCode })
+                });
+
+                const data = await res.json();
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<span>🛡️ Verify MFA & Access Vendor Console →</span>';
 
                 if (res.ok && data.success) {
                     localStorage.setItem('vendor_token', data.token);
                     localStorage.setItem('vendor_user', JSON.stringify(data.vendor));
                     window.location.href = '/vendor';
                 } else {
-                    alertBox.textContent = data.error || 'Authentication failed. Please verify credentials.';
-                    alertBox.className = (data.status === 'submitted' || data.status === 'under_review') ? 'vendor-alert info' : 'vendor-alert error';
-                    alertBox.style.display = 'block';
+                    showLoginAlert(data.error || 'MFA verification failed. Please enter the valid code.');
                 }
             } catch (err) {
                 submitBtn.disabled = false;
-                submitBtn.innerHTML = '<span>Sign In to Vendor Console →</span>';
-                alertBox.textContent = 'Connection error: ' + err.message;
-                alertBox.className = 'vendor-alert error';
-                alertBox.style.display = 'block';
+                submitBtn.innerHTML = '<span>🛡️ Verify MFA & Access Vendor Console →</span>';
+                showLoginAlert('Connection error: ' + err.message);
             }
         }
     </script>

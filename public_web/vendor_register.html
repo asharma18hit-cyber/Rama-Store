@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Samaur Mart Marketplace - Vendor Registration & Onboarding</title>
+    <title>Samaur Mart Marketplace - Vendor Registration & Onboarding (MFA Verified)</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=IBM+Plex+Mono:wght@500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css?v=20261029_v6_multivendor">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=IBM+Plex+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css?v=20261029_v7_mfa">
 
     <style>
         :root {
@@ -21,7 +21,7 @@
 
         body {
             margin: 0;
-            padding: 2rem 1rem;
+            padding: 2.5rem 1rem;
             background-color: var(--v-bg);
             background-image:
                 radial-gradient(circle at 10% 10%, rgba(184, 137, 43, 0.08) 0%, transparent 50%),
@@ -58,13 +58,13 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            padding: 5px 12px;
+            padding: 5px 14px;
             background: rgba(184, 137, 43, 0.15);
             border: 1px solid rgba(184, 137, 43, 0.35);
             border-radius: 9999px;
             font-size: 0.8rem;
             color: #fbbf24;
-            font-weight: 600;
+            font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.05em;
             margin-bottom: 0.75rem;
@@ -154,6 +154,10 @@
             cursor: pointer;
             transition: all 0.25s ease;
             box-shadow: 0 6px 20px rgba(184, 137, 43, 0.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
 
         .btn-register-submit:hover {
@@ -190,32 +194,93 @@
             color: #6ee7b7;
             display: block;
         }
+
+        /* MFA Modal Styling */
+        .mfa-modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(3, 7, 18, 0.88);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            z-index: 99999;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            box-sizing: border-box;
+            animation: fadeIn 0.25s ease;
+        }
+
+        .mfa-modal-card {
+            background: rgba(13, 21, 39, 0.98);
+            border: 1px solid var(--v-border);
+            border-radius: 16px;
+            padding: 2.75rem 2.25rem;
+            max-width: 470px;
+            width: 100%;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85), 0 0 50px rgba(184, 137, 43, 0.2);
+            text-align: center;
+            box-sizing: border-box;
+            animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        .otp-input-field {
+            width: 100%;
+            box-sizing: border-box;
+            text-align: center;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 2.2rem;
+            letter-spacing: 0.35em;
+            font-weight: 800;
+            background: #090f1d;
+            border: 2px solid var(--gold-accent);
+            border-radius: 10px;
+            color: #fbbf24;
+            padding: 0.85rem 1rem;
+            outline: none;
+            transition: all 0.2s ease;
+            box-shadow: 0 0 20px rgba(184, 137, 43, 0.15);
+        }
+
+        .otp-input-field:focus {
+            border-color: #f59e0b;
+            box-shadow: 0 0 25px rgba(245, 158, 11, 0.35);
+        }
     </style>
 </head>
 <body>
 
     <div class="reg-container">
         <div class="reg-header">
-            <div class="badge-reg">🚀 Multi-Vendor Onboarding</div>
+            <div class="badge-reg">🚀 Multi-Vendor Onboarding • 2FA Enforced</div>
             <h1 class="reg-title">Sell on Samaur <span>Mart</span></h1>
-            <p class="reg-subtitle">Apply to become an authorized merchant. Reach thousands of verified customers.</p>
+            <p class="reg-subtitle">Apply to become an authorized merchant. Real-time Multi-Factor Authentication (MFA) required.</p>
         </div>
 
         <div id="reg-alert" class="alert-box"></div>
 
-        <div id="reg-success-view" style="display: none; text-align: center; padding: 2rem 1rem;">
-            <div style="font-size: 3.5rem; margin-bottom: 1rem;">🎉</div>
-            <h2 style="font-size: 1.75rem; color: #fbbf24; margin-bottom: 0.75rem;">Application Submitted Successfully!</h2>
-            <p id="success-message" style="color: #cbd5e1; font-size: 1rem; max-width: 600px; margin: 0 auto 2rem auto; line-height: 1.6;"></p>
-            <a href="/vendor/login" class="btn-register-submit" style="display: inline-block; width: auto; text-decoration: none; padding: 0.85rem 2rem;">
-                Go to Vendor Login Portal →
+        <div id="reg-success-view" style="display: none; text-align: center; padding: 2.5rem 1.5rem;">
+            <div style="font-size: 4rem; margin-bottom: 1rem;">🎉</div>
+            <div style="display: inline-flex; align-items: center; gap: 6px; padding: 5px 14px; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.35); border-radius: 9999px; font-size: 0.85rem; color: #6ee7b7; font-weight: 700; margin-bottom: 1rem;">
+                ✓ Mobile & Identity MFA Verified
+            </div>
+            <h2 style="font-size: 1.85rem; color: #fbbf24; margin-bottom: 0.75rem;">Merchant Application Submitted!</h2>
+            <p id="success-message" style="color: #cbd5e1; font-size: 1rem; max-width: 620px; margin: 0 auto 2rem auto; line-height: 1.6;"></p>
+            <a href="/vendor/login" class="btn-register-submit" style="display: inline-flex; width: auto; text-decoration: none; padding: 0.95rem 2.5rem;">
+                Sign in to Vendor Console →
             </a>
         </div>
 
         <form id="vendor-reg-form" onsubmit="handleVendorRegistration(event)">
             <!-- 1. Contact & Account Credentials -->
             <div class="reg-section">
-                <div class="section-title">👤 1. Primary Contact & Login Credentials</div>
+                <div class="section-title">
+                    <span>👤 1. Primary Contact & Login Credentials</span>
+                    <span style="font-size: 0.75rem; color: #fbbf24; margin-left: auto; font-weight: normal; background: rgba(184,137,43,0.15); padding: 3px 10px; border-radius: 12px; border: 1px solid rgba(184,137,43,0.3);">MFA Required</span>
+                </div>
                 <div class="grid-2">
                     <div class="form-group">
                         <label class="form-label" for="v-contact-name">Contact Person Full Name *</label>
@@ -228,8 +293,8 @@
                 </div>
                 <div class="grid-2">
                     <div class="form-group">
-                        <label class="form-label" for="v-phone">10-Digit Mobile Number *</label>
-                        <input type="tel" id="v-phone" class="form-input" placeholder="e.g. 9876543210" pattern="[0-9]{10}" required>
+                        <label class="form-label" for="v-phone">10-Digit Mobile Number * (MFA Verification Sent Here)</label>
+                        <input type="tel" id="v-phone" class="form-input" placeholder="e.g. 9876543210" pattern="[0-9]{10}" maxlength="10" required>
                     </div>
                     <div class="form-group">
                         <label class="form-label" for="v-password">Create Portal Password * (min 6 chars)</label>
@@ -258,7 +323,7 @@
                 <div class="grid-2">
                     <div class="form-group">
                         <label class="form-label" for="v-pincode">PIN Code *</label>
-                        <input type="text" id="v-pincode" class="form-input" placeholder="e.g. 201301" pattern="[0-9]{6}" required>
+                        <input type="text" id="v-pincode" class="form-input" placeholder="e.g. 201301" pattern="[0-9]{6}" maxlength="6" required>
                     </div>
                     <div class="form-group">
                         <label class="form-label" for="v-tax-id">GSTIN / Business Tax ID (Optional for Small Sellers)</label>
@@ -287,7 +352,7 @@
             </div>
 
             <button type="submit" id="btn-submit-reg" class="btn-register-submit">
-                <span>Submit Merchant Application for Review →</span>
+                <span>🔐 Verify Mobile (MFA) & Submit Application →</span>
             </button>
 
             <div style="text-align: center; margin-top: 1.5rem; font-size: 0.9rem; color: #94a3b8;">
@@ -296,21 +361,112 @@
         </form>
     </div>
 
+    <!-- MFA CHALLENGE MODAL (Real 2-Factor Authentication) -->
+    <div id="modal-vendor-mfa" class="mfa-modal-overlay">
+        <div class="mfa-modal-card">
+            <div style="display: inline-flex; align-items: center; gap: 6px; padding: 5px 14px; background: rgba(184, 137, 43, 0.15); border: 1px solid rgba(184, 137, 43, 0.35); border-radius: 9999px; font-size: 0.8rem; color: #fbbf24; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1rem;">
+                🛡️ Multi-Factor Authentication (MFA)
+            </div>
+
+            <h2 style="font-size: 1.6rem; font-weight: 800; color: #f8fafc; margin: 0 0 0.5rem 0;">Verify Mobile Number</h2>
+            <p style="font-size: 0.92rem; color: #94a3b8; margin: 0 0 1.25rem 0; line-height: 1.5;">
+                Enter the 6-digit verification code dispatched to:
+                <br>
+                <strong id="mfa-display-phone" style="color: #fbbf24; font-family: 'IBM Plex Mono', monospace; font-size: 1.15rem; letter-spacing: 0.05em;">+91 98******10</strong>
+            </p>
+
+            <div id="mfa-modal-alert" class="alert-box" style="display: none; margin-bottom: 1rem; text-align: left;"></div>
+
+            <div style="margin-bottom: 1.25rem;">
+                <input
+                    type="text"
+                    id="v-mfa-otp-input"
+                    maxlength="6"
+                    pattern="\d{6}"
+                    placeholder="------"
+                    autocomplete="one-time-code"
+                    class="otp-input-field"
+                    oninput="this.value = this.value.replace(/\D/g, '')"
+                >
+            </div>
+
+            <div style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 1.5rem;">
+                Didn't receive code? <a href="javascript:void(0)" id="mfa-resend-link" onclick="resendRegistrationMfa()" style="color: #fbbf24; font-weight: 600; text-decoration: none; pointer-events: none; opacity: 0.6;">Resend Code in <span id="mfa-timer">30</span>s</a>
+            </div>
+
+            <button type="button" id="btn-mfa-confirm" onclick="submitMfaAndRegister()" class="btn-register-submit" style="margin-bottom: 1rem;">
+                <span>🛡️ Verify Code & Complete Registration →</span>
+            </button>
+
+            <div>
+                <a href="javascript:void(0)" onclick="closeMfaModal()" style="color: #94a3b8; font-size: 0.85rem; text-decoration: none;">« Back to Edit Application Details</a>
+            </div>
+        </div>
+    </div>
+
     <script>
+        let cachedRegPayload = null;
+        let resendTimerInterval = null;
+
+        function showTopAlert(msg, type = 'error') {
+            const alertBox = document.getElementById('reg-alert');
+            alertBox.textContent = msg;
+            alertBox.className = `alert-box ${type}`;
+            alertBox.style.display = 'block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function showModalAlert(msg, type = 'error') {
+            const alertBox = document.getElementById('mfa-modal-alert');
+            alertBox.textContent = msg;
+            alertBox.className = `alert-box ${type}`;
+            alertBox.style.display = 'block';
+        }
+
+        function startResendTimer() {
+            let seconds = 30;
+            const timerSpan = document.getElementById('mfa-timer');
+            const resendLink = document.getElementById('mfa-resend-link');
+            timerSpan.textContent = seconds;
+            resendLink.style.pointerEvents = 'none';
+            resendLink.style.opacity = '0.6';
+
+            if (resendTimerInterval) clearInterval(resendTimerInterval);
+            resendTimerInterval = setInterval(() => {
+                seconds--;
+                timerSpan.textContent = seconds;
+                if (seconds <= 0) {
+                    clearInterval(resendTimerInterval);
+                    resendLink.style.pointerEvents = 'auto';
+                    resendLink.style.opacity = '1';
+                    resendLink.innerHTML = 'Resend Code Now';
+                }
+            }, 1000);
+        }
+
+        function closeMfaModal() {
+            document.getElementById('modal-vendor-mfa').style.display = 'none';
+            const submitBtn = document.getElementById('btn-submit-reg');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<span>🔐 Verify Mobile (MFA) & Submit Application →</span>';
+        }
+
         async function handleVendorRegistration(e) {
             e.preventDefault();
             const alertBox = document.getElementById('reg-alert');
             const submitBtn = document.getElementById('btn-submit-reg');
-
             alertBox.style.display = 'none';
-            alertBox.className = 'alert-box';
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<span>Submitting application to marketplace...</span>';
 
-            const payload = {
+            const phone = document.getElementById('v-phone').value.trim().replace(/\D/g, '');
+            if (phone.length !== 10) {
+                showTopAlert('Please enter a valid 10-digit mobile number.');
+                return;
+            }
+
+            cachedRegPayload = {
                 contact_name: document.getElementById('v-contact-name').value.trim(),
                 email: document.getElementById('v-email').value.trim(),
-                phone: document.getElementById('v-phone').value.trim(),
+                phone: phone,
                 password: document.getElementById('v-password').value,
                 business_name: document.getElementById('v-business-name').value.trim(),
                 categories: document.getElementById('v-categories').value.trim(),
@@ -324,32 +480,110 @@
                 }
             };
 
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span>🔐 Dispatching MFA Verification Code...</span>';
+
             try {
-                const res = await fetch('/api/vendor/register', {
+                const res = await fetch('/api/vendor/register-otp-request', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify({
+                        email: cachedRegPayload.email,
+                        phone: cachedRegPayload.phone,
+                        business_name: cachedRegPayload.business_name,
+                        contact_name: cachedRegPayload.contact_name
+                    })
                 });
+
                 const data = await res.json();
                 submitBtn.disabled = false;
-                submitBtn.innerHTML = '<span>Submit Merchant Application for Review →</span>';
+                submitBtn.innerHTML = '<span>🔐 Verify Mobile (MFA) & Submit Application →</span>';
 
                 if (res.ok && data.success) {
-                    document.getElementById('vendor-reg-form').style.display = 'none';
-                    document.getElementById('reg-success-view').style.display = 'block';
-                    document.getElementById('success-message').innerText =
-                        `Your application (Reference ID: ${data.vendor_id}) has been successfully submitted to Samaur Mart! Our administrative team will review your credentials within 24-48 hours. You can sign in using your registered email and password to view status updates.`;
+                    // Open MFA Modal
+                    document.getElementById('mfa-display-phone').textContent = data.masked_phone || `+91 ${phone}`;
+                    document.getElementById('mfa-modal-alert').style.display = 'none';
+                    document.getElementById('v-mfa-otp-input').value = '';
+                    document.getElementById('modal-vendor-mfa').style.display = 'flex';
+                    document.getElementById('v-mfa-otp-input').focus();
+                    startResendTimer();
                 } else {
-                    alertBox.textContent = data.error || 'Failed to submit registration. Please check fields.';
-                    alertBox.className = 'alert-box error';
-                    alertBox.style.display = 'block';
+                    showTopAlert(data.error || 'Failed to request MFA verification code. Please check fields.');
                 }
             } catch (err) {
                 submitBtn.disabled = false;
-                submitBtn.innerHTML = '<span>Submit Merchant Application for Review →</span>';
-                alertBox.textContent = 'Connection error: ' + err.message;
-                alertBox.className = 'alert-box error';
-                alertBox.style.display = 'block';
+                submitBtn.innerHTML = '<span>🔐 Verify Mobile (MFA) & Submit Application →</span>';
+                showTopAlert('Connection error: ' + err.message);
+            }
+        }
+
+        async function resendRegistrationMfa() {
+            if (!cachedRegPayload) return;
+            const resendLink = document.getElementById('mfa-resend-link');
+            resendLink.innerHTML = 'Sending...';
+
+            try {
+                const res = await fetch('/api/vendor/register-otp-request', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: cachedRegPayload.email,
+                        phone: cachedRegPayload.phone,
+                        business_name: cachedRegPayload.business_name,
+                        contact_name: cachedRegPayload.contact_name
+                    })
+                });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    showModalAlert('A new 6-digit MFA verification code has been dispatched.', 'success');
+                    startResendTimer();
+                } else {
+                    showModalAlert(data.error || 'Failed to resend MFA code.');
+                }
+            } catch (err) {
+                showModalAlert('Network error resending code: ' + err.message);
+            }
+        }
+
+        async function submitMfaAndRegister() {
+            const otpCode = document.getElementById('v-mfa-otp-input').value.trim();
+            const confirmBtn = document.getElementById('btn-mfa-confirm');
+
+            if (!otpCode || otpCode.length !== 6) {
+                showModalAlert('Please enter the complete 6-digit numeric verification code.');
+                return;
+            }
+
+            confirmBtn.disabled = true;
+            confirmBtn.innerHTML = '<span>Verifying code & completing registration...</span>';
+            document.getElementById('mfa-modal-alert').style.display = 'none';
+
+            try {
+                const fullPayload = { ...cachedRegPayload, otp: otpCode };
+                const res = await fetch('/api/vendor/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(fullPayload)
+                });
+
+                const data = await res.json();
+                confirmBtn.disabled = false;
+                confirmBtn.innerHTML = '<span>🛡️ Verify Code & Complete Registration →</span>';
+
+                if (res.ok && data.success) {
+                    // Success!
+                    document.getElementById('modal-vendor-mfa').style.display = 'none';
+                    document.getElementById('vendor-reg-form').style.display = 'none';
+                    document.getElementById('reg-success-view').style.display = 'block';
+                    document.getElementById('success-message').innerText =
+                        `Your application (Reference ID: ${data.vendor_id}) has been successfully verified via Multi-Factor Authentication (MFA) and submitted to Samaur Mart! Our administrative team will review your credentials within 24-48 hours.`;
+                } else {
+                    showModalAlert(data.error || 'Verification failed. Please check the 6-digit code.');
+                }
+            } catch (err) {
+                confirmBtn.disabled = false;
+                confirmBtn.innerHTML = '<span>🛡️ Verify Code & Complete Registration →</span>';
+                showModalAlert('Connection error: ' + err.message);
             }
         }
     </script>

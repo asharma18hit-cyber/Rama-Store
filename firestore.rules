@@ -106,8 +106,11 @@ service cloud.firestore {
       allow read, write: if isAdmin();
     }
 
-    // Vendor Sessions (Strictly private backend only)
+    // Vendor Sessions & MFA Verification Codes (Strictly private backend only)
     match /vendor_sessions/{sessionId} {
+      allow read, write: if false;
+    }
+    match /vendor_otps/{otpId} {
       allow read, write: if false;
     }
   }

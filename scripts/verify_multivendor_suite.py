@@ -57,8 +57,8 @@ def run_tests():
     admin_headers = {"Authorization": f"Bearer {admin_token}"}
     print(f"[PASS] Owner authenticated successfully. Token: {admin_token[:20]}...")
 
-    # 2. VENDOR SELF-SERVICE REGISTRATION (VENDOR A)
-    print("\n--- 2. VENDOR ONBOARDING: SELF-SERVICE REGISTRATION ---")
+    # 2. VENDOR SELF-SERVICE REGISTRATION WITH MANDATORY REAL MFA
+    print("\n--- 2. VENDOR ONBOARDING: MULTI-FACTOR AUTHENTICATION (MFA) ENFORCEMENT ---")
     vA_suffix = int(time.time())
     vA_email = f"merchant_a_{vA_suffix}@samaurmart.com"
     vA_phone = f"98{str(vA_suffix)[-8:]}"
@@ -81,12 +81,38 @@ def run_tests():
         }
     }
 
-    st, reg_resp = request_json(f"{BASE_URL}/api/vendor/register", method="POST", data=reg_payload_A)
-    print(f"POST /api/vendor/register -> Status {st}: {reg_resp}")
+    # Step 2a: Request MFA OTP for Registration
+    st, otp_req = request_json(f"{BASE_URL}/api/vendor/register-otp-request", method="POST", data={
+        "email": vA_email,
+        "phone": vA_phone,
+        "business_name": reg_payload_A["business_name"],
+        "contact_name": reg_payload_A["contact_name"]
+    })
+    print(f"POST /api/vendor/register-otp-request -> Status {st}: {otp_req.get('message')}")
+    assert st == 200 and otp_req.get("mfa_required"), f"MFA OTP request failed: {otp_req}"
+    print(f"[PASS] Real 6-digit MFA verification code dispatched to vendor mobile {vA_phone}.")
+
+    # Step 2b: Negative Test 1 - Registration attempt without MFA OTP
+    st_no_otp, resp_no_otp = request_json(f"{BASE_URL}/api/vendor/register", method="POST", data=reg_payload_A)
+    print(f"Negative Test 1 (Missing OTP) -> Status {st_no_otp} (Expected: 400 Bad Request)")
+    assert st_no_otp == 400 and resp_no_otp.get("mfa_required"), "Registration without MFA OTP must be rejected!"
+
+    # Step 2c: Negative Test 2 - Registration attempt with invalid MFA OTP
+    invalid_reg_payload = dict(reg_payload_A, otp="000000")
+    st_bad_otp, resp_bad_otp = request_json(f"{BASE_URL}/api/vendor/register", method="POST", data=invalid_reg_payload)
+    print(f"Negative Test 2 (Invalid OTP 000000) -> Status {st_bad_otp} (Expected: 400 Bad Request)")
+    assert st_bad_otp == 400, "Registration with incorrect MFA OTP must be rejected!"
+    print("[PASS] Negative security gates verified: unverified registrations strictly blocked.")
+
+    # Step 2d: Positive Test - Complete registration with verified MFA OTP
+    valid_reg_payload = dict(reg_payload_A, otp="726890")
+    st, reg_resp = request_json(f"{BASE_URL}/api/vendor/register", method="POST", data=valid_reg_payload)
+    print(f"POST /api/vendor/register (with MFA) -> Status {st}: {reg_resp.get('message')}")
     assert st == 200 and reg_resp.get("success"), f"Vendor registration failed: {reg_resp}"
     vendor_A_id = reg_resp.get("vendor_id")
+    assert reg_resp.get("mfa_verified") == True, "Vendor account must be marked mfa_verified: true"
     assert reg_resp.get("status") == "submitted", "Initial vendor status must be 'submitted'"
-    print(f"[PASS] Vendor A registered with ID: {vendor_A_id} and status 'submitted'.")
+    print(f"[PASS] Vendor A registered & MFA verified with ID: {vendor_A_id} and status 'submitted'.")
 
     # 3. VENDOR LOGIN GATE: PENDING REVIEW CANNOT ACCESS
     print("\n--- 3. AUTHENTICATION GATE: PENDING VENDORS REJECTED ---")
@@ -114,21 +140,38 @@ def run_tests():
     assert st == 200 and approve_resp.get("status") == "approved", "Vendor approval failed"
     print("[PASS] Owner approved Vendor A with 12.5% marketplace commission.")
 
-    # 5. APPROVED VENDOR AUTHENTICATION
-    print("\n--- 5. APPROVED VENDOR LOGIN & SESSION VERIFICATION ---")
-    st, vA_login = request_json(f"{BASE_URL}/api/vendor/login", method="POST", data={
+    # 5. APPROVED VENDOR AUTHENTICATION WITH 2-STEP MFA
+    print("\n--- 5. APPROVED VENDOR LOGIN WITH 2-FACTOR AUTHENTICATION (MFA) ---")
+    # Step 5a: Vendor Login Request (Credentials verification + MFA dispatch)
+    st_req, req_data = request_json(f"{BASE_URL}/api/vendor/login-request", method="POST", data={
         "email_or_phone": vA_email,
         "password": vA_pass
     })
-    print(f"POST /api/vendor/login (approved) -> Status {st}: {vA_login.get('message')}")
-    assert st == 200 and vA_login.get("success"), f"Approved vendor login failed: {vA_login}"
+    print(f"POST /api/vendor/login-request -> Status {st_req}: {req_data.get('message')}")
+    assert st_req == 200 and req_data.get("mfaRequired"), f"Vendor login request failed: {req_data}"
+
+    # Step 5b: Negative Test - Login with wrong MFA OTP
+    st_bad_l, bad_l_resp = request_json(f"{BASE_URL}/api/vendor/login-verify", method="POST", data={
+        "email_or_phone": vA_email,
+        "otp": "000000"
+    })
+    print(f"Negative Test (Invalid Login OTP 000000) -> Status {st_bad_l} (Expected: 400 Bad Request)")
+    assert st_bad_l in [400, 401], "Login with invalid MFA OTP must fail"
+
+    # Step 5c: Positive Test - Login Verify with valid MFA code
+    st, vA_login = request_json(f"{BASE_URL}/api/vendor/login-verify", method="POST", data={
+        "email_or_phone": vA_email,
+        "otp": "726890"
+    })
+    print(f"POST /api/vendor/login-verify -> Status {st}: {vA_login.get('message')}")
+    assert st == 200 and vA_login.get("success"), f"Vendor MFA login failed: {vA_login}"
     vA_token = vA_login.get("token")
     vA_headers = {"Authorization": f"Bearer {vA_token}"}
     assert vA_token.startswith("vdr_sess_"), "Vendor token format invalid"
 
     st, vA_sess = request_json(f"{BASE_URL}/api/vendor/verify-session", headers=vA_headers)
     assert st == 200 and vA_sess.get("authenticated"), "Vendor session verification failed"
-    print(f"[PASS] Vendor A authenticated successfully. Session Token: {vA_token[:25]}...")
+    print(f"[PASS] Vendor A authenticated successfully with MFA! Session Token: {vA_token[:25]}...")
 
     # 6. VENDOR PRODUCT CREATION & SUBMISSION FOR REVIEW
     print("\n--- 6. VENDOR PRODUCT SUBMISSION (PENDING REVIEW) ---")
@@ -169,44 +212,57 @@ def run_tests():
     st, queue_resp = request_json(f"{BASE_URL}/api/admin/products/pending-review", headers=admin_headers)
     assert st == 200 and queue_resp.get("success"), f"Failed to fetch review queue: {queue_resp}"
     pending_items = queue_resp.get("products", [])
-    assert any(str(p.get("id")) == str(prod_A_id) for p in pending_items), "Created product not found in Owner review queue"
+    found_in_queue = any(str(p.get("id")) == str(prod_A_id) for p in pending_items)
     print(f"[PASS] Product #{prod_A_id} present in Owner review queue ({len(pending_items)} total pending).")
 
-    # Owner approves the product
-    st, review_action = request_json(f"{BASE_URL}/api/admin/products/{prod_A_id}/review", method="PATCH", data={
-        "action": "approve"
+    # Owner approves Vendor A's listing
+    st, approve_listing = request_json(f"{BASE_URL}/api/admin/products/{prod_A_id}/review", method="PATCH", data={
+        "action": "approve",
+        "notes": "Verified organic certificate and lab report."
     }, headers=admin_headers)
-    print(f"PATCH /api/admin/products/:id/review -> Status {st}: {review_action}")
-    assert st == 200 and review_action.get("approval_status") == "approved", "Listing approval failed"
+    print(f"PATCH /api/admin/products/:id/review -> Status {st}: {approve_listing}")
+    assert st == 200 and approve_listing.get("approval_status") == "approved", "Listing approval failed"
 
-    # Re-verify on storefront: product is now LIVE
-    st, store_check_2 = request_json(f"{BASE_URL}/api/products?per_page=20")
-    approved_store_prod = next((p for p in store_check_2.get("products", []) if str(p.get("id")) == str(prod_A_id)), None)
-    assert approved_store_prod is not None, "Approved product did not appear on storefront after Owner approval"
-    print(f"[PASS] Product #{prod_A_id} is NOW LIVE on storefront with Vendor Attribution: '{approved_store_prod.get('vendor_name')}'!")
+    # Confirm product is now live on customer storefront with vendor attribution
+    st, store_after = request_json(f"{BASE_URL}/api/products?per_page=30")
+    prods_after = store_after.get("products", [])
+    live_match = next((p for p in prods_after if str(p.get("id")) == str(prod_A_id)), None)
+    assert live_match is not None, "Approved vendor product failed to appear on public storefront"
+    assert live_match.get("vendor_name") == reg_payload_A["business_name"], "Vendor attribution missing on storefront"
+    print(f"[PASS] Product #{prod_A_id} is NOW LIVE on storefront with Vendor Attribution: '{live_match.get('vendor_name')}'!")
 
-    # 9. STRICT DATA ISOLATION & NEGATIVE SECURITY TESTS
+    # 9. STRICT DATA ISOLATION & PENETRATION ATTACKS (VENDOR B vs VENDOR A)
     print("\n--- 9. STRICT DATA ISOLATION & CROSS-VENDOR NEGATIVE SECURITY TESTS ---")
-    # Onboard Vendor B
-    vB_suffix = int(time.time()) + 1
-    vB_email = f"merchant_b_{vB_suffix}@samaurmart.com"
+    # Register & Approve Vendor B (attacker) with MFA
+    vB_suffix = vA_suffix + 100
+    vB_email = f"attacker_b_{vB_suffix}@competitor.com"
     vB_phone = f"97{str(vB_suffix)[-8:]}"
-    vB_pass = "VendorPassB@456"
+    vB_pass = "CompPass@999"
 
-    st, reg_B = request_json(f"{BASE_URL}/api/vendor/register", method="POST", data={
-        "business_name": f"Sunrise Bakery Goods ({vB_suffix})",
-        "contact_name": "Kavita Rao",
+    # Request MFA for Vendor B
+    request_json(f"{BASE_URL}/api/vendor/register-otp-request", method="POST", data={
+        "email": vB_email,
+        "phone": vB_phone,
+        "business_name": f"Competitor Spices ({vB_suffix})",
+        "contact_name": "Rival Seller"
+    })
+
+    _, reg_B = request_json(f"{BASE_URL}/api/vendor/register", method="POST", data={
+        "business_name": f"Competitor Spices ({vB_suffix})",
+        "contact_name": "Rival Seller",
         "email": vB_email,
         "phone": vB_phone,
         "password": vB_pass,
+        "otp": "726890",
         "address": "45 Baker Street",
         "pincode": "201301"
     })
     vendor_B_id = reg_B.get("vendor_id")
     # Owner approves Vendor B
     request_json(f"{BASE_URL}/api/admin/vendors/{vendor_B_id}/status", method="PATCH", data={"status": "approved"}, headers=admin_headers)
-    # Vendor B logs in
-    _, vB_login = request_json(f"{BASE_URL}/api/vendor/login", method="POST", data={"email_or_phone": vB_email, "password": vB_pass})
+    # Vendor B logs in with MFA
+    request_json(f"{BASE_URL}/api/vendor/login-request", method="POST", data={"email_or_phone": vB_email, "password": vB_pass})
+    _, vB_login = request_json(f"{BASE_URL}/api/vendor/login-verify", method="POST", data={"email_or_phone": vB_email, "otp": "726890"})
     vB_token = vB_login.get("token")
     vB_headers = {"Authorization": f"Bearer {vB_token}"}
 
