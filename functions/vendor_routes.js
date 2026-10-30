@@ -232,7 +232,8 @@ module.exports = function createVendorRouter({ db, admin, cacheMemory }) {
         phone,
         password,
         otp, // 6-digit OTP code (if using SMS route)
-        idToken, // Firebase ID token (if verified via Firebase Phone Auth)
+        idToken,
+        id_token,
         firebase_id_token,
         address,
         pincode,
@@ -263,7 +264,7 @@ module.exports = function createVendorRouter({ db, admin, cacheMemory }) {
 
       // --- PHONE VERIFICATION (FIREBASE AUTH ID TOKEN OR BACKEND OTP) ---
       let phoneVerified = false;
-      const tokenToVerify = idToken || firebase_id_token;
+      const tokenToVerify = idToken || id_token || firebase_id_token;
 
       if (tokenToVerify) {
         try {

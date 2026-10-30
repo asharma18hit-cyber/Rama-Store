@@ -356,13 +356,13 @@
         <!-- STEP 1: FACTOR 1 - OWNER CREDENTIALS -->
         <form id="form-admin-creds" class="auth-form-step active" onsubmit="submitAdminCreds(event)">
             <div class="input-wrapper">
-                <input type="text" id="admin-identifier" class="input-field" placeholder=" " required value="7268903804" autocomplete="username">
+                <input type="text" id="admin-identifier" class="input-field" placeholder=" " required autocomplete="username">
                 <label class="floating-label" for="admin-identifier">Registered Owner Phone / Email</label>
             </div>
             
             <div class="input-wrapper">
-                <input type="password" id="admin-password" class="input-field" placeholder=" " required value="Admin@12345" autocomplete="current-password">
-                <label class="floating-label" for="admin-password">Admin Master Password</label>
+                <input type="password" id="admin-password" class="input-field" placeholder=" " required autocomplete="current-password">
+                <label class="floating-label" for="admin-password">Password</label>
                 <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('admin-password', this)">👁️</button>
             </div>
 
@@ -511,7 +511,7 @@
             }
         })();
 
-        let lastAdminIdentifier = '7268903804';
+        let lastAdminIdentifier = '';
         let resendInterval = null;
 
         function startResendCountdown(seconds = 30) {
