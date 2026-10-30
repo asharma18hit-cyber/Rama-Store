@@ -1,6 +1,7 @@
 // functions/vendor_routes.js - Multi-Vendor Marketplace Backend Architecture
 const express = require("express");
 const crypto = require("crypto");
+const { dispatchSmsOtp, normalizePhone } = require("./sms_gateway");
 
 /**
  * Creates and mounts all Multi-Vendor API routes.
@@ -148,7 +149,7 @@ module.exports = function createVendorRouter({ db, admin, cacheMemory }) {
   // 1. VENDOR ONBOARDING & MULTI-FACTOR AUTHENTICATION (MFA)
   // =============================================================
 
-  // POST /api/vendor/register-otp-request - Step 1: MFA Challenge for Registration
+  // POST /api/vendor/register-otp-request - Request OTP for Vendor Mobile Verification
   router.post("/vendor/register-otp-request", async (req, res) => {
     try {
       const { email, phone, business_name, contact_name } = req.body;
@@ -172,9 +173,23 @@ module.exports = function createVendorRouter({ db, admin, cacheMemory }) {
         return res.status(400).json({ error: "A vendor account with this mobile number already exists. Please sign in." });
       }
 
-      // Generate 6-digit cryptographic MFA code
-      const otpCode = String(Math.floor(100000 + Math.random() * 900000));
+      // Check cooldown (30 seconds)
       const otpDocId = "reg_" + cleanPhone;
+      const existingOtpDoc = await db.collection("vendor_otps").doc(otpDocId).get();
+      const now = Date.now();
+      if (existingOtpDoc.exists) {
+        const lastReq = existingOtpDoc.data().lastRequestedAt || 0;
+        if (now - lastReq < 30 * 1000) {
+          const remaining = Math.ceil((30 * 1000 - (now - lastReq)) / 1000);
+          return res.status(429).json({
+            error: `Please wait ${remaining} seconds before requesting a new verification code.`,
+            cooldown_seconds: remaining
+          });
+        }
+      }
+
+      // Generate cryptographically random 6-digit code
+      const otpCode = String(crypto.randomInt(100000, 999999));
 
       await db.collection("vendor_otps").doc(otpDocId).set({
         code: otpCode,
@@ -182,30 +197,32 @@ module.exports = function createVendorRouter({ db, admin, cacheMemory }) {
         email: cleanEmail,
         type: "registration",
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
-        expiresAt: Date.now() + 10 * 60 * 1000, // 10 minutes
+        lastRequestedAt: now,
+        expiresAt: now + 10 * 60 * 1000, // 10 minutes
         attempts: 0
       });
 
-      console.log(`[Vendor Registration MFA] Code dispatched for ${cleanPhone} (${cleanEmail}): ${otpCode}`);
+      // Dispatch real SMS via carrier gateway
+      const smsResult = await dispatchSmsOtp(cleanPhone, otpCode, "Vendor Registration");
+      console.log(`[Vendor Registration OTP] Dispatched for ${cleanPhone} via ${smsResult.provider || "gateway"}`);
 
       const maskedPhone = "+91 " + cleanPhone.slice(0, 2) + "******" + cleanPhone.slice(-2);
 
       return res.json({
         success: true,
-        message: `6-digit MFA verification code dispatched to ${maskedPhone} and ${cleanEmail}.`,
+        message: `Verification code sent to ${maskedPhone}.`,
         masked_phone: maskedPhone,
         raw_phone: cleanPhone,
         email: cleanEmail,
-        mfa_required: true,
         expires_in_seconds: 600
       });
     } catch (err) {
       console.error("vendor register-otp-request error:", err);
-      return res.status(500).json({ error: "Failed to dispatch registration MFA code: " + err.message });
+      return res.status(500).json({ error: "Failed to send verification code: " + err.message });
     }
   });
 
-  // POST /api/vendor/register - Step 2: Complete Registration with MFA Verification
+  // POST /api/vendor/register - Complete Registration with Phone Verification
   router.post("/vendor/register", async (req, res) => {
     try {
       const {
@@ -214,7 +231,9 @@ module.exports = function createVendorRouter({ db, admin, cacheMemory }) {
         email,
         phone,
         password,
-        otp, // Mandatory 6-digit MFA verification code
+        otp, // 6-digit OTP code (if using SMS route)
+        idToken, // Firebase ID token (if verified via Firebase Phone Auth)
+        firebase_id_token,
         address,
         pincode,
         categories,
@@ -242,42 +261,73 @@ module.exports = function createVendorRouter({ db, admin, cacheMemory }) {
       const cleanEmail = email.trim().toLowerCase();
       const cleanPhone = String(phone).replace(/\D/g, "").slice(-10);
 
-      // --- MFA VERIFICATION ENFORCEMENT ---
-      const inputOtp = otp ? String(otp).trim() : "";
-      if (!inputOtp || inputOtp.length !== 6 || !/^\d{6}$/.test(inputOtp)) {
-        return res.status(400).json({
-          error: "Multi-Factor Authentication (MFA) required: Please enter the 6-digit numeric verification code sent to your mobile.",
-          mfa_required: true
-        });
+      // --- PHONE VERIFICATION (FIREBASE AUTH ID TOKEN OR BACKEND OTP) ---
+      let phoneVerified = false;
+      const tokenToVerify = idToken || firebase_id_token;
+
+      if (tokenToVerify) {
+        try {
+          const decoded = await admin.auth().verifyIdToken(tokenToVerify);
+          const tokenPhone = decoded.phone_number ? decoded.phone_number.replace(/\D/g, "").slice(-10) : "";
+          if (tokenPhone === cleanPhone) {
+            phoneVerified = true;
+          } else {
+            return res.status(400).json({
+              error: "Verified phone number does not match application phone number."
+            });
+          }
+        } catch (tokErr) {
+          console.warn("[Vendor Register] Firebase ID token verify failed:", tokErr.message);
+        }
       }
 
-      const otpDocId = "reg_" + cleanPhone;
-      const otpDoc = await db.collection("vendor_otps").doc(otpDocId).get();
-      const isMasterMfa = ["726890", "123456", "949268"].includes(inputOtp);
+      if (!phoneVerified) {
+        const inputOtp = otp ? String(otp).trim() : "";
+        if (!inputOtp || inputOtp.length !== 6 || !/^\d{6}$/.test(inputOtp)) {
+          return res.status(400).json({
+            error: "Please enter the 6-digit verification code sent to your mobile."
+          });
+        }
 
-      let mfaVerified = false;
-      if (otpDoc.exists) {
+        const otpDocId = "reg_" + cleanPhone;
+        const otpDoc = await db.collection("vendor_otps").doc(otpDocId).get();
+
+        if (!otpDoc.exists) {
+          return res.status(400).json({
+            error: "No verification code found. Please click 'Send OTP' to request a new code."
+          });
+        }
+
         const otpData = otpDoc.data();
         if (Date.now() > (otpData.expiresAt || 0)) {
           await otpDoc.ref.delete().catch(() => {});
           return res.status(400).json({
-            error: "Verification code has expired. Please request a new 6-digit MFA code.",
-            mfa_expired: true
+            error: "Verification code has expired. Please request a new code."
           });
         }
-        if (String(otpData.code).trim() === inputOtp || isMasterMfa) {
-          mfaVerified = true;
+
+        const currentAttempts = otpData.attempts || 0;
+        if (currentAttempts >= 3) {
+          await otpDoc.ref.delete().catch(() => {});
+          return res.status(429).json({
+            error: "Too many failed attempts. Please request a new verification code."
+          });
+        }
+
+        if (String(otpData.code).trim() === inputOtp) {
+          phoneVerified = true;
           await otpDoc.ref.delete().catch(() => {});
         } else {
-          await otpDoc.ref.update({ attempts: (otpData.attempts || 0) + 1 }).catch(() => {});
+          await otpDoc.ref.update({ attempts: currentAttempts + 1 }).catch(() => {});
+          return res.status(400).json({
+            error: "Invalid verification code. Please check the code sent to your phone and try again."
+          });
         }
-      } else if (isMasterMfa) {
-        mfaVerified = true;
       }
 
-      if (!mfaVerified) {
+      if (!phoneVerified) {
         return res.status(400).json({
-          error: "Invalid 6-digit MFA verification code. Please check the code sent to your phone and try again."
+          error: "Mobile verification failed. Please verify your phone number to continue."
         });
       }
 
@@ -303,7 +353,6 @@ module.exports = function createVendorRouter({ db, admin, cacheMemory }) {
         phone: cleanPhone,
         phone_verified: true,
         email_verified: true,
-        mfa_verified: true,
         password_hash: hash,
         password_salt: salt,
         address: address ? String(address).trim() : "",
@@ -319,10 +368,10 @@ module.exports = function createVendorRouter({ db, admin, cacheMemory }) {
         created_at: nowIso,
         updated_at: nowIso,
         audit_log: [{
-          action: "registered_mfa_verified",
+          action: "registered_phone_verified",
           timestamp: nowIso,
           changed_by: contact_name.trim(),
-          summary: "Vendor application submitted with verified 6-digit MFA security OTP."
+          summary: "Vendor application submitted with verified phone number."
         }]
       };
 
@@ -330,9 +379,10 @@ module.exports = function createVendorRouter({ db, admin, cacheMemory }) {
 
       return res.json({
         success: true,
-        message: "Vendor application submitted and MFA verified successfully! Your account will be reviewed by the Samaur Mart management team.",
+        message: "Vendor application submitted successfully! Your account will be reviewed by the store owner.",
         vendor_id: vendorId,
         status: "submitted",
+        phone_verified: true,
         mfa_verified: true
       });
     } catch (err) {
@@ -465,7 +515,7 @@ module.exports = function createVendorRouter({ db, admin, cacheMemory }) {
       const inputOtp = String(otp).trim();
       const otpKey = "login_" + (vendor.phone || cleanPhone || vendorDoc.id);
       const otpDoc = await db.collection("vendor_otps").doc(otpKey).get();
-      const isMasterMfa = ["726890", "123456", "949268"].includes(inputOtp);
+      const isMasterMfa = false;
 
       let mfaVerified = false;
       if (otpDoc.exists) {
@@ -528,10 +578,10 @@ module.exports = function createVendorRouter({ db, admin, cacheMemory }) {
     }
   });
 
-  // POST /api/vendor/login - Unified Login (supports credentials + optional otp, or direct verification)
+  // POST /api/vendor/login - Direct, clean login for vendors
   router.post("/vendor/login", async (req, res) => {
     try {
-      const { email_or_phone, password, otp } = req.body;
+      const { email_or_phone, password } = req.body;
       if (!email_or_phone || !password) {
         return res.status(400).json({ error: "Email or phone and password are required." });
       }
@@ -564,21 +614,21 @@ module.exports = function createVendorRouter({ db, admin, cacheMemory }) {
         return res.status(403).json({
           success: false,
           status: vendor.status,
-          error: "Your vendor application is currently under review by Samaur Mart management. You will be able to access the vendor portal once approved."
+          error: "Your vendor application is currently under review by the store owner. You will be able to log in once approved."
         });
       }
       if (vendor.status === "rejected") {
         return res.status(403).json({
           success: false,
           status: "rejected",
-          error: `Your vendor application was rejected: ${vendor.rejection_reason || "Please contact support for further information."}`
+          error: `Your vendor application was rejected: ${vendor.rejection_reason || "Please contact support."}`
         });
       }
       if (vendor.status === "suspended" || vendor.status === "deactivated") {
         return res.status(403).json({
           success: false,
           status: vendor.status,
-          error: "Your vendor account has been suspended or deactivated by the marketplace management."
+          error: "Your vendor account has been suspended or deactivated. Please contact support."
         });
       }
       if (vendor.status !== "approved") {
@@ -587,28 +637,6 @@ module.exports = function createVendorRouter({ db, admin, cacheMemory }) {
           status: vendor.status,
           error: `Vendor account is in status '${vendor.status}'. Access is restricted to approved vendors.`
         });
-      }
-
-      // If OTP provided, verify OTP!
-      if (otp) {
-        const inputOtp = String(otp).trim();
-        const otpKey = "login_" + (vendor.phone || cleanPhone || vendorDoc.id);
-        const otpDoc = await db.collection("vendor_otps").doc(otpKey).get();
-        const isMasterMfa = ["726890", "123456", "949268"].includes(inputOtp);
-        let mfaVerified = false;
-        if (otpDoc.exists) {
-          const otpData = otpDoc.data();
-          if (Date.now() <= (otpData.expiresAt || 0) && (String(otpData.code).trim() === inputOtp || isMasterMfa)) {
-            mfaVerified = true;
-            await otpDoc.ref.delete().catch(() => {});
-          }
-        } else if (isMasterMfa) {
-          mfaVerified = true;
-        }
-
-        if (!mfaVerified) {
-          return res.status(400).json({ error: "Invalid 6-digit MFA verification code." });
-        }
       }
 
       // Create secure session token
@@ -622,7 +650,6 @@ module.exports = function createVendorRouter({ db, admin, cacheMemory }) {
         email: vendor.email,
         phone: vendor.phone,
         role: "vendor",
-        mfa_verified: true,
         createdAt: now,
         lastActivity: now,
         expiresAt: now + 24 * 60 * 60 * 1000
@@ -632,7 +659,7 @@ module.exports = function createVendorRouter({ db, admin, cacheMemory }) {
 
       return res.json({
         success: true,
-        message: "Vendor login successful!",
+        message: "Login successful!",
         token,
         vendor: {
           id: vendorDoc.id,
@@ -640,13 +667,14 @@ module.exports = function createVendorRouter({ db, admin, cacheMemory }) {
           contact_name: vendor.contact_name,
           email: vendor.email,
           phone: vendor.phone,
+          status: vendor.status,
           commission_rate: vendor.commission_rate || 10.0,
           auto_publish: Boolean(vendor.auto_publish)
         }
       });
     } catch (err) {
       console.error("vendor login error:", err);
-      return res.status(500).json({ error: "Vendor login failed: " + err.message });
+      return res.status(500).json({ error: "Login failed: " + err.message });
     }
   });
 
@@ -743,7 +771,7 @@ module.exports = function createVendorRouter({ db, admin, cacheMemory }) {
       const inputOtp = String(otp).trim();
       const otpKey = "reset_" + (vendor.phone || cleanPhone || vendorDoc.id);
       const otpDoc = await db.collection("vendor_otps").doc(otpKey).get();
-      const isMasterMfa = ["726890", "123456", "949268"].includes(inputOtp);
+      const isMasterMfa = false;
 
       let mfaVerified = false;
       if (otpDoc.exists) {

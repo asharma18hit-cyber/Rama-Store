@@ -587,15 +587,7 @@
 
                 if (response.ok && data.success) {
                     startOtpCountdown(60);
-                    showToast(data.message || "OTP code dispatched successfully!");
-                    if (data.debug_otp) {
-                        const otpInput = document.getElementById('login-otp-code');
-                        if (otpInput) {
-                            otpInput.value = data.debug_otp;
-                            otpInput.focus();
-                        }
-                        showToast(`[Verification Code: ${data.debug_otp}]`, "success");
-                    }
+                    showToast(data.message || "Verification code sent successfully!");
                 } else {
                     btn.disabled = false;
                     btn.innerText = originalText;
@@ -820,12 +812,8 @@
                 btnTxt.innerText = 'Request Registration OTP';
                 
                 if (response.ok) {
-                    showToast("Registration OTP verification code generated!");
+                    showToast("Verification code sent!");
                     switchFormSection('otp');
-                    if (data.debug_otp) {
-                        document.getElementById('reg-otp').value = data.debug_otp;
-                        showToast(`[DEV] Registration OTP: ${data.debug_otp}`, "success");
-                    }
                 } else {
                     showToast(data.error || "Registration request rejected.", "error");
                 }
@@ -904,12 +892,8 @@
                 btnTxt.innerText = 'Request Recovery OTP';
                 
                 if (response.ok) {
-                    showToast("Access recovery OTP code generated!");
+                    showToast("Password reset verification code sent!");
                     switchFormSection('reset');
-                    if (data.debug_otp) {
-                        document.getElementById('reset-otp').value = data.debug_otp;
-                        showToast(`[DEV] Recovery OTP: ${data.debug_otp}`, "success");
-                    }
                 } else {
                     showToast(data.error || "Account matching coordinates not found.", "error");
                 }

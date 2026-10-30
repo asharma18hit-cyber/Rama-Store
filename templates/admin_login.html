@@ -350,9 +350,7 @@
             <img src="/static/rama_store_logo.jpg" alt="Logo" onerror="this.src='https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=120&q=80'">
             <h1>Rama <span>Store</span></h1>
             <p>Owner & Seller Admin Console</p>
-            <div class="auth-badge">
-                <span>🛡️</span> 2-Factor Authentication (MFA) Active
-            </div>
+            <div class="auth-badge"><span>👤</span> Store Owner Login</div>
         </div>
 
         <!-- STEP 1: FACTOR 1 - OWNER CREDENTIALS -->
@@ -371,13 +369,13 @@
             <div style="margin-top: 0.75rem;">
                 <button type="submit" class="submit-btn" id="btn-creds-submit">
                     <span class="btn-spinner"></span>
-                    <span class="btn-text">🔐 Verify Credentials & Proceed to MFA ➔</span>
+                    <span class="btn-text">Sign In ➔</span>
                 </button>
             </div>
 
             <div class="back-link" style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem;">
                 <a href="/store">➔ Customer Storefront</a>
-                <span style="color: #64748b; font-size: 0.75rem;">MFA Enforced</span>
+                
             </div>
         </form>
 
@@ -385,23 +383,20 @@
         <form id="form-admin-otp" class="auth-form-step" onsubmit="submitAdminOTP(event)">
             <div class="mfa-info-box">
                 <div style="font-weight: 700; color: #f59e0b; margin-bottom: 4px; font-size: 0.9rem;">
-                    🛡️ Multi-Factor Authentication (MFA)
+                    Verification Code
                 </div>
-                Enter the 6-digit verification code sent to <strong id="display-admin-phone" style="color: #fff; font-family: 'IBM Plex Mono', monospace;">+91 7268903804</strong>
-                <div style="margin-top: 6px; font-size: 0.78rem; color: #94a3b8; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 6px;">
-                    Enter the SMS OTP or your registered Admin Master MFA Key: <strong style="color: #f59e0b; font-family: 'IBM Plex Mono', monospace; font-size: 0.95rem;">726890</strong>
-                </div>
+                Enter the 6-digit code sent to your phone
             </div>
 
             <div class="input-wrapper">
                 <input type="text" id="admin-otp-code" class="input-field" placeholder=" " required pattern="\d{6}" maxlength="6" autocomplete="one-time-code" style="text-align: center; font-size: 1.6rem; letter-spacing: 0.35em; font-weight: 700; font-family: 'IBM Plex Mono', monospace; height: 3.5rem;">
-                <label class="floating-label" for="admin-otp-code" style="text-align: center; width: 100%;">6-Digit MFA Security Code</label>
+                <label class="floating-label" for="admin-otp-code" style="text-align: center; width: 100%;">6-Digit Verification Code</label>
             </div>
 
             <div>
                 <button type="submit" class="submit-btn" id="btn-otp-submit">
                     <span class="btn-spinner"></span>
-                    <span class="btn-text">🛡️ Verify MFA & Access Admin Console</span>
+                    <span class="btn-text">Verify & Access Admin Console ➔</span>
                 </button>
             </div>
 
@@ -533,7 +528,7 @@
                     clearInterval(resendInterval);
                     btn.style.pointerEvents = 'auto';
                     btn.style.opacity = '1';
-                    btn.innerHTML = `Resend MFA Code`;
+                    btn.innerHTML = `Resend Code`;
                 } else {
                     const span = document.getElementById('resend-timer');
                     if (span) span.innerText = remaining;
@@ -600,7 +595,7 @@
                 const data = await res.json();
                 btn.disabled = false;
                 spinner.style.display = 'none';
-                btnTxt.innerText = '🔐 Verify Credentials & Proceed to MFA ➔';
+                btnTxt.innerText = 'Sign In ➔';
 
                 if (!res.ok || !data.success) {
                     showToast(data.error || "Incorrect admin credentials.", "error");
@@ -616,7 +611,7 @@
                 document.getElementById('form-admin-creds').classList.remove('active');
                 document.getElementById('form-admin-otp').classList.add('active');
                 
-                showToast("Credentials verified. Enter 6-digit MFA code.");
+                showToast("Verification code sent to your phone.");
                 startResendCountdown(30);
 
                 const otpInput = document.getElementById('admin-otp-code');
@@ -639,24 +634,24 @@
             } catch (err) {
                 btn.disabled = false;
                 spinner.style.display = 'none';
-                btnTxt.innerText = '🔐 Verify Credentials & Proceed to MFA ➔';
+                btnTxt.innerText = 'Sign In ➔';
                 showToast("Connection failed: " + err.message, "error");
             }
         }
 
         async function resendMfaCode() {
             const password = document.getElementById('admin-password').value;
-            showToast("Generating fresh MFA code...");
+            showToast("Sending fresh verification code...");
             try {
                 await fetch('/api/auth/admin-login-request', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email_or_phone: lastAdminIdentifier, password: password })
                 });
-                showToast("Fresh MFA code generated.");
+                showToast("Verification code sent.");
                 startResendCountdown(30);
             } catch (_) {
-                showToast("Could not resend. You can use your Master MFA Key: 726890");
+                showToast("Could not resend code. Please try again.", "error");
             }
         }
 
@@ -665,7 +660,7 @@
             e.preventDefault();
             const otp = document.getElementById('admin-otp-code').value.trim();
             if (otp.length !== 6 || !/^\d{6}$/.test(otp)) {
-                showToast("Please enter a 6-digit MFA code.", "error");
+                showToast("Please enter the 6-digit verification code.", "error");
                 return;
             }
             
@@ -675,7 +670,7 @@
             
             btn.disabled = true;
             spinner.style.display = 'inline-block';
-            btnTxt.innerText = 'Verifying MFA...';
+            btnTxt.innerText = 'Verifying...';
 
             try {
                 // If Firebase Phone Auth confirmed via SMS
@@ -711,8 +706,8 @@
 
                 btn.disabled = false;
                 spinner.style.display = 'none';
-                btnTxt.innerText = '🛡️ Verify MFA & Access Admin Console';
-                showToast(data.error || "Incorrect MFA code. Enter SMS code or Master Key (726890).", "error");
+                btnTxt.innerText = 'Verify & Access Admin Console ➔';
+                showToast(data.error || "Incorrect verification code. Please try again.", "error");
 
                 const otpInput = document.getElementById('admin-otp-code');
                 if (otpInput) {
@@ -724,7 +719,7 @@
             } catch (err) {
                 btn.disabled = false;
                 spinner.style.display = 'none';
-                btnTxt.innerText = '🛡️ Verify MFA & Access Admin Console';
+                btnTxt.innerText = 'Verify & Access Admin Console ➔';
                 showToast("Verification error: " + err.message, "error");
             }
         }
@@ -734,7 +729,7 @@
             localStorage.setItem('adminUser', JSON.stringify(data.user));
             localStorage.setItem('currentUser', JSON.stringify(data.user));
             
-            showToast("✅ MFA Verified! Welcome to Rama Store Admin Console.");
+            showToast("Welcome to Rama Store Admin Console.");
             setTimeout(() => {
                 window.location.replace(data.redirect || '/admin');
             }, 500);
